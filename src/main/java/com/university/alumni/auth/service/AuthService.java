@@ -1,8 +1,12 @@
 package com.university.alumni.auth.service;
 
+import org.springframework.cache.CacheManager;
 import com.university.alumni.auth.dto.AuthDtos.*;
 import com.university.alumni.auth.entity.RefreshToken;
+import com.university.alumni.auth.entity.VerificationToken;
+import com.university.alumni.auth.repository.VerificationTokenRepository;
 import com.university.alumni.common.config.AppProperties;
+import com.university.alumni.common.exception.BadRequestException;
 import com.university.alumni.common.exception.ConflictException;
 import com.university.alumni.security.service.JwtService;
 import com.university.alumni.user.entity.Role;
@@ -20,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 import static com.university.alumni.common.config.RedisConfig.CacheNames.USER_DETAILS;
 
@@ -29,13 +35,16 @@ import static com.university.alumni.common.config.RedisConfig.CacheNames.USER_DE
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository        userRepository;
-    private final RoleRepository        roleRepository;
-    private final PasswordEncoder       passwordEncoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final JwtService            jwtService;
-    private final RefreshTokenService   refreshTokenService;
-    private final AppProperties         appProperties;
+    private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final EmailService emailService;
+    private final AppProperties appProperties;
+    private final CacheManager cacheManager;
 
     // ── Register ─────────────────────────────────────────────────────────────
 
@@ -54,60 +63,55 @@ public class AuthService {
                 .firstName(request.firstName().trim())
                 .lastName(request.lastName().trim())
                 .phone(request.phone())
-                .enabled(true)     // FIX: Temporarily true so users can login before email verification is built
+                .enabled(false) // Locked until verified
                 .build();
 
         user.addRole(alumniRole);
         userRepository.save(user);
 
-        log.info("New user registered: {}", user.getEmail());
-        return new MessageResponse("Registration successful. You can now log in.");
+        // Generate Verification Token
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = VerificationToken.builder()
+                .token(token)
+                .user(user)
+                .tokenType(VerificationToken.TokenType.EMAIL_VERIFICATION)
+                .expiryDate(Instant.now().plus(24, ChronoUnit.HOURS))
+                .build();
+        verificationTokenRepository.save(verificationToken);
+
+        // Send Email
+        String verifyUrl = "http://localhost:5173/verify-email?token=" + token;
+        emailService.sendEmail(user.getEmail(), "Verify your Alumni Account",
+                "Click the link to verify your account: " + verifyUrl);
+
+        log.info("New user registered and verification email sent: {}", user.getEmail());
+        return new MessageResponse("Registration successful. Please check your email to verify your account.");
     }
 
-    // ── Login ─────────────────────────────────────────────────────────────────
+    // ── Login & Refresh & Logout (Remains Same as Sprint 1.2) ───────────────
 
     @Transactional
     public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email().toLowerCase().trim(),
-                        request.password()
-                )
-        );
-
-        User user = userRepository.findByEmailAndDeletedAtIsNull(
-                        request.email().toLowerCase().trim())
-                .orElseThrow();
-
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                request.email().toLowerCase().trim(), request.password()));
+        User user = userRepository.findByEmailAndDeletedAtIsNull(request.email().toLowerCase().trim()).orElseThrow();
         userRepository.updateLastLogin(user.getId(), Instant.now());
-
         String accessToken  = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-
-        String deviceInfo = extractDeviceInfo(httpRequest);
-        refreshTokenService.create(user, refreshToken, deviceInfo);
-
-        log.info("User logged in: {}", user.getEmail());
+        refreshTokenService.create(user, refreshToken, extractDeviceInfo(httpRequest));
         return buildAuthResponse(user, accessToken, refreshToken);
     }
-
-    // ── Refresh ───────────────────────────────────────────────────────────────
 
     @Transactional
     public AuthResponse refresh(RefreshTokenRequest request, HttpServletRequest httpRequest) {
         RefreshToken storedToken = refreshTokenService.validateAndGet(request.refreshToken());
         User user = storedToken.getUser();
-
         refreshTokenService.revoke(storedToken);
-
         String newAccessToken  = jwtService.generateAccessToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
         refreshTokenService.create(user, newRefreshToken, extractDeviceInfo(httpRequest));
-
         return buildAuthResponse(user, newAccessToken, newRefreshToken);
     }
-
-    // ── Logout ────────────────────────────────────────────────────────────────
 
     @Transactional
     @CacheEvict(value = USER_DETAILS, key = "#userEmail")
@@ -128,7 +132,25 @@ public class AuthService {
 
     @Transactional
     public MessageResponse verifyEmail(String token) {
-        return new MessageResponse("Email verified successfully");
+        VerificationToken verificationToken = verificationTokenRepository
+                .findByTokenAndTokenType(token, VerificationToken.TokenType.EMAIL_VERIFICATION)
+                .orElseThrow(() -> new BadRequestException("Invalid or expired verification token"));
+
+        if (verificationToken.isExpired()) {
+            throw new BadRequestException("Verification token has expired");
+        }
+
+        User user = verificationToken.getUser();
+        user.setEnabled(true);
+        userRepository.save(user);
+        verificationTokenRepository.delete(verificationToken);
+
+        var cache = cacheManager.getCache(USER_DETAILS);
+        if (cache != null) {
+            cache.evict(user.getEmail());
+        }
+
+        return new MessageResponse("Email verified successfully. You can now log in.");
     }
 
     // ── Forgot / Reset Password ───────────────────────────────────────────────
@@ -136,6 +158,18 @@ public class AuthService {
     @Transactional
     public MessageResponse forgotPassword(String email) {
         userRepository.findByEmailAndDeletedAtIsNull(email.toLowerCase()).ifPresent(user -> {
+            String token = UUID.randomUUID().toString();
+            VerificationToken resetToken = VerificationToken.builder()
+                    .token(token)
+                    .user(user)
+                    .tokenType(VerificationToken.TokenType.PASSWORD_RESET)
+                    .expiryDate(Instant.now().plus(1, ChronoUnit.HOURS))
+                    .build();
+            verificationTokenRepository.save(resetToken);
+
+            String resetUrl = "http://localhost:5173/reset-password?token=" + token;
+            emailService.sendEmail(user.getEmail(), "Password Reset Request",
+                    "Click the link to reset your password: " + resetUrl);
             log.info("Password reset requested for: {}", email);
         });
         return new MessageResponse("If an account with that email exists, a reset link has been sent.");
@@ -143,39 +177,37 @@ public class AuthService {
 
     @Transactional
     public MessageResponse resetPassword(ResetPasswordRequest request) {
-        return new MessageResponse("Password reset successfully");
+        VerificationToken verificationToken = verificationTokenRepository
+                .findByTokenAndTokenType(request.token(), VerificationToken.TokenType.PASSWORD_RESET)
+                .orElseThrow(() -> new BadRequestException("Invalid or expired reset token"));
+
+        if (verificationToken.isExpired()) {
+            throw new BadRequestException("Reset token has expired");
+        }
+
+        User user = verificationToken.getUser();
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+        verificationTokenRepository.delete(verificationToken);
+
+        var cache = cacheManager.getCache(USER_DETAILS);
+        if (cache != null) {
+            cache.evict(user.getEmail());
+        }
+
+        return new MessageResponse("Password reset successfully. You can now log in with your new password.");
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private AuthResponse buildAuthResponse(User user, String accessToken, String refreshToken) {
-        List<String> roles = user.getAuthorities()
-                .stream()
-                .map(a -> a.getAuthority())
-                .toList();
-
-        UserInfo userInfo = new UserInfo(
-                user.getId().toString(),
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getProfilePhotoUrl(),
-                roles
-        );
-
-        return new AuthResponse(
-                accessToken,
-                refreshToken,
-                "Bearer",
-                appProperties.getJwt().getAccessTokenExpiryMs() / 1000,
-                userInfo
-        );
+        List<String> roles = user.getAuthorities().stream().map(a -> a.getAuthority()).toList();
+        UserInfo userInfo = new UserInfo(user.getId().toString(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getProfilePhotoUrl(), roles);
+        return new AuthResponse(accessToken, refreshToken, "Bearer", appProperties.getJwt().getAccessTokenExpiryMs() / 1000, userInfo);
     }
 
     private String extractDeviceInfo(HttpServletRequest request) {
         String userAgent = request.getHeader("User-Agent");
-        return userAgent != null
-                ? userAgent.substring(0, Math.min(userAgent.length(), 255))
-                : "Unknown device";
+        return userAgent != null ? userAgent.substring(0, Math.min(userAgent.length(), 255)) : "Unknown device";
     }
 }
