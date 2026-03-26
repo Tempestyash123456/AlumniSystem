@@ -71,10 +71,6 @@ public class CachedUserDetails implements UserDetails {
 
     // ── UserDetails ───────────────────────────────────────────────────────────
 
-    /**
-     * @JsonIgnore prevents Jackson from trying to serialize/deserialize this computed field,
-     * which fixes the "setterless property" Exception.
-     */
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -104,9 +100,9 @@ public class CachedUserDetails implements UserDetails {
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return enabled; } // Matches the field name, safe to leave.
+    public boolean isEnabled() { return enabled; }
 
-    // ── Extra fields available via @AuthenticationPrincipal ──────────────────
+    // ── Extra fields & Getters for Jackson Serialization ──────────────────────
 
     public UUID   getId()              { return id; }
     public String getEmail()           { return email; }
@@ -114,4 +110,8 @@ public class CachedUserDetails implements UserDetails {
     public String getLastName()        { return lastName; }
     public String getProfilePhotoUrl() { return profilePhotoUrl; }
     public List<String> getRoles()     { return roles; }
+
+    // FIX: These two getters tell Jackson to save the password and locked status into Redis
+    public String getPasswordHash()    { return passwordHash; }
+    public boolean getAccountLocked()  { return accountLocked; }
 }
