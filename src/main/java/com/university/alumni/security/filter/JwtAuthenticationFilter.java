@@ -3,6 +3,8 @@ package com.university.alumni.security.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.university.alumni.common.dto.ApiResponse;
 import com.university.alumni.security.service.JwtService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,21 +23,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
 
-/**
- * Runs once per request, before Spring Security's UsernamePasswordAuthenticationFilter.
- *
- * Flow:
- * 1. Extract Bearer token from Authorization header
- * 2. Validate signature and structure
- * 3. Load UserDetails from DB (or cache)
- * 4. If valid ? set Authentication in SecurityContextHolder
- * 5. Continue filter chain
- *
- * If the token is missing, the request continues unauthenticated ?
- * Spring Security will reject it at the endpoint level if authentication is required.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -47,13 +36,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
-    // Define exact paths that should completely bypass JWT inspection
-    private static final Set<String> EXACT_PUBLIC_PATHS = Set.of(
+    // FIX: Match exact list of public paths from SecurityConfig
+    private static final List<String> PUBLIC_PATHS = List.of(
             "/api/v1/auth/login",
             "/api/v1/auth/register",
-            "/api/v1/auth/refresh", // Assuming you have a refresh endpoint
-            "/api/v1/health"
+            "/api/v1/auth/refresh",
+            "/api/v1/auth/forgot-password",
+            "/api/v1/auth/reset-password",
+            "/api/v1/auth/verify-email",
+            "/api/v1/health",
+            "/actuator"
     );
+
+    /**
+     * FIX: Use Spring's native way to skip the filter entirely for public endpoints.
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+    }
 
     @Override
     protected void doFilterInternal(
@@ -61,16 +63,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // Skip filter for exact public auth endpoints so we don't accidentally
-        // reject them if a user sends a malformed token while trying to log in.
-        if (isPublicPath(request.getServletPath())) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        // No Authorization header ? continue unauthenticated (Spring Security handles 401)
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
@@ -78,60 +72,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String jwt = authHeader.substring(BEARER_PREFIX.length());
 
-        // Fast structure/signature check before hitting the DB
-        if (!jwtService.isTokenStructureValid(jwt)) {
-            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "INVALID_TOKEN", "JWT token is malformed or signature invalid");
-            return;
-        }
-
-        // Reject refresh tokens used as access tokens
-        if ("REFRESH".equals(jwtService.extractTokenType(jwt))) {
-            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
-                    "WRONG_TOKEN_TYPE", "Refresh token cannot be used for API access");
-            return;
-        }
-
         try {
-            final String username = jwtService.extractUsername(jwt);
+            // FIX: Parse token ONCE, improving performance and catching expiration properly.
+            Claims claims = jwtService.extractAllClaims(jwt);
 
-            // Only authenticate if not already authenticated in this request
-            if (username != null &&
-                    SecurityContextHolder.getContext().getAuthentication() == null) {
+            if ("REFRESH".equals(claims.get("type"))) {
+                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                        "WRONG_TOKEN_TYPE", "Refresh token cannot be used for API access");
+                return;
+            }
 
+            String username = claims.getSubject();
+
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,                        // credentials null ? already authenticated
-                                    userDetails.getAuthorities()
-                            );
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request));
+                // Token is already structurally validated and unexpired by this point.
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.debug("Authenticated user '{}' for path '{}'",
-                            username, request.getServletPath());
-                }
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+                log.debug("Authenticated user '{}' for path '{}'", username, request.getServletPath());
             }
+
+        } catch (ExpiredJwtException e) {
+            // FIX: The frontend can now specifically look for this code to trigger a silent refresh
+            log.debug("JWT token is expired: {}", e.getMessage());
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "TOKEN_EXPIRED", "JWT token has expired");
+            return;
         } catch (Exception e) {
-            log.error("Could not set user authentication in security context", e);
-            SecurityContextHolder.clearContext();
+            log.debug("JWT validation failed: {}", e.getMessage());
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                    "INVALID_TOKEN", "JWT token is malformed or invalid");
+            return;
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    // -- Helpers -------------------------------------------------------------
-
-    /**
-     * Checks if the current request path is explicitly public.
-     * Uses a Set for exact matches, and startsWith for wildcard directories.
-     */
-    private boolean isPublicPath(String path) {
-        return EXACT_PUBLIC_PATHS.contains(path) || path.startsWith("/actuator/");
     }
 
     private void writeErrorResponse(HttpServletResponse response,

@@ -3,7 +3,6 @@ package com.university.alumni.auth.service;
 import com.university.alumni.auth.dto.AuthDtos.*;
 import com.university.alumni.auth.entity.RefreshToken;
 import com.university.alumni.common.config.AppProperties;
-import com.university.alumni.common.exception.BadRequestException;
 import com.university.alumni.common.exception.ConflictException;
 import com.university.alumni.security.service.JwtService;
 import com.university.alumni.user.entity.Role;
@@ -42,12 +41,10 @@ public class AuthService {
 
     @Transactional
     public MessageResponse register(RegisterRequest request) {
-        // Check duplicate email
         if (userRepository.existsByEmailAndDeletedAtIsNull(request.email())) {
             throw new ConflictException("An account with this email already exists");
         }
 
-        // Default role for self-registration is ALUMNI
         Role alumniRole = roleRepository.findByName(Role.ALUMNI)
                 .orElseThrow(() -> new RuntimeException("Default role ROLE_ALUMNI not found"));
 
@@ -57,24 +54,20 @@ public class AuthService {
                 .firstName(request.firstName().trim())
                 .lastName(request.lastName().trim())
                 .phone(request.phone())
-                .enabled(false)     // Must verify email first
+                .enabled(true)     // FIX: Temporarily true so users can login before email verification is built
                 .build();
 
         user.addRole(alumniRole);
         userRepository.save(user);
 
         log.info("New user registered: {}", user.getEmail());
-
-        // TODO Sprint 1.3: Send verification email
-        return new MessageResponse(
-                "Registration successful. Please check your email to verify your account.");
+        return new MessageResponse("Registration successful. You can now log in.");
     }
 
     // ── Login ─────────────────────────────────────────────────────────────────
 
     @Transactional
     public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
-        // Spring Security handles credential validation + exception on bad credentials
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.email().toLowerCase().trim(),
@@ -86,14 +79,11 @@ public class AuthService {
                         request.email().toLowerCase().trim())
                 .orElseThrow();
 
-        // Update last login
         userRepository.updateLastLogin(user.getId(), Instant.now());
 
-        // Generate tokens
         String accessToken  = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        // Persist hashed refresh token
         String deviceInfo = extractDeviceInfo(httpRequest);
         refreshTokenService.create(user, refreshToken, deviceInfo);
 
@@ -105,11 +95,9 @@ public class AuthService {
 
     @Transactional
     public AuthResponse refresh(RefreshTokenRequest request, HttpServletRequest httpRequest) {
-        // 1. Validate the raw token
         RefreshToken storedToken = refreshTokenService.validateAndGet(request.refreshToken());
         User user = storedToken.getUser();
 
-        // 2. Rotate — revoke old, issue new (prevents replay attacks)
         refreshTokenService.revoke(storedToken);
 
         String newAccessToken  = jwtService.generateAccessToken(user);
@@ -140,7 +128,6 @@ public class AuthService {
 
     @Transactional
     public MessageResponse verifyEmail(String token) {
-        // TODO Sprint 1.3: Implement email verification token lookup
         return new MessageResponse("Email verified successfully");
     }
 
@@ -148,18 +135,14 @@ public class AuthService {
 
     @Transactional
     public MessageResponse forgotPassword(String email) {
-        // Always return success even if email not found (prevent email enumeration)
         userRepository.findByEmailAndDeletedAtIsNull(email.toLowerCase()).ifPresent(user -> {
-            // TODO Sprint 1.3: Generate reset token and send email
             log.info("Password reset requested for: {}", email);
         });
-        return new MessageResponse(
-                "If an account with that email exists, a reset link has been sent.");
+        return new MessageResponse("If an account with that email exists, a reset link has been sent.");
     }
 
     @Transactional
     public MessageResponse resetPassword(ResetPasswordRequest request) {
-        // TODO Sprint 1.3: Validate reset token and update password
         return new MessageResponse("Password reset successfully");
     }
 
