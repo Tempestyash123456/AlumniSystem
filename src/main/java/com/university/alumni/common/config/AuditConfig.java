@@ -1,0 +1,30 @@
+package com.university.alumni.common.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.AuditorAware;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Optional;
+
+@Configuration
+public class AuditConfig {
+
+    /**
+     * Spring Data uses this bean to fill @CreatedBy / @LastModifiedBy.
+     * Returns the username from the current security context, or "system"
+     * for automated/background operations.
+     */
+    @Bean
+    public AuditorAware<String> auditorProvider() {
+        return () -> {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated() ||
+                    "anonymousUser".equals(auth.getPrincipal())) {
+                return Optional.of("system");
+            }
+            return Optional.of(auth.getName());
+        };
+    }
+}
