@@ -25,39 +25,55 @@ const Directory = () => {
                 setLoading(false);
             }
         };
-
         fetchAlumni();
     }, []);
 
-    if (loading) return <div className="text-center text-gray-500 py-10 animate-pulse">Loading directory...</div>;
-    if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
+    if (loading) return (
+        <div className="flex items-center justify-center h-64">
+            <div className="animate-pulse flex flex-col items-center gap-4">
+                <div className="h-8 w-8 rounded-full border-2 border-t-zinc-50 border-zinc-800 animate-spin"></div>
+                <p className="text-sm text-zinc-500">Loading directory...</p>
+            </div>
+        </div>
+    );
+    
+    if (error) return <div className="text-center text-red-400 py-10 font-medium">{error}</div>;
 
     return (
-        <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">Alumni Directory</h2>
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-2xl font-semibold tracking-tight">Alumni Directory</h2>
+                <p className="text-sm text-zinc-400">Connect with your peers and expand your network.</p>
+            </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {alumniList.map((alumni) => (
-                    <div key={alumni.id} className="bg-white rounded-xl shadow border border-gray-100 p-6 flex flex-col items-center text-center hover:shadow-lg transition">
-                        <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-2xl font-bold mb-4">
-                            {alumni.profilePhotoUrl ? (
-                                <img src={alumni.profilePhotoUrl} alt="Profile" className="w-full h-full rounded-full object-cover" />
-                            ) : (
-                                `${alumni.firstName.charAt(0)}${alumni.lastName.charAt(0)}`
-                            )}
+                    <div key={alumni.id} className="rounded-xl border border-zinc-800 bg-zinc-900/40 text-zinc-50 shadow-sm transition-all hover:bg-zinc-800/40 hover:shadow-md">
+                        <div className="p-6 flex flex-col items-center text-center">
+                            
+                            <div className="w-20 h-20 rounded-full border border-zinc-700 bg-zinc-800 flex items-center justify-center text-xl font-medium text-zinc-300 mb-4 shadow-inner">
+                                {alumni.profilePhotoUrl ? (
+                                    <img src={alumni.profilePhotoUrl} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                                ) : (
+                                    `${alumni.firstName.charAt(0)}${alumni.lastName.charAt(0)}`
+                                )}
+                            </div>
+                            
+                            <h3 className="font-semibold leading-none tracking-tight mb-1">{alumni.firstName} {alumni.lastName}</h3>
+                            <p className="text-sm text-zinc-400">{alumni.email}</p>
+                            
+                            <button className="mt-6 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-300 border border-zinc-800 bg-transparent hover:bg-zinc-800 text-zinc-300 hover:text-zinc-50 h-8 px-4 w-full">
+                                View Profile
+                            </button>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-800">{alumni.firstName} {alumni.lastName}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{alumni.email}</p>
-                        
-                        <button className="mt-4 text-blue-600 text-sm font-semibold hover:underline">
-                            View Profile
-                        </button>
                     </div>
                 ))}
             </div>
             
             {alumniList.length === 0 && (
-                <div className="text-center text-gray-500 py-10">No verified alumni found yet.</div>
+                <div className="rounded-xl border border-zinc-800 border-dashed p-12 text-center">
+                    <p className="text-sm text-zinc-400">No verified alumni found in the network yet.</p>
+                </div>
             )}
         </div>
     );

@@ -10,9 +10,28 @@ import { type JSX } from 'react';
 const DashboardHome = () => {
     const { user } = useAuth();
     return (
-        <div className="bg-white p-8 rounded-xl shadow border border-gray-100">
-            <h1 className="text-3xl font-bold text-gray-800">Welcome to your Dashboard, {user?.firstName}!</h1>
-            <p className="text-gray-600 mt-4">Use the navigation bar above to explore the Alumni Directory.</p>
+        <div className="metallic-panel p-8 border-l-4 border-l-cyan-500 relative overflow-hidden">
+            {/* Background Tech Grid */}
+            <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(0,255,255,0.5)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.5)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+            
+            <div className="relative z-10">
+                <h1 className="text-3xl font-bold text-cyan-400 uppercase tracking-widest neon-text-cyan">
+                    TERMINAL_ACCESS: GRANTED
+                </h1>
+                <p className="text-gray-400 mt-2 font-mono text-sm">
+                    {'>'} Welcome, Operative {user?.firstName}. System status is optimal.
+                </p>
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-gray-900/50 border border-cyan-900 p-4 rounded-sm border-l-2 border-l-cyan-400">
+                        <p className="text-xs text-gray-500 uppercase">Clearance Level</p>
+                        <p className="text-lg text-cyan-100">{user?.roles?.join(', ')}</p>
+                    </div>
+                    <div className="bg-gray-900/50 border border-pink-900 p-4 rounded-sm border-l-2 border-l-pink-500">
+                        <p className="text-xs text-gray-500 uppercase">Network Status</p>
+                        <p className="text-lg text-pink-400">ONLINE</p>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

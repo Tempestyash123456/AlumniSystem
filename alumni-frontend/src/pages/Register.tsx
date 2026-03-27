@@ -6,11 +6,11 @@ import { Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
 const registerSchema = z.object({
-    firstName: z.string().min(2, 'First name is required'),
-    lastName: z.string().min(2, 'Last name is required'),
-    email: z.string().email('Please enter a valid email address'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    phone: z.string().min(10, 'Please enter a valid phone number'),
+    firstName: z.string().min(2, 'Required'),
+    lastName: z.string().min(2, 'Required'),
+    email: z.string().email('Invalid email'),
+    password: z.string().min(8, 'Min 8 chars'),
+    phone: z.string().min(10, 'Invalid phone'),
 });
 
 type RegisterFormInputs = z.infer<typeof registerSchema>;
@@ -24,66 +24,72 @@ const Register = () => {
     });
 
     const onSubmit = async (data: RegisterFormInputs) => {
-        setServerError(null);
-        setSuccessMessage(null);
+        setServerError(null); setSuccessMessage(null);
         try {
             const response = await api.post('/auth/register', data);
-            setSuccessMessage(response.data.data.message || 'Registration successful! Please check your email to verify.');
+            setSuccessMessage(response.data.data.message || 'Registration successful! Please check your email.');
         } catch (error: any) {
-            setServerError(error.response?.data?.error?.message || 'Failed to register. Please try again.');
+            setServerError(error.response?.data?.error?.message || 'Failed to register.');
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 py-10">
-            <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-bold text-center text-blue-600 mb-6">Join the Alumni Network</h2>
+        <div className="min-h-screen flex items-center justify-center p-4 bg-zinc-950 py-10">
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 text-zinc-50 shadow w-full max-w-md backdrop-blur-sm">
+                <div className="flex flex-col space-y-1.5 p-6">
+                    <h3 className="font-semibold tracking-tight text-2xl">Create an account</h3>
+                    <p className="text-sm text-zinc-400">Enter your information to join the alumni network.</p>
+                </div>
+                
+                <div className="p-6 pt-0">
+                    {serverError && <div className="rounded-md border border-red-900/50 bg-red-900/20 p-3 mb-6 text-sm text-red-400">{serverError}</div>}
+                    {successMessage && <div className="rounded-md border border-green-900/50 bg-green-900/20 p-3 mb-6 text-sm text-green-400">{successMessage}</div>}
 
-                {serverError && <div className="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 text-sm">{serverError}</div>}
-                {successMessage && <div className="bg-green-100 text-green-700 px-4 py-3 rounded mb-4 text-sm">{successMessage}</div>}
-
-                {!successMessage && (
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="flex gap-4">
-                            <div className="w-1/2">
-                                <label className="block text-gray-700 text-sm font-bold mb-2">First Name</label>
-                                <input type="text" {...register('firstName')} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 border-gray-300" />
-                                {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName.message}</p>}
+                    {!successMessage && (
+                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="shadcn-label">First name</label>
+                                    <input type="text" {...register('firstName')} className="shadcn-input" />
+                                    {errors.firstName && <p className="text-sm text-red-500">{errors.firstName.message}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="shadcn-label">Last name</label>
+                                    <input type="text" {...register('lastName')} className="shadcn-input" />
+                                    {errors.lastName && <p className="text-sm text-red-500">{errors.lastName.message}</p>}
+                                </div>
                             </div>
-                            <div className="w-1/2">
-                                <label className="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
-                                <input type="text" {...register('lastName')} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 border-gray-300" />
-                                {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName.message}</p>}
+
+                            <div className="space-y-2">
+                                <label className="shadcn-label">Email</label>
+                                <input type="email" {...register('email')} className="shadcn-input" />
+                                {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
                             </div>
-                        </div>
 
-                        <div>
-                            <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
-                            <input type="email" {...register('email')} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 border-gray-300" />
-                            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-                        </div>
+                            <div className="space-y-2">
+                                <label className="shadcn-label">Phone</label>
+                                <input type="tel" {...register('phone')} className="shadcn-input" />
+                                {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
+                            </div>
 
-                        <div>
-                            <label className="block text-gray-700 text-sm font-bold mb-2">Phone</label>
-                            <input type="tel" {...register('phone')} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 border-gray-300" />
-                            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
-                        </div>
+                            <div className="space-y-2">
+                                <label className="shadcn-label">Password</label>
+                                <input type="password" {...register('password')} className="shadcn-input" />
+                                {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
+                            </div>
 
-                        <div>
-                            <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
-                            <input type="password" {...register('password')} className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 border-gray-300" />
-                            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-                        </div>
+                            <button type="submit" disabled={isSubmitting} className="shadcn-button mt-4">
+                                {isSubmitting ? 'Creating account...' : 'Create account'}
+                            </button>
+                        </form>
+                    )}
+                </div>
 
-                        <button type="submit" disabled={isSubmitting} className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
-                            {isSubmitting ? 'Registering...' : 'Create Account'}
-                        </button>
-                    </form>
-                )}
-
-                <p className="text-center text-sm text-gray-600 mt-4">
-                    Already have an account? <Link to="/login" className="text-blue-600 hover:underline">Log in</Link>
-                </p>
+                <div className="flex items-center justify-center p-6 pt-0">
+                    <p className="text-sm text-zinc-400">
+                        Already have an account? <Link to="/login" className="text-zinc-50 hover:underline underline-offset-4">Sign in</Link>
+                    </p>
+                </div>
             </div>
         </div>
     );
