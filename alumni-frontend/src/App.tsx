@@ -17,9 +17,17 @@ const DashboardHome = () => {
     );
 };
 
+// 1. Protected Route: Keeps unauthorized users OUT of the app
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
     const { isAuthenticated } = useAuth();
-    return isAuthenticated ? children : <Navigate to="/login" />;
+    // Using 'replace' prevents them from hitting the "Back" button to bypass the redirect
+    return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+// 2. Public Route: Keeps authorized users OUT of the login/register pages
+const PublicRoute = ({ children }: { children: JSX.Element }) => {
+    const { isAuthenticated } = useAuth();
+    return isAuthenticated ? <Navigate to="/" replace /> : children;
 };
 
 function App() {
@@ -27,21 +35,29 @@ function App() {
     <AuthProvider>
         <Router>
             <Routes>
-                {/* Public Routes */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+                {/* Public Routes (Only accessible if NOT logged in) */}
+                <Route path="/login" element={
+                    <PublicRoute><Login /></PublicRoute>
+                } />
+                <Route path="/register" element={
+                    <PublicRoute><Register /></PublicRoute>
+                } />
+                
+                {/* Verify Email doesn't need shielding, anyone with a link can hit it */}
                 <Route path="/verify-email" element={<VerifyEmail />} />
                 
-                {/* Protected Routes wrapped in MainLayout */}
+                {/* Protected Routes (Only accessible if LOGGED IN) */}
                 <Route path="/" element={
                     <ProtectedRoute>
                         <MainLayout />
                     </ProtectedRoute>
                 }>
-                    {/* These render inside the <Outlet /> of MainLayout */}
                     <Route index element={<DashboardHome />} />
                     <Route path="directory" element={<Directory />} />
                 </Route>
+                
+                {/* Catch-all route: If they type a random URL, send them to the root */}
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </Router>
     </AuthProvider>

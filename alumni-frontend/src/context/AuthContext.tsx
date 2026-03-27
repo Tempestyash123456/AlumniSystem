@@ -1,5 +1,4 @@
-// @ts-ignore
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 
 interface User {
     id: string;
@@ -19,15 +18,13 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
-
-    useEffect(() => {
-        // Hydrate user state from local storage on initial load
+    
+    // FIX: We now initialize the state synchronously by checking localStorage immediately.
+    // This prevents the app from briefly showing the login page when a logged-in user refreshes.
+    const [user, setUser] = useState<User | null>(() => {
         const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-    }, []);
+        return storedUser ? JSON.parse(storedUser) : null;
+    });
 
     const login = (accessToken: string, refreshToken: string, userData: User) => {
         localStorage.setItem('accessToken', accessToken);
