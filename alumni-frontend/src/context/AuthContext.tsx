@@ -5,6 +5,7 @@ interface User {
     email: string;
     firstName: string;
     lastName: string;
+    profilePhotoUrl: string | null;
     roles: string[];
 }
 

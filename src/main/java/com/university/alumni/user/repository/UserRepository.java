@@ -23,6 +23,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     boolean existsByEmailAndDeletedAtIsNull(String email);
 
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.id = :id AND u.deletedAt IS NULL")
+    Optional<User> findByIdWithRoles(@Param("id") UUID id);
+
     @Modifying
     @Query("UPDATE User u SET u.lastLoginAt = :loginAt, u.failedLoginCount = 0 WHERE u.id = :id")
     void updateLastLogin(@Param("id") UUID id, @Param("loginAt") Instant loginAt);
