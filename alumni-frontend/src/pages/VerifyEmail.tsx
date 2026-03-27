@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/axiosConfig';
+import { UiLinkButton } from '../components/ui/ModernUI';
 
 const VerifyEmail = () => {
     const [searchParams] = useSearchParams();
@@ -21,17 +22,17 @@ const VerifyEmail = () => {
     return (
         <div className="min-h-screen flex items-center justify-center p-4 cp-grid-bg relative overflow-hidden">
             <div className="absolute inset-0 pointer-events-none"
-                style={{ background: 'radial-gradient(circle at 50% 50%, rgba(0,245,255,0.04) 0%, transparent 60%)' }} />
+                style={{ background: 'radial-gradient(circle at 50% 50%, rgba(96,165,250,0.2) 0%, transparent 60%)' }} />
 
-            <div className="w-full max-w-md relative z-10">
+            <div className="w-full max-w-md relative z-10 cp-slide-up">
                 <div className="text-center mb-8">
                     <h1 className="font-display text-3xl font-bold tracking-widest glow-cyan" style={{ color: 'var(--cyan)' }}>PORTAL</h1>
                     <p className="font-mono-cp text-xs text-cyan-500/40 mt-2 tracking-widest">EMAIL VERIFICATION PROTOCOL</p>
                 </div>
 
-                <div className="cp-card cp-scanlines p-8 text-center space-y-6">
-                    <div className="flex items-center justify-between pb-4" style={{ borderBottom: '1px solid rgba(0,245,255,0.1)' }}>
-                        <span className="font-display text-xs tracking-widest text-cyan-400/80">VERIFY_IDENTITY.EXE</span>
+                <div className="cp-card cp-scanlines cp-soft-glass p-8 text-center space-y-6">
+                    <div className="flex items-center justify-between pb-4" style={{ borderBottom: '1px solid rgba(148,163,184,0.28)' }}>
+                        <span className="font-display text-xs tracking-widest" style={{ color: 'rgba(191,219,254,0.9)' }}>VERIFY_IDENTITY.EXE</span>
                         <div className="flex gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-red-500/60" />
                             <span className="w-2 h-2 rounded-full bg-amber-500/60" />
@@ -54,14 +55,14 @@ const VerifyEmail = () => {
                         <div className="space-y-5 py-2">
                             <div className="flex justify-center">
                                 <div className="w-14 h-14 rounded-sm flex items-center justify-center text-2xl"
-                                    style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.4)', boxShadow: '0 0 20px rgba(0,255,136,0.2)' }}>
+                                    style={{ background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(52,211,153,0.5)', boxShadow: '0 12px 24px rgba(16,185,129,0.22)' }}>
                                     ✓
                                 </div>
                             </div>
                             <div className="cp-alert-success">{message}</div>
-                            <Link to="/login" className="cp-btn-primary w-full h-10 block text-center leading-10">
+                            <UiLinkButton to="/login" className="w-full h-10 block text-center leading-10">
                                 [ PROCEED TO LOGIN ]
-                            </Link>
+                            </UiLinkButton>
                         </div>
                     )}
 
@@ -69,14 +70,14 @@ const VerifyEmail = () => {
                         <div className="space-y-5 py-2">
                             <div className="flex justify-center">
                                 <div className="w-14 h-14 rounded-sm flex items-center justify-center text-2xl"
-                                    style={{ background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.4)', boxShadow: '0 0 20px rgba(255,45,120,0.2)' }}>
+                                    style={{ background: 'rgba(225,29,72,0.2)', border: '1px solid rgba(244,114,182,0.5)', boxShadow: '0 12px 24px rgba(190,24,93,0.22)' }}>
                                     ✕
                                 </div>
                             </div>
                             <div className="cp-alert-error">{message}</div>
-                            <Link to="/register" className="cp-btn-secondary w-full h-10 block text-center leading-10 text-xs">
+                            <UiLinkButton to="/register" variant="secondary" className="w-full h-10 block text-center leading-10 text-xs">
                                 REQUEST NEW CREDENTIALS →
-                            </Link>
+                            </UiLinkButton>
                         </div>
                     )}
                 </div>

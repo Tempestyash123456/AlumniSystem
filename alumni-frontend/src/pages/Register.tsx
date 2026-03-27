@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
+import { UiButton, UiInput, UiLinkButton } from '../components/ui/ModernUI';
 
 const registerSchema = z.object({
     firstName: z.string().min(2, 'Required'),
@@ -34,20 +35,20 @@ const Register = () => {
     return (
         <div className="min-h-screen flex items-center justify-center p-4 py-10 cp-grid-bg relative overflow-hidden">
             <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
-                style={{ background: 'radial-gradient(circle, rgba(157,0,255,0.05) 0%, transparent 70%)' }} />
+                style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.2) 0%, transparent 70%)' }} />
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full pointer-events-none"
-                style={{ background: 'radial-gradient(circle, rgba(0,245,255,0.04) 0%, transparent 70%)' }} />
+                style={{ background: 'radial-gradient(circle, rgba(96,165,250,0.18) 0%, transparent 70%)' }} />
 
-            <div className="w-full max-w-md relative z-10">
+            <div className="w-full max-w-md relative z-10 cp-slide-up">
                 <div className="text-center mb-8">
                     <p className="font-mono-cp text-xs tracking-[0.3em] text-cyan-500/60 mb-3">ALUMNI_NETWORK // v2.0</p>
                     <h1 className="font-display text-3xl font-bold tracking-widest glow-cyan" style={{ color: 'var(--cyan)' }}>PORTAL</h1>
                     <p className="font-mono-cp text-xs text-cyan-500/40 mt-2 tracking-widest">NEW OPERATIVE REGISTRATION</p>
                 </div>
 
-                <div className="cp-card cp-scanlines p-8 space-y-6">
-                    <div className="flex items-center justify-between pb-4" style={{ borderBottom: '1px solid rgba(0,245,255,0.1)' }}>
-                        <span className="font-display text-xs tracking-widest text-cyan-400/80">REGISTER_OPERATIVE.EXE</span>
+                <div className="cp-card cp-scanlines cp-soft-glass p-8 space-y-6">
+                    <div className="flex items-center justify-between pb-4" style={{ borderBottom: '1px solid rgba(148,163,184,0.28)' }}>
+                        <span className="font-display text-xs tracking-widest" style={{ color: 'rgba(191,219,254,0.9)' }}>REGISTER_OPERATIVE.EXE</span>
                         <div className="flex gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-red-500/60" />
                             <span className="w-2 h-2 rounded-full bg-amber-500/60" />
@@ -59,9 +60,9 @@ const Register = () => {
                     {successMessage && (
                         <div className="cp-alert-success space-y-3">
                             <div><span className="cp-status-online mr-2" />{successMessage}</div>
-                            <Link to="/login" className="cp-btn-primary w-full h-9 text-xs block text-center leading-9">
+                            <UiLinkButton to="/login" className="w-full h-9 text-xs block text-center leading-9">
                                 → PROCEED TO LOGIN
-                            </Link>
+                            </UiLinkButton>
                         </div>
                     )}
 
@@ -70,45 +71,45 @@ const Register = () => {
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <label className="cp-label">// first_name</label>
-                                    <input type="text" {...register('firstName')} className="cp-input" placeholder="John" />
+                                    <UiInput type="text" {...register('firstName')} placeholder="John" />
                                     {errors.firstName && <p className="font-mono-cp text-xs mt-1" style={{ color: 'var(--pink)' }}>⚠ {errors.firstName.message}</p>}
                                 </div>
                                 <div>
                                     <label className="cp-label">// last_name</label>
-                                    <input type="text" {...register('lastName')} className="cp-input" placeholder="Doe" />
+                                    <UiInput type="text" {...register('lastName')} placeholder="Doe" />
                                     {errors.lastName && <p className="font-mono-cp text-xs mt-1" style={{ color: 'var(--pink)' }}>⚠ {errors.lastName.message}</p>}
                                 </div>
                             </div>
                             <div>
                                 <label className="cp-label">// email_address</label>
-                                <input type="email" {...register('email')} className="cp-input" placeholder="operative@network.sys" />
+                                <UiInput type="email" {...register('email')} placeholder="operative@network.sys" />
                                 {errors.email && <p className="font-mono-cp text-xs mt-1" style={{ color: 'var(--pink)' }}>⚠ {errors.email.message}</p>}
                             </div>
                             <div>
                                 <label className="cp-label">// phone_number</label>
-                                <input type="tel" {...register('phone')} className="cp-input" placeholder="+91 98765 43210" />
+                                <UiInput type="tel" {...register('phone')} placeholder="+91 98765 43210" />
                                 {errors.phone && <p className="font-mono-cp text-xs mt-1" style={{ color: 'var(--pink)' }}>⚠ {errors.phone.message}</p>}
                             </div>
                             <div>
                                 <label className="cp-label">// passphrase</label>
-                                <input type="password" {...register('password')} className="cp-input" placeholder="Min 8 chars, mixed case + symbol" />
+                                <UiInput type="password" {...register('password')} placeholder="Min 8 chars, mixed case + symbol" />
                                 {errors.password && <p className="font-mono-cp text-xs mt-1" style={{ color: 'var(--pink)' }}>⚠ {errors.password.message}</p>}
                             </div>
-                            <button type="submit" disabled={isSubmitting} className="cp-btn-primary w-full h-10 mt-2">
+                            <UiButton type="submit" disabled={isSubmitting} className="w-full h-10 mt-2">
                                 {isSubmitting ? (
                                     <span className="flex items-center gap-2">
                                         <span className="w-3 h-3 border border-cyan-400 border-t-transparent rounded-full animate-spin" />
                                         REGISTERING...
                                     </span>
                                 ) : '[ REQUEST_ACCESS ]'}
-                            </button>
+                            </UiButton>
                         </form>
                     )}
 
-                    <div className="text-center pt-2" style={{ borderTop: '1px solid rgba(0,245,255,0.08)' }}>
-                        <p className="font-mono-cp text-xs" style={{ color: 'rgba(0,245,255,0.4)' }}>
+                    <div className="text-center pt-2" style={{ borderTop: '1px solid rgba(148,163,184,0.24)' }}>
+                        <p className="font-mono-cp text-xs" style={{ color: 'rgba(191,219,254,0.84)' }}>
                             ALREADY REGISTERED?{' '}
-                            <Link to="/login" style={{ color: 'var(--cyan)' }}>LOGIN →</Link>
+                            <Link to="/login" className="cp-link" style={{ color: 'var(--cyan)' }}>LOGIN →</Link>
                         </p>
                     </div>
                 </div>

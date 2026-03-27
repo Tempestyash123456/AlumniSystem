@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -7,6 +7,7 @@ import MainLayout from './components/MainLayout';
 import Directory from './pages/Directory';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
+import { GlassCard, PageContainer, UiStatCard } from './components/ui/ModernUI';
 import { type JSX } from 'react';
 
 const DashboardHome = () => {
@@ -17,19 +18,19 @@ const DashboardHome = () => {
     const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
     return (
-        <div className="space-y-6">
+        <PageContainer>
             {/* Hero banner */}
-            <div className="cp-card cp-scanlines cp-grid-bg p-8 relative overflow-hidden">
+            <GlassCard className="cp-scanlines cp-grid-bg p-8 relative overflow-hidden">
                 <div className="absolute inset-0 pointer-events-none"
-                    style={{ background: 'radial-gradient(ellipse at 0% 50%, rgba(0,245,255,0.06) 0%, transparent 60%)' }} />
+                    style={{ background: 'radial-gradient(ellipse at 0% 50%, rgba(96,165,250,0.24) 0%, transparent 60%)' }} />
                 <div className="relative z-10">
-                    <p className="font-mono-cp text-xs tracking-[0.2em] mb-2" style={{ color: 'rgba(0,245,255,0.5)' }}>
+                    <p className="font-mono-cp text-xs tracking-[0.2em] mb-2" style={{ color: 'rgba(191,219,254,0.8)' }}>
                         {dateStr} // {timeStr} // SESSION_ACTIVE
                     </p>
                     <h1 className="font-display text-2xl md:text-3xl font-bold tracking-widest glow-cyan mb-1" style={{ color: 'var(--cyan)' }}>
                         TERMINAL_ACCESS: GRANTED
                     </h1>
-                    <p className="font-mono-cp text-sm" style={{ color: 'rgba(0,245,255,0.5)' }}>
+                    <p className="font-mono-cp text-sm" style={{ color: 'rgba(226,232,240,0.9)' }}>
                         {'>'} Welcome back, Operative{' '}
                         <span style={{ color: 'var(--cyan)' }}>{user?.firstName?.toUpperCase()}</span>.
                         System integrity nominal.
@@ -41,15 +42,17 @@ const DashboardHome = () => {
                             { label: 'NETWORK_STATUS',  value: 'ONLINE',  color: 'var(--green)' },
                             { label: 'SYSTEM_MODE',     value: isAdmin ? 'ADMIN' : 'OPERATIVE', color: isAdmin ? 'var(--pink)' : 'var(--cyan)' },
                         ].map(({ label, value, color }) => (
-                            <div key={label} className="p-4 space-y-1"
-                                style={{ background: 'rgba(0,0,0,0.4)', border: `1px solid rgba(0,245,255,0.1)`, borderLeft: `2px solid ${color}` }}>
-                                <p className="font-mono-cp text-xs" style={{ color: 'rgba(0,245,255,0.4)' }}>{label}</p>
-                                <p className="font-display text-sm font-semibold tracking-wide" style={{ color }}>{value}</p>
-                            </div>
+                            <UiStatCard
+                                key={label}
+                                label={label}
+                                value={<span className="text-sm">{value}</span>}
+                                accent={color}
+                                className="cp-stat-tile"
+                            />
                         ))}
                     </div>
                 </div>
-            </div>
+            </GlassCard>
 
             {/* Quick action grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -58,26 +61,18 @@ const DashboardHome = () => {
                     { to: '/profile',   label: 'MY_PROFILE',       desc: 'Update your operative dossier.',         icon: '◉', color: 'var(--purple)' },
                     ...(isAdmin ? [{ to: '/admin', label: 'ADMIN_CONSOLE', desc: 'Manage operatives and system access.', icon: '⬟', color: 'var(--pink)' }] : []),
                 ].map(({ to, label, desc, icon, color }) => (
-                    <a key={to} href={to}
-                        className="cp-card p-6 block group transition-all duration-300 cursor-pointer"
-                        style={{ textDecoration: 'none' }}
-                        onMouseEnter={e => {
-                            (e.currentTarget as HTMLElement).style.borderColor = color;
-                            (e.currentTarget as HTMLElement).style.boxShadow = `0 0 20px ${color}22`;
-                        }}
-                        onMouseLeave={e => {
-                            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,245,255,0.12)';
-                            (e.currentTarget as HTMLElement).style.boxShadow = 'none';
-                        }}>
+                    <Link key={to} to={to}
+                        className="cp-card cp-soft-glass cp-hover-lift p-6 block group cursor-pointer"
+                        style={{ textDecoration: 'none' }}>
                         <div className="text-2xl mb-3" style={{ color }}>{icon}</div>
                         <p className="font-display text-xs tracking-widest mb-1" style={{ color }}>{label}</p>
-                        <p className="font-mono-cp text-xs" style={{ color: 'rgba(0,245,255,0.35)' }}>{desc}</p>
+                        <p className="font-mono-cp text-xs" style={{ color: 'rgba(203,213,225,0.9)' }}>{desc}</p>
                         <p className="font-mono-cp text-xs mt-4 transition-all group-hover:translate-x-1"
                             style={{ color }}>→ ACCESS</p>
-                    </a>
+                    </Link>
                 ))}
             </div>
-        </div>
+        </PageContainer>
     );
 };
 

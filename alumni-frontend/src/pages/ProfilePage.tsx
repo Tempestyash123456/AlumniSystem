@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axiosConfig';
+import { GlassCard, PageContainer, SectionHeading, UiBadge, UiButton, UiInput, UiTextarea } from '../components/ui/ModernUI';
 
 interface Profile {
     userId: string; firstName: string; lastName: string; email: string;
@@ -21,25 +22,25 @@ const CpField = ({ label, name, value, type = 'text', onChange, placeholder = ''
     <div className="space-y-1">
         <label className="cp-label">{label}</label>
         {textarea ? (
-            <textarea name={name} value={value} onChange={onChange} placeholder={placeholder} rows={3}
-                className="cp-textarea w-full" readOnly={readOnly}
+            <UiTextarea name={name} value={value} onChange={onChange} placeholder={placeholder} rows={3}
+                className="w-full" readOnly={readOnly}
                 style={readOnly ? { opacity: 0.5, cursor: 'not-allowed' } : {}} />
         ) : (
-            <input type={type} name={name} value={value} onChange={onChange} placeholder={placeholder}
-                className="cp-input" readOnly={readOnly}
+            <UiInput type={type} name={name} value={value} onChange={onChange} placeholder={placeholder}
+                readOnly={readOnly}
                 style={readOnly ? { opacity: 0.5, cursor: 'not-allowed' } : {}} />
         )}
     </div>
 );
 
 const CpSection = ({ title, icon, children }: { title: string; icon: string; children: React.ReactNode }) => (
-    <div className="cp-card p-6 space-y-5">
-        <div className="flex items-center gap-2 pb-3" style={{ borderBottom: '1px solid rgba(0,245,255,0.1)' }}>
+    <GlassCard className="p-6 space-y-5">
+        <div className="flex items-center gap-2 pb-3" style={{ borderBottom: '1px solid rgba(148,163,184,0.28)' }}>
             <span style={{ color: 'var(--cyan)', fontSize: '14px' }}>{icon}</span>
             <span className="cp-section-title">{title}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{children}</div>
-    </div>
+    </GlassCard>
 );
 
 const ScoreBar = ({ score }: { score: number }) => {
@@ -48,7 +49,7 @@ const ScoreBar = ({ score }: { score: number }) => {
     return (
         <div className="space-y-2">
             <div className="flex items-center justify-between">
-                <span className="font-mono-cp text-xs" style={{ color: 'rgba(0,245,255,0.5)' }}>
+                <span className="font-mono-cp text-xs" style={{ color: 'rgba(191,219,254,0.8)' }}>
                     PROFILE_SCORE :: {label}
                 </span>
                 <span className="font-display text-sm font-bold" style={{ color }}>{score}%</span>
@@ -125,7 +126,7 @@ const ProfilePage = () => {
                 <div className="cp-toggle-knob" />
             </div>
             <span className="font-mono-cp text-xs tracking-wide transition-colors"
-                style={{ color: toggles[field] ? 'var(--cyan)' : 'rgba(0,245,255,0.4)' }}>
+                style={{ color: toggles[field] ? 'var(--cyan)' : 'rgba(148,163,184,0.95)' }}>
                 {label}
             </span>
         </label>
@@ -142,28 +143,25 @@ const ProfilePage = () => {
     if (!profile) return <div className="cp-alert-error font-mono-cp text-sm mt-8">{error}</div>;
 
     return (
-        <div className="space-y-5 max-w-4xl">
+        <PageContainer className="max-w-4xl space-y-5">
             {/* Header */}
             <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div>
-                    <p className="font-mono-cp text-xs tracking-widest mb-1" style={{ color: 'rgba(0,245,255,0.4)' }}>// OPERATIVE_DOSSIER</p>
-                    <h2 className="font-display text-2xl font-bold tracking-widest glow-cyan" style={{ color: 'var(--cyan)' }}>MY PROFILE</h2>
-                </div>
-                <button onClick={handleSave} disabled={saving} className="cp-btn-primary h-9 px-6">
+                <SectionHeading overline="// OPERATIVE_DOSSIER" title="MY PROFILE" />
+                <UiButton onClick={handleSave} disabled={saving} className="h-9 px-6">
                     {saving ? (
                         <span className="flex items-center gap-2">
                             <span className="w-3 h-3 border border-cyan-400 border-t-transparent rounded-full animate-spin" />
                             SAVING...
                         </span>
                     ) : '[ SAVE_CHANGES ]'}
-                </button>
+                </UiButton>
             </div>
 
             {success && <div className="cp-alert-success font-mono-cp text-sm">✓ DOSSIER_UPDATED :: Changes saved successfully.</div>}
             {error   && <div className="cp-alert-error   font-mono-cp text-sm">⚠ {error}</div>}
 
             {/* Score */}
-            <div className="cp-card p-4"><ScoreBar score={profile.profileScore} /></div>
+            <GlassCard className="p-4"><ScoreBar score={profile.profileScore} /></GlassCard>
 
             {/* Sections */}
             <CpSection title="BASIC_INFORMATION" icon="◉">
@@ -207,36 +205,36 @@ const ProfilePage = () => {
             </CpSection>
 
             {/* Skills */}
-            <div className="cp-card p-6 space-y-4">
-                <div className="flex items-center gap-2 pb-3" style={{ borderBottom: '1px solid rgba(0,245,255,0.1)' }}>
+            <GlassCard className="p-6 space-y-4">
+                <div className="flex items-center gap-2 pb-3" style={{ borderBottom: '1px solid rgba(148,163,184,0.28)' }}>
                     <span style={{ color: 'var(--cyan)', fontSize: '14px' }}>⬟</span>
                     <span className="cp-section-title">SKILL_MODULES</span>
                 </div>
                 <div className="flex gap-2">
-                    <input value={skillInput} onChange={e => setSkillInput(e.target.value)}
+                    <UiInput value={skillInput} onChange={e => setSkillInput(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSkill())}
                         placeholder="input skill and press Enter..."
-                        className="cp-input flex-1" />
-                    <button onClick={addSkill} className="cp-btn-secondary px-4 text-xs">ADD</button>
+                        className="flex-1" />
+                    <UiButton onClick={addSkill} variant="secondary" className="px-4 text-xs">ADD</UiButton>
                 </div>
                 <div className="flex flex-wrap gap-2 min-h-[2rem]">
                     {(profile.skills || []).map((skill, i) => (
-                        <span key={i} className="cp-skill">
+                        <UiBadge key={i} variant="cyan" className="inline-flex items-center gap-1.5">
                             {skill}
                             <button onClick={() => removeSkill(i)}
                                 className="ml-1 transition-colors hover:opacity-60"
                                 style={{ color: 'var(--pink)', fontSize: '10px' }}>✕</button>
-                        </span>
+                        </UiBadge>
                     ))}
                     {!(profile.skills?.length) && (
-                        <p className="font-mono-cp text-xs italic" style={{ color: 'rgba(0,245,255,0.2)' }}>// no_modules_loaded</p>
+                        <p className="font-mono-cp text-xs italic" style={{ color: 'rgba(148,163,184,0.88)' }}>// no_modules_loaded</p>
                     )}
                 </div>
-            </div>
+            </GlassCard>
 
             {/* Visibility toggles */}
-            <div className="cp-card p-6 space-y-4">
-                <div className="flex items-center gap-2 pb-3" style={{ borderBottom: '1px solid rgba(0,245,255,0.1)' }}>
+            <GlassCard className="p-6 space-y-4">
+                <div className="flex items-center gap-2 pb-3" style={{ borderBottom: '1px solid rgba(148,163,184,0.28)' }}>
                     <span style={{ color: 'var(--cyan)', fontSize: '14px' }}>◈</span>
                     <span className="cp-section-title">VISIBILITY_PROTOCOLS</span>
                 </div>
@@ -245,15 +243,15 @@ const ProfilePage = () => {
                     <CpToggle field="openToMentor"  label="// MENTOR_MODE    :: open to mentoring operatives" />
                     <CpToggle field="openToHire"    label="// HIRE_SIGNAL    :: open to new assignments" />
                 </div>
-            </div>
+            </GlassCard>
 
             {/* Save footer */}
             <div className="flex justify-end pb-4">
-                <button onClick={handleSave} disabled={saving} className="cp-btn-primary h-9 px-8">
+                <UiButton onClick={handleSave} disabled={saving} className="h-9 px-8">
                     {saving ? 'SAVING...' : '[ COMMIT_CHANGES ]'}
-                </button>
+                </UiButton>
             </div>
-        </div>
+        </PageContainer>
     );
 };
 

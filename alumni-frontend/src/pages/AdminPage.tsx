@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axiosConfig';
+import { GlassCard, PageContainer, SectionHeading, UiBadge, UiButton, UiInput, UiStatCard, UiAvatar } from '../components/ui/ModernUI';
 
 interface AdminUser {
     id: string; firstName: string; lastName: string; email: string;
@@ -15,17 +16,17 @@ const roleColor = (role: string) => {
         ROLE_ADMIN:'var(--pink)', ROLE_ALUMNI:'var(--cyan)',
         ROLE_STUDENT:'var(--purple)', ROLE_FACULTY:'var(--amber)',
     };
-    return map[role] || 'rgba(0,245,255,0.5)';
+    return map[role] || 'rgba(191,219,254,0.75)';
 };
 
 const RoleBadge = ({ role }: { role: string }) => (
-    <span className="cp-badge font-mono-cp" style={{
+    <UiBadge className="font-mono-cp" style={{
         background: `${roleColor(role)}11`,
         border: `1px solid ${roleColor(role)}44`,
         color: roleColor(role),
     }}>
         {role.replace('ROLE_','')}
-    </span>
+    </UiBadge>
 );
 
 const AdminPage = () => {
@@ -105,15 +106,15 @@ const AdminPage = () => {
     if (error) return <div className="cp-alert-error font-mono-cp text-sm max-w-lg mt-8">{error}</div>;
 
     return (
-        <div className="space-y-5">
+        <PageContainer className="space-y-5">
             {/* Toast */}
             {toast && (
-                <div className="fixed bottom-6 right-6 z-50 font-mono-cp text-sm px-4 py-3"
+                <div className="fixed bottom-6 right-6 z-50 font-mono-cp text-sm px-4 py-3 cp-toast"
                     style={{
-                        background: toast.ok ? 'rgba(0,255,136,0.08)' : 'rgba(255,45,120,0.08)',
-                        border: `1px solid ${toast.ok ? 'rgba(0,255,136,0.4)' : 'rgba(255,45,120,0.4)'}`,
+                        background: toast.ok ? 'rgba(16,185,129,0.2)' : 'rgba(225,29,72,0.2)',
+                        border: `1px solid ${toast.ok ? 'rgba(52,211,153,0.45)' : 'rgba(244,114,182,0.45)'}`,
                         color: toast.ok ? 'var(--green)' : 'var(--pink)',
-                        boxShadow: `0 0 20px ${toast.ok ? 'rgba(0,255,136,0.15)' : 'rgba(255,45,120,0.15)'}`,
+                        boxShadow: `0 14px 28px ${toast.ok ? 'rgba(16,185,129,0.25)' : 'rgba(190,24,93,0.25)'}`,
                     }}>
                     {toast.ok ? '✓' : '⚠'} {toast.msg}
                 </div>
@@ -121,8 +122,7 @@ const AdminPage = () => {
 
             {/* Header */}
             <div>
-                <p className="font-mono-cp text-xs tracking-widest mb-1" style={{ color: 'rgba(255,45,120,0.5)' }}>// ADMIN_CONSOLE</p>
-                <h2 className="font-display text-2xl font-bold tracking-widest glow-pink" style={{ color: 'var(--pink)' }}>SYSTEM_CONTROL</h2>
+                <SectionHeading overline="// ADMIN_CONSOLE" title="SYSTEM_CONTROL" accent="var(--pink)" />
             </div>
 
             {/* Stats */}
@@ -133,11 +133,7 @@ const AdminPage = () => {
                     { label: 'LOCKED',       value: users.filter(u => u.accountLocked).length,       color: 'var(--amber)'  },
                     { label: 'ADMINS',       value: users.filter(u => u.roles.includes('ROLE_ADMIN')).length, color: 'var(--pink)' },
                 ].map(s => (
-                    <div key={s.label} className="cp-card p-4 space-y-1"
-                        style={{ borderLeft: `2px solid ${s.color}` }}>
-                        <p className="font-mono-cp text-xs" style={{ color: 'rgba(0,245,255,0.4)' }}>{s.label}</p>
-                        <p className="font-display text-2xl font-bold" style={{ color: s.color }}>{s.value}</p>
-                    </div>
+                    <UiStatCard key={s.label} label={s.label} value={s.value} accent={s.color} />
                 ))}
             </div>
 
@@ -145,12 +141,12 @@ const AdminPage = () => {
                 {/* User list */}
                 <div className="flex-1 min-w-0 space-y-3">
                     <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono-cp text-xs" style={{ color: 'rgba(0,245,255,0.4)' }}>⌕</span>
-                        <input value={search} onChange={e => setSearch(e.target.value)}
-                            placeholder="search operatives..." className="cp-input pl-8 w-full" />
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono-cp text-xs" style={{ color: 'rgba(148,163,184,0.95)' }}>⌕</span>
+                        <UiInput value={search} onChange={e => setSearch(e.target.value)}
+                            placeholder="search operatives..." className="pl-8 w-full" />
                     </div>
 
-                    <div className="cp-card overflow-hidden">
+                    <GlassCard className="overflow-hidden">
                         <table className="cp-table">
                             <thead>
                                 <tr>
@@ -167,16 +163,15 @@ const AdminPage = () => {
                                         style={{ cursor: 'pointer' }}>
                                         <td>
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 flex-shrink-0 flex items-center justify-center font-display text-xs font-bold"
-                                                    style={{ background: 'rgba(0,245,255,0.06)', border: '1px solid rgba(0,245,255,0.2)', color: 'var(--cyan)' }}>
-                                                    {u.profilePhotoUrl
-                                                        ? <img src={u.profilePhotoUrl} className="w-full h-full object-cover" alt="" />
-                                                        : `${u.firstName[0]}${u.lastName[0]}`
-                                                    }
-                                                </div>
+                                                <UiAvatar
+                                                    size="md"
+                                                    src={u.profilePhotoUrl}
+                                                    initials={`${u.firstName[0]}${u.lastName[0]}`}
+                                                    className="flex-shrink-0"
+                                                />
                                                 <div>
                                                     <p className="font-display text-xs tracking-wide" style={{ color: '#e2e8f0' }}>{u.firstName} {u.lastName}</p>
-                                                    <p className="font-mono-cp text-xs truncate max-w-[160px]" style={{ color: 'rgba(0,245,255,0.35)' }}>{u.email}</p>
+                                                    <p className="font-mono-cp text-xs truncate max-w-[160px]" style={{ color: 'rgba(148,163,184,0.95)' }}>{u.email}</p>
                                                 </div>
                                             </div>
                                         </td>
@@ -202,53 +197,51 @@ const AdminPage = () => {
                                     </tr>
                                 ))}
                                 {filtered.length === 0 && (
-                                    <tr><td colSpan={3} className="text-center py-8 font-mono-cp text-xs" style={{ color: 'rgba(0,245,255,0.3)' }}>NO_NODES_FOUND</td></tr>
+                                    <tr><td colSpan={3} className="text-center py-8 font-mono-cp text-xs" style={{ color: 'rgba(191,219,254,0.72)' }}>NO_NODES_FOUND</td></tr>
                                 )}
                             </tbody>
                         </table>
-                    </div>
+                    </GlassCard>
                 </div>
 
                 {/* Detail panel */}
                 {selected && (
                     <div className="w-72 shrink-0 space-y-4">
-                        <div className="cp-card p-5 space-y-5">
+                        <GlassCard className="p-5 space-y-5">
                             {/* Avatar + name */}
                             <div className="flex flex-col items-center text-center gap-3 pb-4"
-                                style={{ borderBottom: '1px solid rgba(0,245,255,0.1)' }}>
-                                <div className="w-14 h-14 flex items-center justify-center font-display text-lg font-bold"
-                                    style={{ background: 'rgba(0,245,255,0.06)', border: '1px solid rgba(0,245,255,0.3)', color: 'var(--cyan)', boxShadow: '0 0 15px rgba(0,245,255,0.1)' }}>
-                                    {selected.profilePhotoUrl
-                                        ? <img src={selected.profilePhotoUrl} className="w-full h-full object-cover" alt="" />
-                                        : `${selected.firstName[0]}${selected.lastName[0]}`
-                                    }
-                                </div>
+                                style={{ borderBottom: '1px solid rgba(148,163,184,0.28)' }}>
+                                <UiAvatar
+                                    size="lg"
+                                    src={selected.profilePhotoUrl}
+                                    initials={`${selected.firstName[0]}${selected.lastName[0]}`}
+                                />
                                 <div>
                                     <p className="font-display text-sm font-semibold tracking-wide" style={{ color: '#e2e8f0' }}>
                                         {selected.firstName} {selected.lastName}
                                     </p>
-                                    <p className="font-mono-cp text-xs mt-0.5" style={{ color: 'rgba(0,245,255,0.4)' }}>{selected.email}</p>
+                                    <p className="font-mono-cp text-xs mt-0.5" style={{ color: 'rgba(148,163,184,0.95)' }}>{selected.email}</p>
                                 </div>
                             </div>
 
                             {/* Profile score */}
                             <div className="space-y-1">
-                                <div className="flex justify-between font-mono-cp text-xs" style={{ color: 'rgba(0,245,255,0.4)' }}>
+                                <div className="flex justify-between font-mono-cp text-xs" style={{ color: 'rgba(191,219,254,0.75)' }}>
                                     <span>PROFILE_SCORE</span><span style={{ color: 'var(--cyan)' }}>{selected.profileScore}%</span>
                                 </div>
                                 <div className="cp-bar-track">
-                                    <div className="cp-bar-fill" style={{ width: `${selected.profileScore}%`, background: 'var(--cyan)', boxShadow: '0 0 6px rgba(0,245,255,0.5)' }} />
+                                    <div className="cp-bar-fill" style={{ width: `${selected.profileScore}%`, background: 'var(--cyan)', boxShadow: '0 8px 16px rgba(96,165,250,0.45)' }} />
                                 </div>
                             </div>
 
                             {/* Meta */}
-                            <div className="font-mono-cp text-xs space-y-1" style={{ color: 'rgba(0,245,255,0.35)' }}>
+                            <div className="font-mono-cp text-xs space-y-1" style={{ color: 'rgba(148,163,184,0.9)' }}>
                                 <p>LAST_LOGIN :: {selected.lastLoginAt ? new Date(selected.lastLoginAt).toLocaleDateString() : 'NEVER'}</p>
                                 <p>CREATED   :: {new Date(selected.createdAt).toLocaleDateString()}</p>
                             </div>
 
                             {/* Role management */}
-                            <div className="space-y-2 pt-1" style={{ borderTop: '1px solid rgba(0,245,255,0.1)' }}>
+                            <div className="space-y-2 pt-1" style={{ borderTop: '1px solid rgba(148,163,184,0.28)' }}>
                                 <p className="cp-section-title pt-2">ROLE_MANAGEMENT</p>
                                 <div className="flex flex-wrap gap-1.5">
                                     {selected.roles.map(r => <RoleBadge key={r} role={r} />)}
@@ -260,11 +253,11 @@ const AdminPage = () => {
                                         return (
                                             <button key={r} disabled={actionLoading}
                                                 onClick={() => has ? removeRole(selected.id, r) : assignRole(selected.id, r)}
-                                                className="font-mono-cp text-xs px-2 py-1.5 transition-all disabled:opacity-40"
+                                                className="font-mono-cp text-xs px-2 py-1.5 transition-all disabled:opacity-40 cp-hover-lift"
                                                 style={{
                                                     background: has ? `${c}15` : 'rgba(0,0,0,0.3)',
-                                                    border: `1px solid ${has ? c + '50' : 'rgba(0,245,255,0.15)'}`,
-                                                    color: has ? c : 'rgba(0,245,255,0.4)',
+                                                    border: `1px solid ${has ? c + '50' : 'rgba(148,163,184,0.35)'}`,
+                                                    color: has ? c : 'rgba(191,219,254,0.75)',
                                                 }}>
                                                 {has ? '− ' : '+ '}{r.replace('ROLE_','')}
                                             </button>
@@ -274,35 +267,26 @@ const AdminPage = () => {
                             </div>
 
                             {/* Account actions */}
-                            <div className="space-y-2 pt-1" style={{ borderTop: '1px solid rgba(0,245,255,0.1)' }}>
+                            <div className="space-y-2 pt-1" style={{ borderTop: '1px solid rgba(148,163,184,0.28)' }}>
                                 <p className="cp-section-title pt-2">ACCOUNT_CONTROLS</p>
-                                <button disabled={actionLoading} onClick={() => toggleEnable(selected)}
-                                    className="w-full font-mono-cp text-xs py-2 transition-all disabled:opacity-40"
-                                    style={{ border: '1px solid rgba(0,245,255,0.2)', color: 'rgba(0,245,255,0.6)', background: 'transparent' }}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,245,255,0.5)'; (e.currentTarget as HTMLElement).style.color = 'var(--cyan)'; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,245,255,0.2)'; (e.currentTarget as HTMLElement).style.color = 'rgba(0,245,255,0.6)'; }}>
+                                <UiButton disabled={actionLoading} onClick={() => toggleEnable(selected)}
+                                    variant="ghost" className="w-full font-mono-cp text-xs py-2">
                                     {selected.enabled ? 'DISABLE_ACCOUNT' : 'ENABLE_ACCOUNT'}
-                                </button>
-                                <button disabled={actionLoading} onClick={() => toggleLock(selected)}
-                                    className="w-full font-mono-cp text-xs py-2 transition-all disabled:opacity-40"
-                                    style={{ border: '1px solid rgba(255,184,0,0.25)', color: 'rgba(255,184,0,0.6)', background: 'transparent' }}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--amber)'; (e.currentTarget as HTMLElement).style.color = 'var(--amber)'; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,184,0,0.25)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,184,0,0.6)'; }}>
+                                </UiButton>
+                                <UiButton disabled={actionLoading} onClick={() => toggleLock(selected)}
+                                    variant="amber" className="w-full font-mono-cp text-xs py-2">
                                     {selected.accountLocked ? 'UNLOCK_ACCOUNT' : 'LOCK_ACCOUNT'}
-                                </button>
-                                <button disabled={actionLoading} onClick={() => deleteUser(selected)}
-                                    className="w-full font-mono-cp text-xs py-2 transition-all disabled:opacity-40"
-                                    style={{ border: '1px solid rgba(255,45,120,0.3)', color: 'rgba(255,45,120,0.6)', background: 'transparent' }}
-                                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--pink)'; (e.currentTarget as HTMLElement).style.color = 'var(--pink)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 0 10px rgba(255,45,120,0.15)'; }}
-                                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,45,120,0.3)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,45,120,0.6)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}>
+                                </UiButton>
+                                <UiButton disabled={actionLoading} onClick={() => deleteUser(selected)}
+                                    variant="danger" className="w-full font-mono-cp text-xs py-2">
                                     PURGE_OPERATIVE
-                                </button>
+                                </UiButton>
                             </div>
-                        </div>
+                        </GlassCard>
                     </div>
                 )}
             </div>
-        </div>
+        </PageContainer>
     );
 };
 
