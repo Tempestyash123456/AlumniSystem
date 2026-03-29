@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,7 +37,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
-    // FIX: Match exact list of public paths from SecurityConfig
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/v1/auth/login",
             "/api/v1/auth/register",
@@ -45,16 +45,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/v1/auth/reset-password",
             "/api/v1/auth/verify-email",
             "/api/v1/health",
-            "/actuator"
+            "/actuator",
+            "/uploads/"
     );
 
-    /**
-     * FIX: Use Spring's native way to skip the filter entirely for public endpoints.
-     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+        String path   = request.getServletPath();
+        String method = request.getMethod();
+
+        // Skip auth entirely for public paths
+        if (PUBLIC_PATHS.stream().anyMatch(path::startsWith)) return true;
+
+        // GET /api/v1/posts and /api/v1/posts/{id} are public reads
+        if (HttpMethod.GET.matches(method) && path.startsWith("/api/v1/posts")) return true;
+
+        return false;
     }
 
     @Override
@@ -73,7 +79,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt = authHeader.substring(BEARER_PREFIX.length());
 
         try {
-            // FIX: Parse token ONCE, improving performance and catching expiration properly.
             Claims claims = jwtService.extractAllClaims(jwt);
 
             if ("REFRESH".equals(claims.get("type"))) {
@@ -87,7 +92,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                // Token is already structurally validated and unexpired by this point.
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -102,7 +106,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
         } catch (ExpiredJwtException e) {
-            // FIX: The frontend can now specifically look for this code to trigger a silent refresh
             log.debug("JWT token is expired: {}", e.getMessage());
             writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
                     "TOKEN_EXPIRED", "JWT token has expired");
@@ -123,10 +126,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     String message) throws IOException {
         response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
         ApiResponse<Void> errorResponse = ApiResponse.error(
                 new ApiResponse.ApiError(status, code, message, null));
-
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 }
