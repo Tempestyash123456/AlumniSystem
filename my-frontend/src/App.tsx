@@ -12,6 +12,8 @@ import { DashboardPage } from './pages/dashboard/DashboardPage.tsx';
 import { AlumniDirectoryPage, AlumniProfileViewPage } from './pages/alumni/AlumniDirectory.tsx';
 import { ProfilePage } from './pages/profile/ProfilePage.tsx';
 import { AdminPage } from './pages/admin/AdminPage.tsx';
+import { PostsPage } from './pages/admin/PostsPage.tsx';
+import { PostsFeedPage } from './pages/posts/PostsFeedPage.tsx';
 
 // ── Guards ────────────────────────────────────────────────────────────────────
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -35,7 +37,7 @@ const RedirectIfAuth: React.FC<{ children: React.ReactNode }> = ({ children }) =
     return <>{children}</>;
 };
 
-// ── Bootstrap: verify stored token on cold start ──────────────────────────────
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
 const AppBootstrap: React.FC<{ onDone: () => void }> = ({ onDone }) => {
     const { isAuthenticated, setUser, clearAuth } = useAuthStore();
 
@@ -72,20 +74,24 @@ const App: React.FC = () => {
         <BrowserRouter>
             <Routes>
                 {/* Public auth routes */}
-                <Route path="/login"          element={<RedirectIfAuth><LoginPage /></RedirectIfAuth>} />
-                <Route path="/register"       element={<RedirectIfAuth><RegisterPage /></RedirectIfAuth>} />
+                <Route path="/login"           element={<RedirectIfAuth><LoginPage /></RedirectIfAuth>} />
+                <Route path="/register"        element={<RedirectIfAuth><RegisterPage /></RedirectIfAuth>} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password"  element={<ResetPasswordPage />} />
                 <Route path="/verify-email"    element={<VerifyEmailPage />} />
 
-                {/* Protected routes */}
-                <Route path="/dashboard" element={<RequireAuth><Layout><DashboardPage /></Layout></RequireAuth>} />
-                <Route path="/alumni"    element={<RequireAuth><Layout><AlumniDirectoryPage /></Layout></RequireAuth>} />
-                <Route path="/alumni/:userId" element={<RequireAuth><Layout><AlumniProfileViewPage /></Layout></RequireAuth>} />
-                <Route path="/profile"   element={<RequireAuth><Layout><ProfilePage /></Layout></RequireAuth>} />
+                {/* Protected — all authenticated users */}
+                <Route path="/dashboard"    element={<RequireAuth><Layout><DashboardPage /></Layout></RequireAuth>} />
+                <Route path="/profile"      element={<RequireAuth><Layout><ProfilePage /></Layout></RequireAuth>} />
+                <Route path="/posts"        element={<RequireAuth><Layout><PostsFeedPage /></Layout></RequireAuth>} />
 
-                {/* Admin routes */}
-                <Route path="/admin" element={<RequireAdmin><Layout><AdminPage /></Layout></RequireAdmin>} />
+                {/* Admin-only directory and individual profile view */}
+                <Route path="/alumni"         element={<RequireAuth><Layout><AlumniDirectoryPage /></Layout></RequireAuth>} />
+                <Route path="/alumni/:userId" element={<RequireAuth><Layout><AlumniProfileViewPage /></Layout></RequireAuth>} />
+
+                {/* Admin-only management */}
+                <Route path="/admin"       element={<RequireAdmin><Layout><AdminPage /></Layout></RequireAdmin>} />
+                <Route path="/admin/posts" element={<RequireAdmin><Layout><PostsPage /></Layout></RequireAdmin>} />
 
                 {/* Fallbacks */}
                 <Route path="/"  element={<Navigate to="/dashboard" replace />} />

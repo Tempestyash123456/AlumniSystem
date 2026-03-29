@@ -1,6 +1,6 @@
 import type {
     ApiResponse, AuthResponse, UserInfo, ProfileResponse,
-    UpdateProfileRequest, AdminUserListResponse, AdminUserDto, AlumniDto
+    UpdateProfileRequest, AdminUserListResponse, AdminUserDto, AlumniDto, PostDto
 } from '../types';
 
 const BASE_URL = 'http://localhost:8080/api/v1';
@@ -45,9 +45,12 @@ async function apiFetch<T>(
 ): Promise<ApiResponse<T>> {
     const token = tokenStorage.getAccess();
     const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
         ...(options.headers as Record<string, string>),
     };
+    // Only set Content-Type for non-FormData requests
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
     try {
@@ -101,6 +104,11 @@ export const profileApi = {
     getMyProfile: () => apiFetch<ProfileResponse>('/profile'),
     updateMyProfile: (data: UpdateProfileRequest) => apiFetch<ProfileResponse>('/profile', { method: 'PUT', body: JSON.stringify(data) }),
     getProfileById: (userId: string) => apiFetch<ProfileResponse>(`/profile/${userId}`),
+    uploadPhoto: (file: File) => {
+        const form = new FormData();
+        form.append('photo', file);
+        return apiFetch<{ profilePhotoUrl: string }>('/profile/photo', { method: 'POST', body: form });
+    },
 };
 
 export const alumniApi = {
@@ -114,4 +122,22 @@ export const adminApi = {
     deleteUser: (userId: string) => apiFetch<void>(`/admin/users/${userId}`, { method: 'DELETE' }),
     assignRole: (userId: string, roleName: string) => apiFetch<AdminUserDto>(`/admin/users/${userId}/roles`, { method: 'POST', body: JSON.stringify({ roleName }) }),
     removeRole: (userId: string, roleName: string) => apiFetch<AdminUserDto>(`/admin/users/${userId}/roles/${roleName}`, { method: 'DELETE' }),
+};
+
+export const postsApi = {
+    getAll: () => apiFetch<PostDto[]>('/posts'),
+    getOne: (postId: string) => apiFetch<PostDto>(`/posts/${postId}`),
+    create: (title: string, description: string, image?: File | null) => {
+        const form = new FormData();
+        form.append('data', JSON.stringify({ title, description }));
+        if (image) form.append('image', image);
+        return apiFetch<PostDto>('/posts', { method: 'POST', body: form });
+    },
+    update: (postId: string, title: string, description: string, image?: File | null) => {
+        const form = new FormData();
+        form.append('data', JSON.stringify({ title, description }));
+        if (image) form.append('image', image);
+        return apiFetch<PostDto>(`/posts/${postId}`, { method: 'PUT', body: form });
+    },
+    delete: (postId: string) => apiFetch<void>(`/posts/${postId}`, { method: 'DELETE' }),
 };

@@ -1,10 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { profileApi } from '../../lib/api.ts';
+import { useAuthStore } from '../../store/authStore.ts';
 import type { ProfileResponse, UpdateProfileRequest } from '../../types';
 import {
     Input, Textarea, Select, Button, Alert,
     ProgressBar, Toggle, SkillsInput, Spinner,
 } from '../../components/ui';
+
+const BASE_URL = 'http://localhost:8080';
 
 // --- Static options ---
 const INDUSTRY_OPTIONS = [
@@ -31,7 +34,131 @@ const SECTIONS: { id: Section; label: string; icon: string }[] = [
     { id: 'visibility',   label: 'VISIBILITY',    icon: '👁️' },
 ];
 
+// ── Photo Upload Section ──────────────────────────────────────────────────────
+const PhotoUpload: React.FC<{
+    currentUrl?: string;
+    userId: string;
+    onSuccess: (url: string) => void;
+}> = ({ currentUrl, userId, onSuccess }) => {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploading, setUploading] = useState(false);
+    const [error, setError]         = useState('');
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    const displayUrl = previewUrl || (currentUrl ? `${BASE_URL}${currentUrl}` : null);
+
+    const initials = userId.slice(0, 2).toUpperCase();
+
+    const handleFile = async (file: File) => {
+        if (!file.type.startsWith('image/')) { setError('Only image files allowed'); return; }
+        if (file.size > 5 * 1024 * 1024)   { setError('File exceeds 5 MB'); return; }
+
+        // Optimistic preview
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewUrl(objectUrl);
+        setUploading(true);
+        setError('');
+
+        const res = await profileApi.uploadPhoto(file);
+        setUploading(false);
+
+        if (res.data) {
+            onSuccess(res.data.profilePhotoUrl);
+            // Keep the preview until page refresh
+        } else {
+            setError(res.error?.message || 'Upload failed');
+            setPreviewUrl(null);
+        }
+    };
+
+    return (
+        <div className="cp-panel" style={{ padding: '24px', marginBottom: 4 }}>
+            <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 20 }}>
+                ◉ PROFILE_PHOTO
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+                {/* Avatar */}
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                    <div style={{
+                        width: 80, height: 80, borderRadius: '50%', overflow: 'hidden',
+                        border: '2px solid var(--neon-cyan)',
+                        boxShadow: '0 0 16px rgba(0,245,255,0.3)',
+                        background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                        {displayUrl ? (
+                            <img src={displayUrl} alt="Profile"
+                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                        ) : (
+                            <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '24px', fontWeight: 700, color: 'var(--bg-void)' }}>
+                                {initials}
+                            </span>
+                        )}
+                    </div>
+                    {uploading && (
+                        <div style={{
+                            position: 'absolute', inset: 0, borderRadius: '50%',
+                            background: 'rgba(0,0,0,0.7)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                            <span className="cp-spinner" style={{ width: 20, height: 20 }} />
+                        </div>
+                    )}
+                </div>
+
+                {/* Info + Button */}
+                <div style={{ flex: 1, minWidth: 180 }}>
+                    <div style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
+                        Upload a profile photo. JPG, PNG or WEBP — max 5 MB.
+                    </div>
+                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                        <Button
+                            variant="outline" size="sm"
+                            disabled={uploading}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            {uploading ? 'UPLOADING...' : currentUrl || previewUrl ? 'CHANGE PHOTO' : 'UPLOAD PHOTO'}
+                        </Button>
+                        {(currentUrl || previewUrl) && !uploading && (
+                            <Button variant="ghost" size="sm"
+                                    onClick={() => {
+                                        setPreviewUrl(null);
+                                        onSuccess('');
+                                    }}
+                            >
+                                Remove
+                            </Button>
+                        )}
+                    </div>
+                    {error && (
+                        <div style={{ marginTop: 8, fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)' }}>
+                            ⚠ {error}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFile(file);
+                    e.target.value = '';
+                }}
+            />
+        </div>
+    );
+};
+
+// ── Main Profile Page ─────────────────────────────────────────────────────────
 export const ProfilePage: React.FC = () => {
+    const { user, updateUser } = useAuthStore();
     const [profile, setProfile] = useState<ProfileResponse | null>(null);
     const [loading, setLoading]   = useState(true);
     const [saving, setSaving]      = useState(false);
@@ -139,7 +266,7 @@ export const ProfilePage: React.FC = () => {
                 {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
                 {error   && <Alert type="error"   onClose={() => setError('')}>{error}</Alert>}
 
-                {/* HORIZONTAL NAVIGATION WITH PROPER HIGHLIGHTING */}
+                {/* HORIZONTAL NAVIGATION */}
                 <div
                     className="cp-panel"
                     style={{
@@ -224,6 +351,16 @@ export const ProfilePage: React.FC = () => {
 
                         {activeSection === 'personal' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                {/* Photo Upload — only shown in personal section */}
+                                <PhotoUpload
+                                    currentUrl={profile?.profilePhotoUrl}
+                                    userId={user?.id ?? 'XX'}
+                                    onSuccess={(url) => {
+                                        setProfile(prev => prev ? { ...prev, profilePhotoUrl: url } : prev);
+                                        updateUser({ profilePhotoUrl: url });
+                                    }}
+                                />
+
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <Input label="First Name" value={form.firstName ?? ''} onChange={setStr('firstName')} />
                                     <Input label="Last Name"  value={form.lastName  ?? ''} onChange={setStr('lastName')} />

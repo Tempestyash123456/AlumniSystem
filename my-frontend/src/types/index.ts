@@ -127,3 +127,15 @@ export interface AdminUserListResponse {
     users: AdminUserDto[];
     totalCount: number;
 }
+
+// ── Posts ─────────────────────────────────────────────────────────────────────
+export interface PostDto {
+    id: string;
+    title: string;
+    description: string;   // Raw Markdown
+    imageUrl?: string;
+    authorFirstName: string;
+    authorLastName: string;
+    createdAt: string;
+    updatedAt: string;
+}

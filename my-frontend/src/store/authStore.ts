@@ -40,7 +40,6 @@ export const useAuthStore = create<AuthState>()(
         }),
         {
             name: 'auth-store',
-            // Only persist essential data
             partialize: (state) => ({
                 user: state.user,
                 isAuthenticated: state.isAuthenticated,
