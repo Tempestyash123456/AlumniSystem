@@ -141,3 +141,9 @@ export const postsApi = {
     },
     delete: (postId: string) => apiFetch<void>(`/posts/${postId}`, { method: 'DELETE' }),
 };
+
+export const getImageUrl = (path: string | null | undefined) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path; // Already absolute
+    return `http://localhost:8080${path}`;
+};

@@ -53,6 +53,7 @@ public class SecurityConfig {
             "/api/v1/posts",          // Anyone can read the posts feed
             "/api/v1/posts/**",       // Anyone can read a single post
             "/uploads/**",            // Serve uploaded images publicly
+            "/api/v1/profile/**",
             "/actuator/health",
             "/actuator/info",
             "/actuator/prometheus",
@@ -71,6 +72,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, PUBLIC_POST_PATHS).permitAll()
                         .requestMatchers(HttpMethod.GET,  PUBLIC_GET_PATHS).permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

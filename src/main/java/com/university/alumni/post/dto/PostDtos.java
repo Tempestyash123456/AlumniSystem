@@ -17,6 +17,7 @@ public final class PostDtos {
             String  imageUrl,
             String  authorFirstName,
             String  authorLastName,
+            String  authorProfilePhotoUrl,
             Instant createdAt,
             Instant updatedAt
     ) {}

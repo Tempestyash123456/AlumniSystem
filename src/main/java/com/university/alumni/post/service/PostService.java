@@ -87,13 +87,15 @@ public class PostService {
     }
 
     private PostResponse toResponse(Post post) {
+        User author = post.getAuthor();
         return new PostResponse(
                 post.getId(),
                 post.getTitle(),
                 post.getDescription(),
                 post.getImageUrl(),
-                post.getAuthor().getFirstName(),
-                post.getAuthor().getLastName(),
+                author.getFirstName(),
+                author.getLastName(),
+                author.getProfilePhotoUrl(),
                 post.getCreatedAt(),
                 post.getUpdatedAt()
         );

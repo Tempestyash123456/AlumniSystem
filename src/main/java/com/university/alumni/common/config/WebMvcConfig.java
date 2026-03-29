@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
@@ -20,11 +21,17 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String absolutePath = Paths.get(uploadDir).toAbsolutePath().toUri().toString();
-        if (!absolutePath.endsWith("/")) {
-            absolutePath += "/";
-        }
+        // Expose the upload directory to the web
+        exposeDirectory(uploadDir, registry);
+    }
+
+    private void exposeDirectory(String dirName, ResourceHandlerRegistry registry) {
+        Path uploadPath = Paths.get(dirName);
+        String absPath = uploadPath.toFile().getAbsolutePath();
+
+        // This ensures /uploads/** maps to the file system path
+        // We use "file:" prefix to tell Spring it's a local file system path
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations(absolutePath);
+                .addResourceLocations("file:" + absPath + "/");
     }
 }

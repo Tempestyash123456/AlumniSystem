@@ -3,6 +3,8 @@ import { adminApi } from '../../lib/api.ts';
 import type { AdminUserDto } from '../../types';
 import { Button, Badge, Spinner, Alert, Confirm, Modal, Input } from '../../components/ui';
 
+const BASE_URL = 'http://localhost:8080'; // Backend base URL for images
+
 export const AdminPage: React.FC = () => {
     const [users, setUsers] = useState<AdminUserDto[]>([]);
     const [loading, setLoading] = useState(true);
@@ -99,7 +101,6 @@ export const AdminPage: React.FC = () => {
         setActionLoading(false);
     };
 
-    // Stats
     const stats = {
         total: users.length,
         enabled: users.filter((u) => u.enabled).length,
@@ -146,13 +147,13 @@ export const AdminPage: React.FC = () => {
                             placeholder="Search users..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            icon={<span>⌕</span>}
+                            icon={<span>🔍</span>}
                         />
                     </div>
                     <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-            {filtered.length} of {users.length}
-          </span>
-                    <Button variant="outline" size="sm" onClick={load}>↻ Refresh</Button>
+                        {filtered.length} of {users.length}
+                    </span>
+                    <Button variant="outline" size="sm" onClick={load}>🔄 Refresh</Button>
                 </div>
 
                 {loading ? (
@@ -174,11 +175,38 @@ export const AdminPage: React.FC = () => {
                             {filtered.map((user) => (
                                 <tr key={user.id}>
                                     <td>
-                                        <div>
-                                            <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '15px' }}>
-                                                {user.firstName} {user.lastName}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                            {/* Profile Photo Display */}
+                                            <div style={{
+                                                width: 36,
+                                                height: 36,
+                                                borderRadius: '50%',
+                                                overflow: 'hidden',
+                                                border: '1px solid var(--border-subtle)',
+                                                background: 'var(--bg-card)',
+                                                flexShrink: 0
+                                            }}>
+                                                {user.profilePhotoUrl ? (
+                                                    <img
+                                                        src={`${BASE_URL}${user.profilePhotoUrl}`}
+                                                        alt=""
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                        onError={(e) => {
+                                                            (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`;
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
+                                                        👤
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{user.email}</div>
+                                            <div>
+                                                <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '15px' }}>
+                                                    {user.firstName} {user.lastName}
+                                                </div>
+                                                <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{user.email}</div>
+                                            </div>
                                         </div>
                                     </td>
                                     <td>
@@ -191,15 +219,15 @@ export const AdminPage: React.FC = () => {
                                                         className={`cp-badge ${isAdminRole ? 'cp-badge-pink' : 'cp-badge-cyan'}`}
                                                         style={{ cursor: isAdminRole ? 'default' : 'pointer' }}
                                                         title={isAdminRole ? 'Admin role cannot be revoked' : 'Click to remove'}
-                                                        onClick={() => !isAdminRole && handleRemoveRole(user, r)} // Only trigger if not admin
+                                                        onClick={() => !isAdminRole && handleRemoveRole(user, r)}
                                                     >
-            {r.replace('ROLE_', '')} {!isAdminRole && '×'} {/* Only show '×' for non-admin roles */}
-        </span>
+                                                            {r.replace('ROLE_', '')} {!isAdminRole && '×'}
+                                                        </span>
                                                 );
                                             })}
                                             <button
                                                 onClick={() => setRoleTarget(user)}
-                                                style={{ background: 'none', border: '1px dashed var(--border-subtle)', color: 'var(--text-muted)', borderRadius: 2, padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontFamily: 'Orbitron, monospace', letterSpacing: '0.05em' }}
+                                                style={{ background: 'none', border: '1px dashed var(--border-subtle)', color: 'var(--text-muted)', borderRadius: 2, padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontFamily: 'Orbitron, monospace' }}
                                             >
                                                 + ADD
                                             </button>
@@ -222,34 +250,17 @@ export const AdminPage: React.FC = () => {
                                         </div>
                                     </td>
                                     <td style={{ color: 'var(--text-muted)', fontSize: '11px' }}>
-                                        {user.lastLoginAt
-                                            ? new Date(user.lastLoginAt).toLocaleDateString()
-                                            : '—'}
+                                        {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleEnable(user)}
-                                                disabled={actionLoading}
-                                            >
+                                            <Button variant="ghost" size="sm" onClick={() => handleEnable(user)} disabled={actionLoading}>
                                                 {user.enabled ? 'Disable' : 'Enable'}
                                             </Button>
-                                            <Button
-                                                variant={user.accountLocked ? 'outline' : 'ghost'}
-                                                size="sm"
-                                                onClick={() => handleLock(user)}
-                                                disabled={actionLoading}
-                                            >
+                                            <Button variant={user.accountLocked ? 'outline' : 'ghost'} size="sm" onClick={() => handleLock(user)} disabled={actionLoading}>
                                                 {user.accountLocked ? 'Unlock' : 'Lock'}
                                             </Button>
-                                            <Button
-                                                variant="danger"
-                                                size="sm"
-                                                onClick={() => setDeleteTarget(user)}
-                                                disabled={actionLoading}
-                                            >
+                                            <Button variant="danger" size="sm" onClick={() => setDeleteTarget(user)} disabled={actionLoading}>
                                                 Delete
                                             </Button>
                                         </div>
@@ -260,14 +271,14 @@ export const AdminPage: React.FC = () => {
                         </table>
                         {filtered.length === 0 && (
                             <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace' }}>
-                                No users found
+                                NO_USERS_FOUND
                             </div>
                         )}
                     </div>
                 )}
             </div>
 
-            {/* Delete confirm */}
+            {/* Modals remain the same */}
             <Confirm
                 open={!!deleteTarget}
                 title="DELETE_USER"
@@ -277,16 +288,15 @@ export const AdminPage: React.FC = () => {
                 onCancel={() => setDeleteTarget(null)}
             />
 
-            {/* Assign role modal */}
             <Modal open={!!roleTarget} title="ASSIGN_ROLE" onClose={() => setRoleTarget(null)} width={400}>
                 <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginBottom: 20 }}>
-                    Assign ADMIN role to {roleTarget?.email}
+                    Manage roles for {roleTarget?.email}
                 </p>
                 <Input
                     label="Role Name"
                     value={newRole}
                     onChange={(e) => setNewRole(e.target.value)}
-                    placeholder="ADMIN"
+                    placeholder="ALUMNI"
                     hint="Prefix ROLE_ will be added automatically"
                     onKeyDown={(e) => { if (e.key === 'Enter') handleAssignRole(); }}
                 />

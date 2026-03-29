@@ -5,6 +5,7 @@ import { adminApi, profileApi } from '../../lib/api.ts';
 import { useAuthStore } from '../../store/authStore.ts';
 import type { AdminUserDto, ProfileResponse } from '../../types';
 import { Spinner, Input, Badge, ProgressBar } from '../../components/ui';
+import { getImageUrl } from '../../lib/api';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const avatarColor = (id: string) => {
@@ -83,8 +84,11 @@ const UserCard: React.FC<{
             }}
         >
             {user.profilePhotoUrl ? (
-                <img src={user.profilePhotoUrl} alt=""
-                     style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${c1}` }} />
+                <img
+                    src={getImageUrl(user.profilePhotoUrl)!}
+                    alt=""
+                    style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${c1}` }}
+                />
             ) : (
                 <div style={{
                     width: 60, height: 60, borderRadius: '50%',
@@ -174,7 +178,11 @@ const UserRow: React.FC<{
             <td>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     {user.profilePhotoUrl ? (
-                        <img src={user.profilePhotoUrl} alt="" style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        <img
+                            src={getImageUrl(user.profilePhotoUrl)!}
+                            alt=""
+                            style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${c1}` }}
+                        />
                     ) : (
                         <div style={{
                             width: 34, height: 34, borderRadius: '50%',
@@ -666,6 +674,14 @@ export const AlumniProfileViewPage: React.FC = () => {
             <div className="cp-panel cp-corners" style={{ padding: '32px' }}>
                 {/* Header row */}
                 <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap' }}>
+
+                    {profile.profilePhotoUrl ? (
+                            <img
+                                src={getImageUrl(profile.profilePhotoUrl)!}
+                                alt=""
+                                style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }}
+                            />
+                        ) : (
                     <div style={{
                         width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
                         background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
@@ -674,7 +690,7 @@ export const AlumniProfileViewPage: React.FC = () => {
                         color: 'var(--bg-void)', boxShadow: '0 0 20px rgba(0,245,255,0.3)',
                     }}>
                         {profile.firstName?.[0]}{profile.lastName?.[0]}
-                    </div>
+                    </div> )}
 
                     <div style={{ flex: 1, minWidth: 200 }}>
                         <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
