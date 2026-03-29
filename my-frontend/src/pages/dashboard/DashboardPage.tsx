@@ -146,19 +146,6 @@ export const DashboardPage: React.FC = () => {
                 {!isAdmin && (
                     <div className="custom-scrollbar-purple" style={{ overflowY: 'auto', paddingRight: 8 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                            <div className="cp-panel" style={{ padding: '20px' }}>
-                                <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 16 }}>
-                                    ◆ SETTINGS
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                                    <span style={{ fontSize: '12px' }}>Public Profile</span>
-                                    <span style={{ color: 'var(--neon-green)' }}>ON</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0' }}>
-                                    <span style={{ fontSize: '12px' }}>Open to Hire</span>
-                                    <span style={{ color: 'var(--neon-purple)' }}>YES</span>
-                                </div>
-                            </div>
 
                             <div className="cp-panel" style={{ padding: '20px' }}>
                                 <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 12 }}>

@@ -33,7 +33,7 @@ type DirectoryTab = 'alumni' | 'admins';
 type ViewMode    = 'grid' | 'list';
 
 interface ProfileCache {
-    [userId: string]: ProfileResponse | null; // null = fetched but empty
+    [userId: string]: ProfileResponse | null;
 }
 
 // ── Filter Select ─────────────────────────────────────────────────────────────
@@ -112,7 +112,6 @@ const UserCard: React.FC<{
                     {user.email}
                 </div>
 
-                {/* Profile details if loaded */}
                 {profile && (
                     <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 3 }}>
                         {profile.currentJobTitle && (
@@ -128,13 +127,13 @@ const UserCard: React.FC<{
                         <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap', marginTop: 4 }}>
                             {profile.graduationYear && (
                                 <span className="cp-badge cp-badge-purple" style={{ fontSize: '8px' }}>
-                  {profile.graduationYear}
-                </span>
+                                    {profile.graduationYear}
+                                </span>
                             )}
                             {profile.degree && (
                                 <span className="cp-badge cp-badge-cyan" style={{ fontSize: '8px' }}>
-                  {profile.degree}
-                </span>
+                                    {profile.degree}
+                                </span>
                             )}
                             {showAdminBadge && (
                                 <span className="cp-badge cp-badge-pink" style={{ fontSize: '8px' }}>ADMIN</span>
@@ -142,7 +141,6 @@ const UserCard: React.FC<{
                         </div>
                     </div>
                 )}
-                {/* Profile score bar */}
                 {typeof user.profileScore === 'number' && user.profileScore > 0 && (
                     <div style={{ marginTop: 10 }}>
                         <div className="cp-progress">
@@ -239,27 +237,23 @@ const UserRow: React.FC<{
 export const AlumniDirectoryPage: React.FC = () => {
     const { isAdmin: currentUserIsAdmin } = useAuthStore();
 
-    // Non-admins cannot access this page
     if (!currentUserIsAdmin) {
         return <Navigate to="/dashboard" replace />;
     }
 
-    const [users, setUsers]             = useState<AdminUserDto[]>([]);
-    const [profileCache, setProfileCache] = useState<ProfileCache>({});
-    const [loading, setLoading]         = useState(true);
-    const [profilesLoading, setProfilesLoading] = useState(false);
-    const [error, setError]             = useState('');
+    const [users, setUsers]                       = useState<AdminUserDto[]>([]);
+    const [profileCache, setProfileCache]         = useState<ProfileCache>({});
+    const [loading, setLoading]                   = useState(true);
+    const [profilesLoading, setProfilesLoading]   = useState(false);
+    const [error, setError]                       = useState('');
 
-    const [tab, setTab]         = useState<DirectoryTab>('alumni');
-    const [view, setView]       = useState<ViewMode>('grid');
-    const [search, setSearch]   = useState('');
-
-    // Alumni-only filters
-    const [filterDept, setFilterDept]   = useState('');
+    const [tab, setTab]             = useState<DirectoryTab>('alumni');
+    const [view, setView]           = useState<ViewMode>('grid');
+    const [search, setSearch]       = useState('');
+    const [filterDept, setFilterDept]     = useState('');
     const [filterDegree, setFilterDegree] = useState('');
-    const [filterYear, setFilterYear]   = useState('');
+    const [filterYear, setFilterYear]     = useState('');
 
-    // 1. Load all users from admin endpoint
     useEffect(() => {
         adminApi.getAllUsers().then((res) => {
             if (res.data) {
@@ -270,7 +264,6 @@ export const AlumniDirectoryPage: React.FC = () => {
         }).finally(() => setLoading(false));
     }, []);
 
-    // 2. Once users load, fetch all profiles in parallel (for filter data)
     useEffect(() => {
         if (users.length === 0) return;
         setProfilesLoading(true);
@@ -288,28 +281,25 @@ export const AlumniDirectoryPage: React.FC = () => {
         }).finally(() => setProfilesLoading(false));
     }, [users]);
 
-    // Derive unique filter options from loaded profiles
     const filterOptions = useMemo(() => {
         const profiles = Object.values(profileCache).filter(Boolean) as ProfileResponse[];
-        const departments  = [...new Set(profiles.map(p => p.department).filter(Boolean) as string[])].sort();
-        const degrees      = [...new Set(profiles.map(p => p.degree).filter(Boolean) as string[])].sort();
-        const years        = [...new Set(profiles.map(p => p.graduationYear).filter(Boolean) as number[])].sort((a, b) => b - a).map(String);
+        const departments = [...new Set(profiles.map(p => p.department).filter(Boolean) as string[])].sort();
+        const degrees     = [...new Set(profiles.map(p => p.degree).filter(Boolean) as string[])].sort();
+        const years       = [...new Set(profiles.map(p => p.graduationYear).filter(Boolean) as number[])].sort((a, b) => b - a).map(String);
         return { departments, degrees, years };
     }, [profileCache]);
 
-    // Split into tabs
     const alumniUsers = useMemo(() => users.filter(u => u.enabled && isAlumni(u)), [users]);
     const adminUsers  = useMemo(() => users.filter(u => u.enabled && isAdmin(u)), [users]);
 
-    // Apply search + filters
     const filteredAlumni = useMemo(() => {
         const q = search.toLowerCase().trim();
         return alumniUsers.filter(u => {
             const profile = profileCache[u.id];
             if (q && !`${u.firstName} ${u.lastName} ${u.email}`.toLowerCase().includes(q)) return false;
-            if (filterDept   && profile?.department     !== filterDept)            return false;
-            if (filterDegree && profile?.degree         !== filterDegree)          return false;
-            if (filterYear   && String(profile?.graduationYear) !== filterYear)    return false;
+            if (filterDept   && profile?.department              !== filterDept)   return false;
+            if (filterDegree && profile?.degree                  !== filterDegree) return false;
+            if (filterYear   && String(profile?.graduationYear)  !== filterYear)   return false;
             return true;
         });
     }, [alumniUsers, profileCache, search, filterDept, filterDegree, filterYear]);
@@ -322,8 +312,8 @@ export const AlumniDirectoryPage: React.FC = () => {
         );
     }, [adminUsers, search]);
 
-    const activeUsers  = tab === 'alumni' ? filteredAlumni : filteredAdmins;
-    const hasFilters   = !!(filterDept || filterDegree || filterYear);
+    const activeUsers = tab === 'alumni' ? filteredAlumni : filteredAdmins;
+    const hasFilters  = !!(filterDept || filterDegree || filterYear);
 
     const resetFilters = () => {
         setFilterDept('');
@@ -334,10 +324,15 @@ export const AlumniDirectoryPage: React.FC = () => {
 
     // ── Render ──────────────────────────────────────────────────────────────────
     return (
-        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        // height: 100% + minHeight: 0 lets this fill the Layout's flex column
+        // so only the cards area scrolls, not the whole page
+        <div
+            className="animate-fade-in"
+            style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}
+        >
 
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+            {/* ── Header ── */}
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, flexShrink: 0 }}>
                 <div>
                     <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 6 }}>
                         ADMIN_CONSOLE › NETWORK_DATABASE
@@ -350,7 +345,6 @@ export const AlumniDirectoryPage: React.FC = () => {
                     </p>
                 </div>
 
-                {/* View toggle */}
                 <div style={{ display: 'flex', border: '1px solid var(--border-subtle)', borderRadius: 4, overflow: 'hidden' }}>
                     {(['grid', 'list'] as const).map((v) => (
                         <button key={v} onClick={() => setView(v)} style={{
@@ -365,8 +359,8 @@ export const AlumniDirectoryPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Tab bar */}
-            <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border-subtle)' }}>
+            {/* ── Tab bar ── */}
+            <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
                 {([
                     { id: 'alumni' as const, label: 'Alumni', count: alumniUsers.length, color: 'var(--neon-cyan)' },
                     { id: 'admins' as const, label: 'Admins', count: adminUsers.length,  color: 'var(--neon-pink)' },
@@ -401,15 +395,14 @@ export const AlumniDirectoryPage: React.FC = () => {
                             fontFamily: 'Share Tech Mono, monospace',
                             fontSize: '10px',
                         }}>
-              {count}
-            </span>
+                            {count}
+                        </span>
                     </button>
                 ))}
             </div>
 
-            {/* Search + Alumni filters */}
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-                {/* Search */}
+            {/* ── Search + Filters ── */}
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end', flexShrink: 0 }}>
                 <div style={{ flex: '1 1 220px', maxWidth: 340 }}>
                     <Input
                         placeholder={tab === 'alumni' ? 'Search alumni...' : 'Search admins...'}
@@ -419,7 +412,6 @@ export const AlumniDirectoryPage: React.FC = () => {
                     />
                 </div>
 
-                {/* Alumni-only filters */}
                 {tab === 'alumni' && (
                     <>
                         <FilterSelect
@@ -443,8 +435,6 @@ export const AlumniDirectoryPage: React.FC = () => {
                             options={filterOptions.years}
                             placeholder="All Years"
                         />
-
-                        {/* Clear filters */}
                         {hasFilters && (
                             <button
                                 onClick={resetFilters}
@@ -470,22 +460,22 @@ export const AlumniDirectoryPage: React.FC = () => {
                 )}
             </div>
 
-            {/* Active filter chips */}
+            {/* ── Active filter chips ── */}
             {tab === 'alumni' && hasFilters && (
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flexShrink: 0 }}>
                     {filterDept   && <span className="cp-badge cp-badge-cyan">Dept: {filterDept}</span>}
                     {filterDegree && <span className="cp-badge cp-badge-purple">Degree: {filterDegree}</span>}
                     {filterYear   && <span className="cp-badge cp-badge-amber">Year: {filterYear}</span>}
                     <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)', alignSelf: 'center' }}>
-            → {filteredAlumni.length} result{filteredAlumni.length !== 1 ? 's' : ''}
-          </span>
+                        → {filteredAlumni.length} result{filteredAlumni.length !== 1 ? 's' : ''}
+                    </span>
                 </div>
             )}
 
-            {/* Profiles loading indicator */}
+            {/* ── Profiles loading indicator ── */}
             {profilesLoading && tab === 'alumni' && (
                 <div style={{
-                    display: 'flex', alignItems: 'center', gap: 10,
+                    display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
                     fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)',
                 }}>
                     <span className="cp-spinner" style={{ width: 14, height: 14 }} />
@@ -493,139 +483,141 @@ export const AlumniDirectoryPage: React.FC = () => {
                 </div>
             )}
 
-            {/* Content */}
-            {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
-                    <Spinner size={32} />
-                </div>
-            ) : error ? (
-                <div style={{ color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace', padding: 40, textAlign: 'center' }}>
-                    ⚠ {error}
-                </div>
-            ) : activeUsers.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: 80 }}>
-                    <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.3 }}>◈</div>
-                    <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)' }}>
-                        {search || hasFilters ? 'No matches for current filters' : `No ${tab} found`}
-                    </p>
-                    {(search || hasFilters) && (
-                        <button
-                            onClick={resetFilters}
-                            className="cp-btn cp-btn-ghost cp-btn-sm"
-                            style={{ marginTop: 16 }}
-                        >
-                            Clear Filters
-                        </button>
-                    )}
-                </div>
-            ) : view === 'grid' ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-                    {activeUsers.map((u, i) => (
-                        <UserCard
-                            key={u.id}
-                            user={u}
-                            profile={profileCache[u.id]}
-                            index={i}
-                            showAdminBadge={tab === 'admins'}
-                        />
-                    ))}
-                </div>
-            ) : (
-                /* List view */
-                <div className="cp-panel" style={{ overflow: 'hidden' }}>
-                    <table className="cp-table">
-                        <thead>
-                        <tr>
-                            <th>Member</th>
-                            {tab === 'alumni' ? (
-                                <>
-                                    <th>Department</th>
-                                    <th>Degree</th>
-                                    <th>Grad Year</th>
-                                    <th>Current Role</th>
-                                </>
-                            ) : (
-                                <>
-                                    <th>Roles</th>
-                                    <th>Last Login</th>
-                                    <th>Profile</th>
-                                    <th></th>
-                                </>
-                            )}
-                            <th style={{ textAlign: 'right' }}>Action</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {tab === 'alumni'
-                            ? activeUsers.map((u, i) => (
-                                <UserRow
-                                    key={u.id}
-                                    user={u}
-                                    profile={profileCache[u.id]}
-                                    index={i}
-                                />
-                            ))
-                            : activeUsers.map((u, i) => (
-                                <tr key={u.id} style={{ animation: `fadeIn 0.2s ease-out ${i * 0.02}s both` }}>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                            {(() => {
-                                                const [c1, c2] = avatarColor(u.id);
-                                                return (
-                                                    <div style={{
-                                                        width: 34, height: 34, borderRadius: '50%',
-                                                        background: `linear-gradient(135deg, ${c1}, ${c2})`,
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        fontFamily: 'Orbitron, monospace', fontSize: '12px', fontWeight: 700,
-                                                        color: 'var(--bg-void)', flexShrink: 0,
-                                                    }}>
-                                                        {initials(u)}
+            {/* ── Scrollable content area ── */}
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 2 }}>
+                {loading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
+                        <Spinner size={32} />
+                    </div>
+                ) : error ? (
+                    <div style={{ color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace', padding: 40, textAlign: 'center' }}>
+                        ⚠ {error}
+                    </div>
+                ) : activeUsers.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: 80 }}>
+                        <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.3 }}>◈</div>
+                        <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)' }}>
+                            {search || hasFilters ? 'No matches for current filters' : `No ${tab} found`}
+                        </p>
+                        {(search || hasFilters) && (
+                            <button
+                                onClick={resetFilters}
+                                className="cp-btn cp-btn-ghost cp-btn-sm"
+                                style={{ marginTop: 16 }}
+                            >
+                                Clear Filters
+                            </button>
+                        )}
+                    </div>
+                ) : view === 'grid' ? (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+                        {activeUsers.map((u, i) => (
+                            <UserCard
+                                key={u.id}
+                                user={u}
+                                profile={profileCache[u.id]}
+                                index={i}
+                                showAdminBadge={tab === 'admins'}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    /* List view */
+                    <div className="cp-panel" style={{ overflow: 'hidden' }}>
+                        <table className="cp-table">
+                            <thead>
+                            <tr>
+                                <th>Member</th>
+                                {tab === 'alumni' ? (
+                                    <>
+                                        <th>Department</th>
+                                        <th>Degree</th>
+                                        <th>Grad Year</th>
+                                        <th>Current Role</th>
+                                    </>
+                                ) : (
+                                    <>
+                                        <th>Roles</th>
+                                        <th>Last Login</th>
+                                        <th>Profile</th>
+                                        <th></th>
+                                    </>
+                                )}
+                                <th style={{ textAlign: 'right' }}>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {tab === 'alumni'
+                                ? activeUsers.map((u, i) => (
+                                    <UserRow
+                                        key={u.id}
+                                        user={u}
+                                        profile={profileCache[u.id]}
+                                        index={i}
+                                    />
+                                ))
+                                : activeUsers.map((u, i) => (
+                                    <tr key={u.id} style={{ animation: `fadeIn 0.2s ease-out ${i * 0.02}s both` }}>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                {(() => {
+                                                    const [c1, c2] = avatarColor(u.id);
+                                                    return (
+                                                        <div style={{
+                                                            width: 34, height: 34, borderRadius: '50%',
+                                                            background: `linear-gradient(135deg, ${c1}, ${c2})`,
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            fontFamily: 'Orbitron, monospace', fontSize: '12px', fontWeight: 700,
+                                                            color: 'var(--bg-void)', flexShrink: 0,
+                                                        }}>
+                                                            {initials(u)}
+                                                        </div>
+                                                    );
+                                                })()}
+                                                <div>
+                                                    <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '14px' }}>
+                                                        {u.firstName} {u.lastName}
                                                     </div>
-                                                );
-                                            })()}
-                                            <div>
-                                                <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '14px' }}>
-                                                    {u.firstName} {u.lastName}
-                                                </div>
-                                                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-                                                    {u.email}
+                                                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
+                                                        {u.email}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                                            {u.roles.map(r => (
-                                                <span key={r} className={`cp-badge ${r.includes('ADMIN') ? 'cp-badge-pink' : 'cp-badge-cyan'}`}>
-                              {r.replace('ROLE_', '')}
-                            </span>
-                                            ))}
-                                        </div>
-                                    </td>
-                                    <td style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-                                        {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : '—'}
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <div style={{ width: 50, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
-                                                <div style={{ height: '100%', width: `${u.profileScore}%`, background: 'linear-gradient(90deg, var(--neon-cyan), var(--neon-purple))' }} />
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                                                {u.roles.map(r => (
+                                                    <span key={r} className={`cp-badge ${r.includes('ADMIN') ? 'cp-badge-pink' : 'cp-badge-cyan'}`}>
+                                                        {r.replace('ROLE_', '')}
+                                                    </span>
+                                                ))}
                                             </div>
-                                            <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace' }}>{u.profileScore}%</span>
-                                        </div>
-                                    </td>
-                                    <td></td>
-                                    <td style={{ textAlign: 'right' }}>
-                                        <Link to={`/alumni/${u.id}`} className="cp-btn cp-btn-ghost cp-btn-sm">
-                                            View →
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))
-                        }
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                                        </td>
+                                        <td style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
+                                            {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : '—'}
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <div style={{ width: 50, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
+                                                    <div style={{ height: '100%', width: `${u.profileScore}%`, background: 'linear-gradient(90deg, var(--neon-cyan), var(--neon-purple))' }} />
+                                                </div>
+                                                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace' }}>{u.profileScore}%</span>
+                                            </div>
+                                        </td>
+                                        <td></td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            <Link to={`/alumni/${u.id}`} className="cp-btn cp-btn-ghost cp-btn-sm">
+                                                View →
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                ))
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
@@ -676,21 +668,22 @@ export const AlumniProfileViewPage: React.FC = () => {
                 <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap' }}>
 
                     {profile.profilePhotoUrl ? (
-                            <img
-                                src={getImageUrl(profile.profilePhotoUrl)!}
-                                alt=""
-                                style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }}
-                            />
-                        ) : (
-                    <div style={{
-                        width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
-                        background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontFamily: 'Orbitron, monospace', fontSize: '28px', fontWeight: 700,
-                        color: 'var(--bg-void)', boxShadow: '0 0 20px rgba(0,245,255,0.3)',
-                    }}>
-                        {profile.firstName?.[0]}{profile.lastName?.[0]}
-                    </div> )}
+                        <img
+                            src={getImageUrl(profile.profilePhotoUrl)!}
+                            alt=""
+                            style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                    ) : (
+                        <div style={{
+                            width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+                            background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontFamily: 'Orbitron, monospace', fontSize: '28px', fontWeight: 700,
+                            color: 'var(--bg-void)', boxShadow: '0 0 20px rgba(0,245,255,0.3)',
+                        }}>
+                            {profile.firstName?.[0]}{profile.lastName?.[0]}
+                        </div>
+                    )}
 
                     <div style={{ flex: 1, minWidth: 200 }}>
                         <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
@@ -719,7 +712,6 @@ export const AlumniProfileViewPage: React.FC = () => {
 
                 <hr className="cp-divider" style={{ marginBottom: 24 }} />
 
-                {/* Bio */}
                 {profile.bio && (
                     <div style={{ marginBottom: 24 }}>
                         <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 8 }}>BIO</div>
@@ -727,18 +719,17 @@ export const AlumniProfileViewPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Info grid */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
                     {[
-                        { label: 'Email',       value: profile.email },
-                        { label: 'Phone',       value: profile.phone },
-                        { label: 'Location',    value: [profile.city, profile.state, profile.country].filter(Boolean).join(', ') },
-                        { label: 'Department',  value: profile.department },
-                        { label: 'Degree',      value: profile.degree },
+                        { label: 'Email',          value: profile.email },
+                        { label: 'Phone',          value: profile.phone },
+                        { label: 'Location',       value: [profile.city, profile.state, profile.country].filter(Boolean).join(', ') },
+                        { label: 'Department',     value: profile.department },
+                        { label: 'Degree',         value: profile.degree },
                         { label: 'Specialization', value: profile.specialization },
-                        { label: 'Industry',    value: profile.industry },
-                        { label: 'Experience',  value: profile.experienceYears != null ? `${profile.experienceYears} yrs` : null },
-                        { label: 'Student ID',  value: profile.studentId },
+                        { label: 'Industry',       value: profile.industry },
+                        { label: 'Experience',     value: profile.experienceYears != null ? `${profile.experienceYears} yrs` : null },
+                        { label: 'Student ID',     value: profile.studentId },
                     ].filter(f => f.value).map(({ label, value }) => (
                         <div key={label}>
                             <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>
@@ -751,7 +742,6 @@ export const AlumniProfileViewPage: React.FC = () => {
                     ))}
                 </div>
 
-                {/* Skills */}
                 {profile.skills && profile.skills.length > 0 && (
                     <div style={{ marginBottom: 24 }}>
                         <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>
@@ -763,7 +753,6 @@ export const AlumniProfileViewPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Links */}
                 {(profile.linkedinUrl || profile.githubUrl || profile.portfolioUrl) && (
                     <div>
                         <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>

@@ -2,6 +2,7 @@ package com.university.alumni.security.config;
 
 import com.university.alumni.common.config.AppProperties;
 import com.university.alumni.security.filter.JwtAuthenticationFilter;
+import com.university.alumni.security.oauth2.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +39,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
     private final AppProperties appProperties;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler; // Injected handler
 
     private static final String[] PUBLIC_POST_PATHS = {
             "/api/v1/auth/login",
@@ -45,21 +47,23 @@ public class SecurityConfig {
             "/api/v1/auth/refresh",
             "/api/v1/auth/forgot-password",
             "/api/v1/auth/reset-password",
-            "/api/v1/auth/verify-email"
+            "/api/v1/auth/verify-email",
+            "/login/oauth2/**" // Allowed for OAuth flow
     };
 
     private static final String[] PUBLIC_GET_PATHS = {
             "/api/v1/health",
-            "/api/v1/posts",          // Anyone can read the posts feed
-            "/api/v1/posts/**",       // Anyone can read a single post
-            "/uploads/**",            // Serve uploaded images publicly
+            "/api/v1/posts",
+            "/api/v1/posts/**",
+            "/uploads/**",
             "/api/v1/profile/**",
             "/actuator/health",
             "/actuator/info",
             "/actuator/prometheus",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/oauth2/**" // Allowed for OAuth flow
     };
 
     @Bean
@@ -76,6 +80,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oAuth2SuccessHandler)
+                )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint())
                         .accessDeniedHandler(accessDeniedHandler())
@@ -91,16 +98,15 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(appProperties.getCors().getAllowedOrigins());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of(
-                "Authorization", "Content-Type", "Accept",
-                "X-Requested-With", "Cache-Control"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "Cache-Control"));
         config.setExposedHeaders(List.of("Authorization", "X-Total-Count"));
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
-        // Also allow CORS for static uploads so the frontend can load images
+        source.registerCorsConfiguration("/api/**", config); // Apply to API
+        source.registerCorsConfiguration("/login/oauth2/**", config); // Apply to OAuth endpoints
+        source.registerCorsConfiguration("/oauth2/**", config);
         source.registerCorsConfiguration("/uploads/**", config);
         return source;
     }
@@ -114,8 +120,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
@@ -129,9 +134,7 @@ public class SecurityConfig {
         return (request, response, authException) -> {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            response.getWriter().write("""
-                    {"success":false,"error":{"status":401,"code":"UNAUTHORIZED",\
-                    "message":"Authentication required"}}""");
+            response.getWriter().write("{\"success\":false,\"error\":{\"status\":401,\"code\":\"UNAUTHORIZED\",\"message\":\"Authentication required\"}}");
         };
     }
 
@@ -140,9 +143,7 @@ public class SecurityConfig {
         return (request, response, accessDeniedException) -> {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
-            response.getWriter().write("""
-                    {"success":false,"error":{"status":403,"code":"FORBIDDEN",\
-                    "message":"You do not have permission to access this resource"}}""");
+            response.getWriter().write("{\"success\":false,\"error\":{\"status\":403,\"code\":\"FORBIDDEN\",\"message\":\"You do not have permission to access this resource\"}}");
         };
     }
 }

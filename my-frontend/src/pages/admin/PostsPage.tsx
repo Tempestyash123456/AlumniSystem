@@ -6,32 +6,21 @@ import { Button, Alert, Input, Spinner, Confirm, Modal } from '../../components/
 const BASE_URL = 'http://localhost:8080';
 
 // ── Minimal Markdown Renderer ─────────────────────────────────────────────────
-// Renders bold, italic, headings, code, links, blockquote, lists, hr
 const renderMarkdown = (md: string): string => {
     let html = md
-        // Escape HTML first
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        // Headings
         .replace(/^### (.+)$/gm, '<h3 style="font-family:Orbitron,monospace;font-size:14px;color:var(--neon-purple);letter-spacing:.08em;margin:18px 0 8px">$1</h3>')
         .replace(/^## (.+)$/gm,  '<h2 style="font-family:Orbitron,monospace;font-size:16px;color:var(--neon-cyan);letter-spacing:.08em;margin:20px 0 10px">$1</h2>')
         .replace(/^# (.+)$/gm,   '<h1 style="font-family:Orbitron,monospace;font-size:20px;color:var(--neon-cyan);letter-spacing:.08em;margin:24px 0 12px">$1</h1>')
-        // Bold / italic
         .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
         .replace(/\*(.+?)\*/g,     '<em style="color:var(--neon-amber)">$1</em>')
-        // Inline code
         .replace(/`([^`]+)`/g, '<code style="background:rgba(0,245,255,0.08);border:1px solid rgba(0,245,255,0.2);padding:2px 6px;border-radius:3px;font-family:Share Tech Mono,monospace;font-size:12px;color:var(--neon-cyan)">$1</code>')
-        // Blockquote
         .replace(/^&gt; (.+)$/gm, '<blockquote style="border-left:3px solid var(--neon-pink);margin:12px 0;padding:8px 16px;background:rgba(255,45,120,0.05);color:var(--text-secondary);font-style:italic">$1</blockquote>')
-        // Unordered list items
         .replace(/^[*-] (.+)$/gm, '<li style="margin:4px 0;padding-left:8px;color:var(--text-secondary)">$1</li>')
-        // Links
         .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noreferrer" style="color:var(--neon-cyan);text-decoration:underline">$1</a>')
-        // HR
         .replace(/^---$/gm, '<hr style="border:none;height:1px;background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent);margin:20px 0">')
-        // Line breaks
         .replace(/\n\n/g, '</p><p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">')
         .replace(/\n/g, '<br>');
-
     return `<p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">${html}</p>`;
 };
 
@@ -43,10 +32,8 @@ const PostCard: React.FC<{
     onView: () => void;
 }> = ({ post, onEdit, onDelete, onView }) => {
     const preview = post.description.replace(/[#*`>\-\[\]]/g, '').slice(0, 180);
-
     return (
         <div className="cp-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {/* Post Image */}
             {post.imageUrl && (
                 <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
                     <img
@@ -55,16 +42,10 @@ const PostCard: React.FC<{
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
-                    <div style={{
-                        position: 'absolute', inset: 0,
-                        background: 'linear-gradient(to bottom, transparent 50%, var(--bg-card))',
-                    }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 50%, var(--bg-card))' }} />
                 </div>
             )}
-
-            {/* Body */}
             <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {/* Meta */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--neon-cyan)', letterSpacing: '0.1em' }}>
                         {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -74,26 +55,12 @@ const PostCard: React.FC<{
                         {post.authorFirstName} {post.authorLastName}
                     </span>
                 </div>
-
-                {/* Title */}
-                <h3 style={{
-                    fontFamily: 'Orbitron, monospace', fontSize: '14px', fontWeight: 700,
-                    color: 'var(--text-primary)', letterSpacing: '0.05em', lineHeight: 1.4,
-                }}>
+                <h3 style={{ fontFamily: 'Orbitron, monospace', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.05em', lineHeight: 1.4 }}>
                     {post.title}
                 </h3>
-
-                {/* Preview */}
-                <p style={{
-                    fontFamily: 'Rajdhani, sans-serif', fontSize: '13px',
-                    color: 'var(--text-muted)', lineHeight: 1.6, flex: 1,
-                    overflow: 'hidden', display: '-webkit-box',
-                    WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
-                }}>
+                <p style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.6, flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
                     {preview}{preview.length >= 180 ? '...' : ''}
                 </p>
-
-                {/* Actions */}
                 <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                     <Button variant="ghost" size="sm" onClick={onView} style={{ flex: 1 }}>Read</Button>
                     <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>
@@ -105,11 +72,7 @@ const PostCard: React.FC<{
 };
 
 // ── Markdown Editor ───────────────────────────────────────────────────────────
-const MarkdownEditor: React.FC<{
-    value: string;
-    onChange: (v: string) => void;
-    label?: string;
-}> = ({ value, onChange, label }) => {
+const MarkdownEditor: React.FC<{ value: string; onChange: (v: string) => void; label?: string }> = ({ value, onChange, label }) => {
     const [tab, setTab] = useState<'write' | 'preview'>('write');
 
     const insertAt = (before: string, after = '') => {
@@ -132,7 +95,7 @@ const MarkdownEditor: React.FC<{
         { label: 'H2', action: () => insertAt('## ') },
         { label: 'H3', action: () => insertAt('### ') },
         { label: 'B',  action: () => insertAt('**', '**'), style: { fontWeight: 700 } },
-        { label: 'I',  action: () => insertAt('*', '*'),   style: { fontStyle: 'italic' } },
+        { label: 'I',  action: () => insertAt('*', '*'),   style: { fontStyle: 'italic' as const } },
         { label: '`',  action: () => insertAt('`', '`') },
         { label: '> ', action: () => insertAt('> ') },
         { label: '—',  action: () => insertAt('\n---\n') },
@@ -142,13 +105,10 @@ const MarkdownEditor: React.FC<{
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {label && <label className="cp-label">{label}</label>}
-
-            {/* Tab bar */}
             <div style={{ display: 'flex', borderBottom: '1px solid var(--border-subtle)' }}>
                 {(['write', 'preview'] as const).map(t => (
                     <button key={t} onClick={() => setTab(t)} style={{
-                        padding: '6px 18px',
-                        background: 'transparent', border: 'none', cursor: 'pointer',
+                        padding: '6px 18px', background: 'transparent', border: 'none', cursor: 'pointer',
                         fontFamily: 'Orbitron, monospace', fontSize: '10px', letterSpacing: '0.1em',
                         color: tab === t ? 'var(--neon-cyan)' : 'var(--text-muted)',
                         borderBottom: tab === t ? '2px solid var(--neon-cyan)' : '2px solid transparent',
@@ -158,10 +118,8 @@ const MarkdownEditor: React.FC<{
                     </button>
                 ))}
             </div>
-
             {tab === 'write' ? (
                 <>
-                    {/* Toolbar */}
                     <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', padding: '6px', background: 'rgba(0,245,255,0.03)', borderRadius: 4 }}>
                         {toolbarBtns.map(btn => (
                             <button key={btn.label} type="button" onClick={btn.action} style={{
@@ -189,11 +147,7 @@ const MarkdownEditor: React.FC<{
                 </>
             ) : (
                 <div
-                    style={{
-                        minHeight: 280, padding: '16px 20px',
-                        background: 'var(--bg-dark)', border: '1px solid var(--border-subtle)',
-                        borderRadius: 4, overflowY: 'auto',
-                    }}
+                    style={{ minHeight: 280, padding: '16px 20px', background: 'var(--bg-dark)', border: '1px solid var(--border-subtle)', borderRadius: 4, overflowY: 'auto' }}
                     dangerouslySetInnerHTML={{ __html: value ? renderMarkdown(value) : '<p style="color:var(--text-disabled);font-family:Share Tech Mono,monospace;font-size:12px">Nothing to preview yet...</p>' }}
                 />
             )}
@@ -202,17 +156,12 @@ const MarkdownEditor: React.FC<{
 };
 
 // ── Image Upload Zone ─────────────────────────────────────────────────────────
-const ImageUploadZone: React.FC<{
-    current?: string | null;
-    onFile: (f: File | null) => void;
-    pendingFile?: File | null;
-}> = ({ current, onFile, pendingFile }) => {
+const ImageUploadZone: React.FC<{ current?: string | null; onFile: (f: File | null) => void; pendingFile?: File | null }> = ({ current, onFile, pendingFile }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [dragging, setDragging] = useState(false);
 
     const previewUrl = pendingFile ? URL.createObjectURL(pendingFile)
-        : current    ? `${BASE_URL}${current}`
-            : null;
+        : current ? `${BASE_URL}${current}` : null;
 
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault(); setDragging(false);
@@ -230,8 +179,7 @@ const ImageUploadZone: React.FC<{
                 onDrop={handleDrop}
                 style={{
                     border: `2px dashed ${dragging ? 'var(--neon-cyan)' : 'var(--border-subtle)'}`,
-                    borderRadius: 6, cursor: 'pointer',
-                    transition: 'all 0.2s', overflow: 'hidden',
+                    borderRadius: 6, cursor: 'pointer', transition: 'all 0.2s', overflow: 'hidden',
                     background: dragging ? 'rgba(0,245,255,0.04)' : 'var(--bg-dark)',
                     minHeight: previewUrl ? 'auto' : 100,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -241,39 +189,27 @@ const ImageUploadZone: React.FC<{
                 {previewUrl ? (
                     <div style={{ position: 'relative', width: '100%' }}>
                         <img src={previewUrl} alt="Preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />
-                        <div style={{
-                            position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            opacity: 0, transition: 'opacity 0.2s',
-                        }}
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}
                              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
                              onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
                         >
-                            <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-cyan)' }}>
-                                CLICK TO REPLACE
-                            </span>
+                            <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-cyan)' }}>CLICK TO REPLACE</span>
                         </div>
                     </div>
                 ) : (
                     <div style={{ textAlign: 'center', padding: 20 }}>
                         <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.4 }}>⬡</div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-                            Drop image here or click to browse
-                        </div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)', marginTop: 4 }}>
-                            JPG / PNG / WEBP · max 5MB
-                        </div>
+                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>Drop image here or click to browse</div>
+                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)', marginTop: 4 }}>JPG / PNG / WEBP · max 5MB</div>
                     </div>
                 )}
             </div>
             {(pendingFile || current) && (
-                <button type="button" onClick={() => onFile(null)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', textAlign: 'left' }}>
+                <button type="button" onClick={() => onFile(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', textAlign: 'left' }}>
                     ✕ Remove image
                 </button>
             )}
-            <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }}
-                   onChange={e => onFile(e.target.files?.[0] || null)} />
+            <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => onFile(e.target.files?.[0] || null)} />
         </div>
     );
 };
@@ -285,8 +221,7 @@ const PostViewModal: React.FC<{ post: PostDto | null; onClose: () => void }> = (
         <Modal open={!!post} title={post.title} onClose={onClose} width={700}>
             {post.imageUrl && (
                 <div style={{ margin: '-24px -24px 24px', height: 240, overflow: 'hidden' }}>
-                    <img src={`${BASE_URL}${post.imageUrl}`} alt={post.title}
-                         style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={`${BASE_URL}${post.imageUrl}`} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
             )}
             <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-muted)', marginBottom: 16, display: 'flex', gap: 12 }}>
@@ -298,27 +233,21 @@ const PostViewModal: React.FC<{ post: PostDto | null; onClose: () => void }> = (
     );
 };
 
-// ── Empty state ────────────────────────────────────────────────────────────────
-
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export const PostsPage: React.FC = () => {
-    const [posts, setPosts]           = useState<PostDto[]>([]);
-    const [loading, setLoading]       = useState(true);
-    const [saving, setSaving]         = useState(false);
-    const [error, setError]           = useState('');
-    const [success, setSuccess]       = useState('');
-    const [search, setSearch]         = useState('');
-
-    // Modals
-    const [editorOpen, setEditorOpen] = useState(false);
-    const [viewPost, setViewPost]     = useState<PostDto | null>(null);
+    const [posts, setPosts]               = useState<PostDto[]>([]);
+    const [loading, setLoading]           = useState(true);
+    const [saving, setSaving]             = useState(false);
+    const [error, setError]               = useState('');
+    const [success, setSuccess]           = useState('');
+    const [search, setSearch]             = useState('');
+    const [editorOpen, setEditorOpen]     = useState(false);
+    const [viewPost, setViewPost]         = useState<PostDto | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<PostDto | null>(null);
-    const [editTarget, setEditTarget] = useState<PostDto | null>(null);
-
-    // Form
-    const [title, setTitle]           = useState('');
-    const [body, setBody]             = useState('');
-    const [imageFile, setImageFile]   = useState<File | null>(null);
+    const [editTarget, setEditTarget]     = useState<PostDto | null>(null);
+    const [title, setTitle]               = useState('');
+    const [body, setBody]                 = useState('');
+    const [imageFile, setImageFile]       = useState<File | null>(null);
 
     const load = async () => {
         setLoading(true);
@@ -383,10 +312,11 @@ export const PostsPage: React.FC = () => {
     );
 
     return (
-        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        // height + minHeight: 0 fills the Layout flex column
+        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
 
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+            {/* ── Header ── */}
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, flexShrink: 0 }}>
                 <div>
                     <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.15em', marginBottom: 6 }}>
                         ADMIN_CONSOLE › CONTENT_MANAGEMENT
@@ -401,12 +331,12 @@ export const PostsPage: React.FC = () => {
                 <Button onClick={openCreate} variant="primary">+ NEW POST</Button>
             </div>
 
-            {/* Alerts */}
-            {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
-            {error   && <Alert type="error"   onClose={() => setError('')}>{error}</Alert>}
+            {/* ── Alerts ── */}
+            {success && <Alert type="success" onClose={() => setSuccess('')} style={{ flexShrink: 0 }}>{success}</Alert>}
+            {error   && <Alert type="error"   onClose={() => setError('')}   style={{ flexShrink: 0 }}>{error}</Alert>}
 
-            {/* Search */}
-            <div style={{ maxWidth: 380 }}>
+            {/* ── Search ── */}
+            <div style={{ maxWidth: 380, flexShrink: 0 }}>
                 <Input
                     placeholder="Search posts..."
                     value={search}
@@ -415,62 +345,42 @@ export const PostsPage: React.FC = () => {
                 />
             </div>
 
-            {/* Grid */}
-            {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
-                    <Spinner size={32} />
-                </div>
-            ) : filtered.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: 80 }}>
-                    <div style={{ fontSize: 56, marginBottom: 16, opacity: 0.2 }}>◈</div>
-                    <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)', marginBottom: 20 }}>
-                        {search ? 'No posts match your search' : 'No posts yet — create the first one'}
-                    </p>
-                    {!search && <Button onClick={openCreate}>Create Post</Button>}
-                </div>
-            ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
-                    {filtered.map(post => (
-                        <PostCard
-                            key={post.id}
-                            post={post}
-                            onEdit={() => openEdit(post)}
-                            onDelete={() => setDeleteTarget(post)}
-                            onView={() => setViewPost(post)}
-                        />
-                    ))}
-                </div>
-            )}
+            {/* ── Scrollable grid area ── */}
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 2 }}>
+                {loading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
+                        <Spinner size={32} />
+                    </div>
+                ) : filtered.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: 80 }}>
+                        <div style={{ fontSize: 56, marginBottom: 16, opacity: 0.2 }}>◈</div>
+                        <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)', marginBottom: 20 }}>
+                            {search ? 'No posts match your search' : 'No posts yet — create the first one'}
+                        </p>
+                        {!search && <Button onClick={openCreate}>Create Post</Button>}
+                    </div>
+                ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+                        {filtered.map(post => (
+                            <PostCard
+                                key={post.id}
+                                post={post}
+                                onEdit={() => openEdit(post)}
+                                onDelete={() => setDeleteTarget(post)}
+                                onView={() => setViewPost(post)}
+                            />
+                        ))}
+                    </div>
+                )}
+            </div>
 
-            {/* ── Create / Edit Modal ────────────────────────────────────────── */}
-            <Modal
-                open={editorOpen}
-                title={editTarget ? 'EDIT_POST' : 'NEW_POST'}
-                onClose={() => setEditorOpen(false)}
-                width={760}
-            >
+            {/* ── Create / Edit Modal ── */}
+            <Modal open={editorOpen} title={editTarget ? 'EDIT_POST' : 'NEW_POST'} onClose={() => setEditorOpen(false)} width={760}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                     {error && <Alert type="error" onClose={() => setError('')}>{error}</Alert>}
-
-                    <Input
-                        label="Title"
-                        value={title}
-                        onChange={e => setTitle(e.target.value)}
-                        placeholder="Post title..."
-                    />
-
-                    <MarkdownEditor
-                        label="Content (Markdown)"
-                        value={body}
-                        onChange={setBody}
-                    />
-
-                    <ImageUploadZone
-                        current={editTarget?.imageUrl}
-                        pendingFile={imageFile}
-                        onFile={setImageFile}
-                    />
-
+                    <Input label="Title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Post title..." />
+                    <MarkdownEditor label="Content (Markdown)" value={body} onChange={setBody} />
+                    <ImageUploadZone current={editTarget?.imageUrl} pendingFile={imageFile} onFile={setImageFile} />
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 8, borderTop: '1px solid var(--border-subtle)' }}>
                         <Button variant="ghost" onClick={() => setEditorOpen(false)}>Cancel</Button>
                         <Button loading={saving} onClick={handleSave}>
@@ -480,10 +390,10 @@ export const PostsPage: React.FC = () => {
                 </div>
             </Modal>
 
-            {/* ── Post View Modal ────────────────────────────────────────────── */}
+            {/* ── Post View Modal ── */}
             <PostViewModal post={viewPost} onClose={() => setViewPost(null)} />
 
-            {/* ── Delete Confirm ─────────────────────────────────────────────── */}
+            {/* ── Delete Confirm ── */}
             <Confirm
                 open={!!deleteTarget}
                 title="DELETE_POST"

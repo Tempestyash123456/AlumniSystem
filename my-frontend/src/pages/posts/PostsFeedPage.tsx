@@ -5,7 +5,7 @@ import { Input, Spinner } from '../../components/ui';
 
 const BASE_URL = 'http://localhost:8080';
 
-// ── Same markdown renderer as PostsPage ───────────────────────────────────────
+// ── Markdown renderer ─────────────────────────────────────────────────────────
 const renderMarkdown = (md: string): string => {
     let html = md
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -35,7 +35,6 @@ const PostExpanded: React.FC<{ post: PostDto; onClose: () => void }> = ({ post, 
         }}>
             ← Back to Feed
         </button>
-
         <article className="cp-panel cp-corners" style={{ overflow: 'hidden' }}>
             {post.imageUrl && (
                 <div style={{ height: 320, overflow: 'hidden', position: 'relative' }}>
@@ -45,54 +44,23 @@ const PostExpanded: React.FC<{ post: PostDto; onClose: () => void }> = ({ post, 
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
-                    <div style={{
-                        position: 'absolute', inset: 0,
-                        background: 'linear-gradient(to bottom, transparent 40%, var(--bg-panel))',
-                    }} />
-                    {/* Title overlay on image */}
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, var(--bg-panel))' }} />
                     <div style={{ position: 'absolute', bottom: 24, left: 32, right: 32 }}>
-                        <h1 style={{
-                            fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700,
-                            color: 'var(--text-primary)', letterSpacing: '0.05em', lineHeight: 1.3,
-                            textShadow: '0 2px 8px rgba(0,0,0,0.8)',
-                        }}>
+                        <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.05em', lineHeight: 1.3, textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
                             {post.title}
                         </h1>
                     </div>
                 </div>
             )}
-
             <div style={{ padding: '32px' }}>
                 {!post.imageUrl && (
-                    <h1 style={{
-                        fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700,
-                        color: 'var(--text-primary)', letterSpacing: '0.05em', lineHeight: 1.3,
-                        marginBottom: 20,
-                    }}>
+                    <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.05em', lineHeight: 1.3, marginBottom: 20 }}>
                         {post.title}
                     </h1>
                 )}
-
-                {/* Meta */}
-                <div style={{
-                    display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28,
-                    paddingBottom: 20, borderBottom: '1px solid var(--border-subtle)',
-                    flexWrap: 'wrap',
-                }}>
-                    <div style={{
-                        display: 'flex', alignItems: 'center', gap: 8,
-                        padding: '6px 12px',
-                        background: 'rgba(0,245,255,0.06)',
-                        border: '1px solid rgba(0,245,255,0.15)',
-                        borderRadius: 4,
-                    }}>
-                        <div style={{
-                            width: 22, height: 22, borderRadius: '50%',
-                            background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontFamily: 'Orbitron, monospace', fontSize: '9px',
-                            color: 'var(--bg-void)', fontWeight: 700,
-                        }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid var(--border-subtle)', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: 'rgba(0,245,255,0.06)', border: '1px solid rgba(0,245,255,0.15)', borderRadius: 4 }}>
+                        <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--bg-void)', fontWeight: 700 }}>
                             {post.authorFirstName[0]}{post.authorLastName[0]}
                         </div>
                         <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
@@ -108,8 +76,6 @@ const PostExpanded: React.FC<{ post: PostDto; onClose: () => void }> = ({ post, 
                         </span>
                     )}
                 </div>
-
-                {/* Rendered Markdown */}
                 <div dangerouslySetInnerHTML={{ __html: renderMarkdown(post.description) }} />
             </div>
         </article>
@@ -125,11 +91,7 @@ const FeedCard: React.FC<{ post: PostDto; index: number; onClick: () => void }> 
         <article
             className="cp-card"
             onClick={onClick}
-            style={{
-                padding: 0, overflow: 'hidden', cursor: 'pointer',
-                display: 'flex', flexDirection: 'column',
-                animation: `fadeIn 0.3s ease-out ${index * 0.05}s both`,
-            }}
+            style={{ padding: 0, overflow: 'hidden', cursor: 'pointer', display: 'flex', flexDirection: 'column', animation: `fadeIn 0.3s ease-out ${index * 0.05}s both` }}
         >
             {post.imageUrl && (
                 <div style={{ height: 200, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
@@ -141,15 +103,10 @@ const FeedCard: React.FC<{ post: PostDto; index: number; onClick: () => void }> 
                         onMouseLeave={e => { (e.target as HTMLImageElement).style.transform = 'scale(1)'; }}
                         onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }}
                     />
-                    <div style={{
-                        position: 'absolute', inset: 0,
-                        background: 'linear-gradient(to bottom, transparent 60%, var(--bg-card))',
-                    }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 60%, var(--bg-card))' }} />
                 </div>
             )}
-
             <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-                {/* Meta row */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--neon-cyan)' }}>
@@ -160,41 +117,18 @@ const FeedCard: React.FC<{ post: PostDto; index: number; onClick: () => void }> 
                             {post.authorFirstName} {post.authorLastName}
                         </span>
                     </div>
-                    <span style={{
-                        fontFamily: 'Share Tech Mono, monospace', fontSize: '9px',
-                        color: 'var(--text-disabled)', letterSpacing: '0.05em',
-                    }}>
+                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '9px', color: 'var(--text-disabled)', letterSpacing: '0.05em' }}>
                         {readTime} min read
                     </span>
                 </div>
-
-                {/* Title */}
-                <h2 style={{
-                    fontFamily: 'Orbitron, monospace', fontSize: '14px', fontWeight: 700,
-                    color: 'var(--text-primary)', letterSpacing: '0.04em', lineHeight: 1.4,
-                    transition: 'color 0.2s',
-                }}>
+                <h2 style={{ fontFamily: 'Orbitron, monospace', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.04em', lineHeight: 1.4, transition: 'color 0.2s' }}>
                     {post.title}
                 </h2>
-
-                {/* Preview text */}
-                <p style={{
-                    fontFamily: 'Rajdhani, sans-serif', fontSize: '14px',
-                    color: 'var(--text-muted)', lineHeight: 1.6, flex: 1,
-                    overflow: 'hidden', display: '-webkit-box',
-                    WebkitLineClamp: 3, WebkitBoxOrient: 'vertical',
-                }}>
+                <p style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.6, flex: 1, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
                     {preview}{preview.length >= 200 ? '...' : ''}
                 </p>
-
-                {/* Read more */}
-                <div style={{
-                    fontFamily: 'Orbitron, monospace', fontSize: '10px',
-                    color: 'var(--neon-cyan)', letterSpacing: '0.1em',
-                    display: 'flex', alignItems: 'center', gap: 6, marginTop: 4,
-                }}>
-                    READ MORE
-                    <span style={{ fontSize: '12px', transition: 'transform 0.2s' }}>→</span>
+                <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', color: 'var(--neon-cyan)', letterSpacing: '0.1em', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                    READ MORE <span style={{ fontSize: '12px', transition: 'transform 0.2s' }}>→</span>
                 </div>
             </div>
         </article>
@@ -203,11 +137,11 @@ const FeedCard: React.FC<{ post: PostDto; index: number; onClick: () => void }> 
 
 // ── Main Feed Page ────────────────────────────────────────────────────────────
 export const PostsFeedPage: React.FC = () => {
-    const [posts, setPosts]         = useState<PostDto[]>([]);
-    const [loading, setLoading]     = useState(true);
-    const [error, setError]         = useState('');
-    const [search, setSearch]       = useState('');
-    const [selected, setSelected]   = useState<PostDto | null>(null);
+    const [posts, setPosts]       = useState<PostDto[]>([]);
+    const [loading, setLoading]   = useState(true);
+    const [error, setError]       = useState('');
+    const [search, setSearch]     = useState('');
+    const [selected, setSelected] = useState<PostDto | null>(null);
 
     useEffect(() => {
         postsApi.getAll().then(res => {
@@ -223,7 +157,7 @@ export const PostsFeedPage: React.FC = () => {
         `${p.authorFirstName} ${p.authorLastName}`.toLowerCase().includes(search.toLowerCase())
     );
 
-    // ── Single post view ────────────────────────────────────────────────────
+    // ── Single post expanded view — scrolls normally ──────────────────────────
     if (selected) {
         return (
             <div className="animate-fade-in" style={{ paddingBottom: 40 }}>
@@ -232,12 +166,13 @@ export const PostsFeedPage: React.FC = () => {
         );
     }
 
-    // ── Feed view ───────────────────────────────────────────────────────────
+    // ── Feed view ─────────────────────────────────────────────────────────────
     return (
-        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        // height + minHeight: 0 fills the Layout flex column
+        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
 
-            {/* Header */}
-            <div>
+            {/* ── Header ── */}
+            <div style={{ flexShrink: 0 }}>
                 <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 6 }}>
                     NETWORK_BROADCAST
                 </div>
@@ -249,8 +184,8 @@ export const PostsFeedPage: React.FC = () => {
                 </p>
             </div>
 
-            {/* Search */}
-            <div style={{ maxWidth: 400 }}>
+            {/* ── Search ── */}
+            <div style={{ maxWidth: 400, flexShrink: 0 }}>
                 <Input
                     placeholder="Search posts..."
                     value={search}
@@ -259,94 +194,82 @@ export const PostsFeedPage: React.FC = () => {
                 />
             </div>
 
-            {/* Content */}
-            {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
-                    <Spinner size={32} />
-                </div>
-            ) : error ? (
-                <div style={{ textAlign: 'center', padding: 60, color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace' }}>
-                    ⚠ {error}
-                </div>
-            ) : filtered.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: 80 }}>
-                    <div style={{ fontSize: 52, opacity: 0.2, marginBottom: 16 }}>◇</div>
-                    <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)' }}>
-                        {search ? 'No posts match your search' : 'No posts published yet'}
-                    </p>
-                </div>
-            ) : (
-                <>
-                    {/* Featured post — first one, full width */}
-                    {!search && filtered.length > 0 && (
-                        <div
-                            className="cp-card"
-                            onClick={() => setSelected(filtered[0])}
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns: filtered[0].imageUrl ? '1fr 1fr' : '1fr',
-                                overflow: 'hidden', cursor: 'pointer',
-                                animation: 'fadeIn 0.4s ease-out both',
-                                minHeight: 240,
-                            }}
-                        >
-                            {filtered[0].imageUrl && (
-                                <div style={{ overflow: 'hidden', minHeight: 240 }}>
-                                    <img
-                                        src={`${BASE_URL}${filtered[0].imageUrl}`}
-                                        alt={filtered[0].title}
-                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                                        onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }}
-                                    />
-                                </div>
-                            )}
-                            <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 14 }}>
-                                <span style={{
-                                    fontFamily: 'Orbitron, monospace', fontSize: '9px',
-                                    color: 'var(--neon-pink)', letterSpacing: '0.2em',
-                                    background: 'rgba(255,45,120,0.08)',
-                                    border: '1px solid rgba(255,45,120,0.2)',
-                                    borderRadius: 2, padding: '3px 10px', display: 'inline-block', width: 'fit-content',
-                                }}>
-                                    LATEST
-                                </span>
-                                <h2 style={{
-                                    fontFamily: 'Orbitron, monospace', fontSize: '18px', fontWeight: 700,
-                                    color: 'var(--text-primary)', letterSpacing: '0.04em', lineHeight: 1.4,
-                                }}>
-                                    {filtered[0].title}
-                                </h2>
-                                <p style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '15px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                                    {filtered[0].description.replace(/[#*`>\-\[\]()!]/g, '').replace(/\n/g, ' ').trim().slice(0, 280)}...
-                                </p>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
-                                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-                                        {filtered[0].authorFirstName} {filtered[0].authorLastName}
+            {/* ── Scrollable content area ── */}
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 2 }}>
+                {loading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
+                        <Spinner size={32} />
+                    </div>
+                ) : error ? (
+                    <div style={{ textAlign: 'center', padding: 60, color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace' }}>
+                        ⚠ {error}
+                    </div>
+                ) : filtered.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: 80 }}>
+                        <div style={{ fontSize: 52, opacity: 0.2, marginBottom: 16 }}>◇</div>
+                        <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)' }}>
+                            {search ? 'No posts match your search' : 'No posts published yet'}
+                        </p>
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                        {/* Featured post — first one, full width */}
+                        {!search && filtered.length > 0 && (
+                            <div
+                                className="cp-card"
+                                onClick={() => setSelected(filtered[0])}
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: filtered[0].imageUrl ? '1fr 1fr' : '1fr',
+                                    overflow: 'hidden', cursor: 'pointer',
+                                    animation: 'fadeIn 0.4s ease-out both',
+                                    minHeight: 240,
+                                }}
+                            >
+                                {filtered[0].imageUrl && (
+                                    <div style={{ overflow: 'hidden', minHeight: 240 }}>
+                                        <img
+                                            src={`${BASE_URL}${filtered[0].imageUrl}`}
+                                            alt={filtered[0].title}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                            onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }}
+                                        />
+                                    </div>
+                                )}
+                                <div style={{ padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 14 }}>
+                                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--neon-pink)', letterSpacing: '0.2em', background: 'rgba(255,45,120,0.08)', border: '1px solid rgba(255,45,120,0.2)', borderRadius: 2, padding: '3px 10px', display: 'inline-block', width: 'fit-content' }}>
+                                        LATEST
                                     </span>
-                                    <span style={{ color: 'var(--text-disabled)' }}>·</span>
-                                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-                                        {new Date(filtered[0].createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                                    </span>
+                                    <h2 style={{ fontFamily: 'Orbitron, monospace', fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.04em', lineHeight: 1.4 }}>
+                                        {filtered[0].title}
+                                    </h2>
+                                    <p style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '15px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                                        {filtered[0].description.replace(/[#*`>\-\[\]()!]/g, '').replace(/\n/g, ' ').trim().slice(0, 280)}...
+                                    </p>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
+                                        <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
+                                            {filtered[0].authorFirstName} {filtered[0].authorLastName}
+                                        </span>
+                                        <span style={{ color: 'var(--text-disabled)' }}>·</span>
+                                        <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
+                                            {new Date(filtered[0].createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Remaining posts grid */}
-                    {filtered.length > 1 && (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18 }}>
-                            {(search ? filtered : filtered.slice(1)).map((post, i) => (
-                                <FeedCard
-                                    key={post.id}
-                                    post={post}
-                                    index={i}
-                                    onClick={() => setSelected(post)}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </>
-            )}
+                        {/* Remaining posts grid */}
+                        {filtered.length > 1 && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18 }}>
+                                {(search ? filtered : filtered.slice(1)).map((post, i) => (
+                                    <FeedCard key={post.id} post={post} index={i} onClick={() => setSelected(post)} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

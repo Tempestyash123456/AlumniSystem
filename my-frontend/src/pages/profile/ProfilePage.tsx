@@ -2,10 +2,8 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { profileApi } from '../../lib/api.ts';
 import { useAuthStore } from '../../store/authStore.ts';
 import type { ProfileResponse, UpdateProfileRequest } from '../../types';
-import {
-    Input, Textarea, Select, Button, Alert,
-    ProgressBar, Toggle, SkillsInput, Spinner,
-} from '../../components/ui';
+// @ts-ignore
+import { Input, Textarea, Select, Button, Alert, ProgressBar, Toggle, SkillsInput, Spinner } from '../../components/ui';
 
 const BASE_URL = 'http://localhost:8080';
 
@@ -25,13 +23,12 @@ const YEAR_OPTIONS = Array.from({ length: 40 }, (_, i) => {
     return { value: y, label: String(y) };
 });
 
-type Section = 'personal' | 'academic' | 'professional' | 'visibility';
+type Section = 'personal' | 'academic' | 'professional' ;
 
 const SECTIONS: { id: Section; label: string; icon: string }[] = [
     { id: 'personal',     label: 'PERSONAL',     icon: '👤' },
     { id: 'academic',     label: 'ACADEMIC',      icon: '🎓' },
     { id: 'professional', label: 'PROFESSIONAL',  icon: '💼' },
-    { id: 'visibility',   label: 'VISIBILITY',    icon: '👁️' },
 ];
 
 // ── Photo Upload Section ──────────────────────────────────────────────────────
@@ -45,7 +42,10 @@ const PhotoUpload: React.FC<{
     const [error, setError]         = useState('');
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-    const displayUrl = previewUrl || (currentUrl ? `${BASE_URL}${currentUrl}` : null);
+    const displayUrl = previewUrl
+        || (currentUrl
+            ? currentUrl.startsWith('http') ? currentUrl : `${BASE_URL}${currentUrl}`
+            : null);
 
     const initials = userId.slice(0, 2).toUpperCase();
 
@@ -212,6 +212,7 @@ export const ProfilePage: React.FC = () => {
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
             setForm(prev => ({ ...prev, [field]: e.target.value ? Number(e.target.value) : undefined }));
 
+    // @ts-ignore
     const setBool = (field: keyof UpdateProfileRequest) => (val: boolean) =>
         setForm(prev => ({ ...prev, [field]: val }));
 
@@ -404,24 +405,6 @@ export const ProfilePage: React.FC = () => {
                                 <Input label="GitHub URL" value={form.githubUrl ?? ''} onChange={setStr('githubUrl')} />
                                 <Input label="Portfolio URL" value={form.portfolioUrl ?? ''} onChange={setStr('portfolioUrl')} />
                                 <SkillsInput skills={form.skills ?? []} onChange={(skills) => setForm(prev => ({ ...prev, skills }))} />
-                            </div>
-                        )}
-
-                        {activeSection === 'visibility' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                                {[
-                                    { field: 'profilePublic' as const, label: 'PUBLIC_PROFILE', desc: 'Allow others to view your profile' },
-                                    { field: 'openToMentor' as const, label: 'OPEN_TO_MENTORING', desc: 'Available to guide others' },
-                                    { field: 'openToHire' as const, label: 'OPEN_TO_OPPORTUNITIES', desc: 'Open to job offers' },
-                                ].map(({ field, label, desc }) => (
-                                    <div key={field} className="cp-card" style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-subtle)' }}>
-                                        <div>
-                                            <div style={{ color: 'var(--neon-cyan)', fontSize: '13px', fontFamily: 'Orbitron, monospace' }}>{label}</div>
-                                            <div style={{ color: 'var(--text-muted)', fontSize: '12px', fontFamily: 'Share Tech Mono, monospace' }}>{desc}</div>
-                                        </div>
-                                        <Toggle checked={(form[field] as boolean) ?? false} onChange={setBool(field)} />
-                                    </div>
-                                ))}
                             </div>
                         )}
                     </div>

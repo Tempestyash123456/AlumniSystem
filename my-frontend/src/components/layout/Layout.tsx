@@ -52,17 +52,23 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     );
 
     // Avatar initials / photo
-    const avatarContent = user?.profilePhotoUrl ? (
+    const photoUrl = user?.profilePhotoUrl
+        ? user.profilePhotoUrl.startsWith('http')
+            ? user.profilePhotoUrl          // Google / absolute URL — use as-is
+            : `${BASE_URL}${user.profilePhotoUrl}`  // local upload — prepend host
+        : null;
+
+    const avatarContent = photoUrl ? (
         <img
-            src={`${BASE_URL}${user.profilePhotoUrl}`}
+            src={photoUrl}
             alt=""
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
     ) : (
         <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', fontWeight: 700, color: 'var(--bg-void)' }}>
-            {`${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase()}
-        </span>
+        {`${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase()}
+    </span>
     );
 
     return (
@@ -204,8 +210,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </header>
 
                 {/* Scrollable content */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '28px 32px' }}>
-                    <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+                <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '28px 32px', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ maxWidth: 1400, margin: '0 auto', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', width: '100%' }}>
                         {children}
                     </div>
                 </div>

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { adminApi } from '../../lib/api.ts';
 import type { AdminUserDto } from '../../types';
 import { Button, Badge, Spinner, Alert, Confirm, Modal, Input } from '../../components/ui';
-
-const BASE_URL = 'http://localhost:8080'; // Backend base URL for images
+import { getImageUrl } from '../../lib/api';
 
 export const AdminPage: React.FC = () => {
     const [users, setUsers] = useState<AdminUserDto[]>([]);
@@ -12,7 +11,6 @@ export const AdminPage: React.FC = () => {
     const [success, setSuccess] = useState('');
     const [search, setSearch] = useState('');
 
-    // Modals
     const [deleteTarget, setDeleteTarget] = useState<AdminUserDto | null>(null);
     const [roleTarget, setRoleTarget] = useState<AdminUserDto | null>(null);
     const [newRole, setNewRole] = useState('');
@@ -109,9 +107,11 @@ export const AdminPage: React.FC = () => {
     };
 
     return (
-        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* Header */}
-            <div>
+        // height + minHeight: 0 fills the Layout flex column
+        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
+
+            {/* ── Header ── */}
+            <div style={{ flexShrink: 0 }}>
                 <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.15em', marginBottom: 6 }}>
                     ADMIN_CONSOLE
                 </div>
@@ -120,13 +120,13 @@ export const AdminPage: React.FC = () => {
                 </h1>
             </div>
 
-            {/* Stat cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14 }}>
+            {/* ── Stat cards ── */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, flexShrink: 0 }}>
                 {[
-                    { label: 'Total Users', value: stats.total, color: 'cyan' },
-                    { label: 'Enabled', value: stats.enabled, color: 'green' },
-                    { label: 'Locked', value: stats.locked, color: 'pink' },
-                    { label: 'Admins', value: stats.admins, color: 'purple' },
+                    { label: 'Total Users', value: stats.total,   color: 'cyan'   },
+                    { label: 'Enabled',     value: stats.enabled, color: 'green'  },
+                    { label: 'Locked',      value: stats.locked,  color: 'pink'   },
+                    { label: 'Admins',      value: stats.admins,  color: 'purple' },
                 ].map(({ label, value, color }) => (
                     <div key={label} className={`cp-stat-card ${color}`}>
                         <div className={`cp-stat-value text-neon-${color}`}>{value}</div>
@@ -135,13 +135,14 @@ export const AdminPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* Alerts */}
-            {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
-            {error && <Alert type="error" onClose={() => setError('')}>{error}</Alert>}
+            {/* ── Alerts ── */}
+            {success && <Alert type="success" onClose={() => setSuccess('')} style={{ flexShrink: 0 }}>{success}</Alert>}
+            {error   && <Alert type="error"   onClose={() => setError('')}   style={{ flexShrink: 0 }}>{error}</Alert>}
 
-            {/* Table */}
-            <div className="cp-panel" style={{ overflow: 'hidden' }}>
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 16 }}>
+            {/* ── Scrollable table panel ── */}
+            <div className="cp-panel" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                {/* Search + controls bar — stays fixed */}
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
                     <div style={{ flex: 1, maxWidth: 340 }}>
                         <Input
                             placeholder="Search users..."
@@ -156,129 +157,129 @@ export const AdminPage: React.FC = () => {
                     <Button variant="outline" size="sm" onClick={load}>🔄 Refresh</Button>
                 </div>
 
-                {loading ? (
-                    <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}><Spinner size={28} /></div>
-                ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table className="cp-table">
-                            <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Roles</th>
-                                <th>Status</th>
-                                <th>Profile</th>
-                                <th>Last Login</th>
-                                <th style={{ textAlign: 'right' }}>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {filtered.map((user) => (
-                                <tr key={user.id}>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                            {/* Profile Photo Display */}
-                                            <div style={{
-                                                width: 36,
-                                                height: 36,
-                                                borderRadius: '50%',
-                                                overflow: 'hidden',
-                                                border: '1px solid var(--border-subtle)',
-                                                background: 'var(--bg-card)',
-                                                flexShrink: 0
-                                            }}>
-                                                {user.profilePhotoUrl ? (
-                                                    <img
-                                                        src={`${BASE_URL}${user.profilePhotoUrl}`}
-                                                        alt=""
-                                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                                        onError={(e) => {
-                                                            (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`;
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
-                                                        👤
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '15px' }}>
-                                                    {user.firstName} {user.lastName}
+                {/* Scrollable table body */}
+                <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'auto' }}>
+                    {loading ? (
+                        <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
+                            <Spinner size={28} />
+                        </div>
+                    ) : (
+                        <>
+                            <table className="cp-table">
+                                <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Roles</th>
+                                    <th>Status</th>
+                                    <th>Profile</th>
+                                    <th>Last Login</th>
+                                    <th style={{ textAlign: 'right' }}>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {filtered.map((user) => (
+                                    <tr key={user.id}>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                <div style={{
+                                                    width: 36, height: 36, borderRadius: '50%',
+                                                    overflow: 'hidden', border: '1px solid var(--border-subtle)',
+                                                    background: 'var(--bg-card)', flexShrink: 0,
+                                                }}>
+                                                    {user.profilePhotoUrl ? (
+                                                        <img
+                                                            src={getImageUrl(user.profilePhotoUrl)!}
+                                                            alt=""
+                                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`;
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' }}>
+                                                            👤
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{user.email}</div>
+                                                <div>
+                                                    <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '15px' }}>
+                                                        {user.firstName} {user.lastName}
+                                                    </div>
+                                                    <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{user.email}</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                                            {user.roles.map((r) => {
-                                                const isAdminRole = r === 'ROLE_ADMIN';
-                                                return (
-                                                    <span
-                                                        key={r}
-                                                        className={`cp-badge ${isAdminRole ? 'cp-badge-pink' : 'cp-badge-cyan'}`}
-                                                        style={{ cursor: isAdminRole ? 'default' : 'pointer' }}
-                                                        title={isAdminRole ? 'Admin role cannot be revoked' : 'Click to remove'}
-                                                        onClick={() => !isAdminRole && handleRemoveRole(user, r)}
-                                                    >
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                                                {user.roles.map((r) => {
+                                                    const isAdminRole = r === 'ROLE_ADMIN';
+                                                    return (
+                                                        <span
+                                                            key={r}
+                                                            className={`cp-badge ${isAdminRole ? 'cp-badge-pink' : 'cp-badge-cyan'}`}
+                                                            style={{ cursor: isAdminRole ? 'default' : 'pointer' }}
+                                                            title={isAdminRole ? 'Admin role cannot be revoked' : 'Click to remove'}
+                                                            onClick={() => !isAdminRole && handleRemoveRole(user, r)}
+                                                        >
                                                             {r.replace('ROLE_', '')} {!isAdminRole && '×'}
                                                         </span>
-                                                );
-                                            })}
-                                            <button
-                                                onClick={() => setRoleTarget(user)}
-                                                style={{ background: 'none', border: '1px dashed var(--border-subtle)', color: 'var(--text-muted)', borderRadius: 2, padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontFamily: 'Orbitron, monospace' }}
-                                            >
-                                                + ADD
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: 4, flexDirection: 'column' }}>
-                                            <Badge variant={user.enabled ? 'green' : 'amber'}>
-                                                {user.enabled ? 'ENABLED' : 'DISABLED'}
-                                            </Badge>
-                                            {user.accountLocked && <Badge variant="pink">LOCKED</Badge>}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <div style={{ width: 50, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
-                                                <div style={{ height: '100%', width: `${user.profileScore}%`, background: 'linear-gradient(90deg, var(--neon-cyan), var(--neon-purple))' }} />
+                                                    );
+                                                })}
+                                                <button
+                                                    onClick={() => setRoleTarget(user)}
+                                                    style={{ background: 'none', border: '1px dashed var(--border-subtle)', color: 'var(--text-muted)', borderRadius: 2, padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontFamily: 'Orbitron, monospace' }}
+                                                >
+                                                    + ADD
+                                                </button>
                                             </div>
-                                            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{user.profileScore}%</span>
-                                        </div>
-                                    </td>
-                                    <td style={{ color: 'var(--text-muted)', fontSize: '11px' }}>
-                                        {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                                            <Button variant="ghost" size="sm" onClick={() => handleEnable(user)} disabled={actionLoading}>
-                                                {user.enabled ? 'Disable' : 'Enable'}
-                                            </Button>
-                                            <Button variant={user.accountLocked ? 'outline' : 'ghost'} size="sm" onClick={() => handleLock(user)} disabled={actionLoading}>
-                                                {user.accountLocked ? 'Unlock' : 'Lock'}
-                                            </Button>
-                                            <Button variant="danger" size="sm" onClick={() => setDeleteTarget(user)} disabled={actionLoading}>
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                        {filtered.length === 0 && (
-                            <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace' }}>
-                                NO_USERS_FOUND
-                            </div>
-                        )}
-                    </div>
-                )}
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: 4, flexDirection: 'column' }}>
+                                                <Badge variant={user.enabled ? 'green' : 'amber'}>
+                                                    {user.enabled ? 'ENABLED' : 'DISABLED'}
+                                                </Badge>
+                                                {user.accountLocked && <Badge variant="pink">LOCKED</Badge>}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <div style={{ width: 50, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
+                                                    <div style={{ height: '100%', width: `${user.profileScore}%`, background: 'linear-gradient(90deg, var(--neon-cyan), var(--neon-purple))' }} />
+                                                </div>
+                                                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{user.profileScore}%</span>
+                                            </div>
+                                        </td>
+                                        <td style={{ color: 'var(--text-muted)', fontSize: '11px' }}>
+                                            {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                                                <Button variant="ghost" size="sm" onClick={() => handleEnable(user)} disabled={actionLoading}>
+                                                    {user.enabled ? 'Disable' : 'Enable'}
+                                                </Button>
+                                                <Button variant={user.accountLocked ? 'outline' : 'ghost'} size="sm" onClick={() => handleLock(user)} disabled={actionLoading}>
+                                                    {user.accountLocked ? 'Unlock' : 'Lock'}
+                                                </Button>
+                                                <Button variant="danger" size="sm" onClick={() => setDeleteTarget(user)} disabled={actionLoading}>
+                                                    Delete
+                                                </Button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                            {filtered.length === 0 && (
+                                <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace' }}>
+                                    NO_USERS_FOUND
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
 
-            {/* Modals remain the same */}
+            {/* ── Modals ── */}
             <Confirm
                 open={!!deleteTarget}
                 title="DELETE_USER"
