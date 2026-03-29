@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuthStore } from '../../store/authStore.ts';
-import { profileApi, alumniApi } from '../../lib/api.ts';
+import { useAuthStore } from '../../store/authStore';
+import { profileApi, alumniApi } from '../../lib/api';
 import { ProgressBar, Spinner, Badge } from '../../components/ui';
 import type { ProfileResponse } from '../../types';
 
@@ -184,9 +184,11 @@ export const DashboardPage: React.FC = () => {
                             ⬡ QUICK_ACCESS
                         </div>
                         {[
-                            { to: '/alumni', icon: '◈', label: 'Browse Directory' },
                             { to: '/profile', icon: '◉', label: 'Edit Profile' },
-                            ...(isAdmin ? [{ to: '/admin', icon: '◆', label: 'Admin Panel' }] : []),
+                            ...(isAdmin ? [
+                                { to: '/alumni', icon: '◈', label: 'User Directory' },
+                                { to: '/admin',  icon: '◆', label: 'Admin Panel' },
+                            ] : []),
                         ].map(({ to, icon, label }) => (
                             <Link key={to} to={to} className="cp-nav-item" style={{ marginBottom: 4 }}>
                                 <span style={{ fontSize: '16px', opacity: 0.7 }}>{icon}</span>

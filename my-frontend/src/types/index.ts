@@ -1,3 +1,4 @@
+// ── API Response Envelope ────────────────────────────────────────────────────
 export interface ApiResponse<T> {
     success: boolean;
     data?: T;
@@ -12,6 +13,7 @@ export interface ApiError {
     fieldErrors?: Record<string, string>;
 }
 
+// ── Auth ─────────────────────────────────────────────────────────────────────
 export interface UserInfo {
     id: string;
     email: string;
@@ -29,14 +31,25 @@ export interface AuthResponse {
     user: UserInfo;
 }
 
-export interface ProfileResponse extends UserInfo {
+export interface MessageResponse {
+    message: string;
+}
+
+// ── Profile ───────────────────────────────────────────────────────────────────
+export interface ProfileResponse {
     userId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
     phone?: string;
+    profilePhotoUrl?: string;
+
     studentId?: string;
     graduationYear?: number;
     degree?: string;
     department?: string;
     specialization?: string;
+
     currentJobTitle?: string;
     currentCompany?: string;
     industry?: string;
@@ -44,11 +57,13 @@ export interface ProfileResponse extends UserInfo {
     linkedinUrl?: string;
     githubUrl?: string;
     portfolioUrl?: string;
+
     bio?: string;
     city?: string;
     state?: string;
     country?: string;
     dateOfBirth?: string;
+
     skills?: string[];
     profileScore: number;
     profilePublic: boolean;
@@ -56,15 +71,57 @@ export interface ProfileResponse extends UserInfo {
     openToHire: boolean;
 }
 
-export interface AdminUserDto extends UserInfo {
+export interface UpdateProfileRequest {
+    firstName?: string | null;
+    lastName?: string | null;
+    phone?: string | null;
+    studentId?: string | null;
+    graduationYear?: number | null;
+    degree?: string | null;
+    department?: string | null;
+    specialization?: string | null;
+    currentJobTitle?: string | null;
+    currentCompany?: string | null;
+    industry?: string | null;
+    experienceYears?: number | null;
+    linkedinUrl?: string | null;
+    githubUrl?: string | null;
+    portfolioUrl?: string | null;
+    bio?: string | null;
+    city?: string | null;
+    state?: string | null;
+    country?: string | null;
+    dateOfBirth?: string | null;
+    skills?: string[] | null;
+    profilePublic?: boolean | null;
+    openToMentor?: boolean | null;
+    openToHire?: boolean | null;
+}
+
+// ── Alumni Directory ──────────────────────────────────────────────────────────
+export interface AlumniDto {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profilePhotoUrl?: string;
+}
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+export interface AdminUserDto {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    profilePhotoUrl?: string;
+    roles: string[];
     enabled: boolean;
     accountLocked: boolean;
     profileScore: number;
     lastLoginAt?: string;
     createdAt: string;
 }
-
-export interface UpdateProfileRequest extends Partial<Omit<ProfileResponse, 'userId' | 'profileScore'>> {}
 
 export interface AdminUserListResponse {
     users: AdminUserDto[];

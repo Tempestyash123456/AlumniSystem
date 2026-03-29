@@ -1,16 +1,16 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../store/authStore.ts';
-import { authApi, tokenStorage } from '../../lib/api.ts';
+import { useAuthStore } from '../../store/authStore';
+import { authApi, tokenStorage } from '../../lib/api';
 
 const NAV_ITEMS = [
     { path: '/dashboard', icon: '⬡', label: 'Dashboard' },
-    { path: '/alumni', icon: '◈', label: 'Directory' },
-    { path: '/profile', icon: '◉', label: 'Profile' },
+    { path: '/profile',   icon: '◉', label: 'Profile' },
 ];
 
 const ADMIN_NAV = [
-    { path: '/admin', icon: '◆', label: 'Admin Panel' },
+    { path: '/alumni', icon: '◈', label: 'Directory' },
+    { path: '/admin',  icon: '◆', label: 'Admin Panel' },
 ];
 
 interface LayoutProps {
