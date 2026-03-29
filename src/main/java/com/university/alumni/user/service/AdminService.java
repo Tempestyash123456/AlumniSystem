@@ -93,8 +93,9 @@ public class AdminService {
     @Transactional
     public void deleteUser(UUID userId) {
         User user = findUserOrThrow(userId);
-        user.softDelete();
-        userRepository.save(user);
+//        user.softDelete();
+        userRepository.delete(user);
+//        userRepository.save(user);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

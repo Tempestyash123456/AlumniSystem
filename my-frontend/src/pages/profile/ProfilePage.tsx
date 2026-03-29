@@ -6,7 +6,7 @@ import {
     ProgressBar, Toggle, SkillsInput, Spinner,
 } from '../../components/ui';
 
-// ── Static options ────────────────────────────────────────────────────────────
+// --- Static options ---
 const INDUSTRY_OPTIONS = [
     'Technology', 'Finance', 'Healthcare', 'Education', 'Manufacturing',
     'Retail', 'Media', 'Consulting', 'Government', 'Non-profit', 'Other',
@@ -25,17 +25,16 @@ const YEAR_OPTIONS = Array.from({ length: 40 }, (_, i) => {
 type Section = 'personal' | 'academic' | 'professional' | 'visibility';
 
 const SECTIONS: { id: Section; label: string; icon: string }[] = [
-    { id: 'personal',     label: 'Personal',     icon: '◉' },
-    { id: 'academic',     label: 'Academic',      icon: '◈' },
-    { id: 'professional', label: 'Professional',  icon: '◆' },
-    { id: 'visibility',   label: 'Visibility',    icon: '⬡' },
+    { id: 'personal',     label: 'PERSONAL',     icon: '👤' },
+    { id: 'academic',     label: 'ACADEMIC',      icon: '🎓' },
+    { id: 'professional', label: 'PROFESSIONAL',  icon: '💼' },
+    { id: 'visibility',   label: 'VISIBILITY',    icon: '👁️' },
 ];
 
-// ── Component ─────────────────────────────────────────────────────────────────
 export const ProfilePage: React.FC = () => {
     const [profile, setProfile] = useState<ProfileResponse | null>(null);
     const [loading, setLoading]   = useState(true);
-    const [saving, setSaving]     = useState(false);
+    const [saving, setSaving]      = useState(false);
     const [success, setSuccess]   = useState('');
     const [error, setError]       = useState('');
     const [activeSection, setActiveSection] = useState<Section>('personal');
@@ -78,17 +77,14 @@ export const ProfilePage: React.FC = () => {
 
     useEffect(() => { loadProfile(); }, [loadProfile]);
 
-    // Generic string field setter
     const setStr = (field: keyof UpdateProfileRequest) =>
         (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
             setForm(prev => ({ ...prev, [field]: e.target.value }));
 
-    // Numeric field setter
     const setNum = (field: keyof UpdateProfileRequest) =>
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
             setForm(prev => ({ ...prev, [field]: e.target.value ? Number(e.target.value) : undefined }));
 
-    // Boolean setter (for Toggle)
     const setBool = (field: keyof UpdateProfileRequest) => (val: boolean) =>
         setForm(prev => ({ ...prev, [field]: val }));
 
@@ -98,7 +94,6 @@ export const ProfilePage: React.FC = () => {
         setError('');
         setSuccess('');
 
-        // Convert empty strings to null before sending
         const clean: UpdateProfileRequest = Object.fromEntries(
             Object.entries(form).map(([k, v]) => [k, v === '' ? null : v])
         ) as UpdateProfileRequest;
@@ -123,237 +118,198 @@ export const ProfilePage: React.FC = () => {
     }
 
     return (
-        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {/* Page header */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-                <div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 6 }}>
-                        USER_CONFIGURATION
+        <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 160px)', overflow: 'hidden', gap: 20 }}>
+
+            {/* FIXED TOP SECTION */}
+            <div style={{ flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+                    <div>
+                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 6 }}>
+                            USER_CONFIGURATION
+                        </div>
+                        <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
+                            My Profile
+                        </h1>
                     </div>
-                    <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
-                        My Profile
-                    </h1>
+                    <div style={{ minWidth: 220 }}>
+                        <ProgressBar label="COMPLETENESS" value={profile?.profileScore ?? 0} />
+                    </div>
                 </div>
-                <div style={{ minWidth: 220 }}>
-                    <ProgressBar label="COMPLETENESS" value={profile?.profileScore ?? 0} />
+
+                {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
+                {error   && <Alert type="error"   onClose={() => setError('')}>{error}</Alert>}
+
+                {/* HORIZONTAL NAVIGATION WITH PROPER HIGHLIGHTING */}
+                <div
+                    className="cp-panel"
+                    style={{
+                        marginTop: 20,
+                        padding: '4px',
+                        display: 'flex',
+                        gap: 4,
+                        overflowX: 'auto',
+                        background: 'rgba(0,0,0,0.3)',
+                        borderRadius: '4px'
+                    }}
+                >
+                    {SECTIONS.map(({ id, label, icon }) => {
+                        const active = activeSection === id;
+                        return (
+                            <button
+                                key={id}
+                                onClick={() => setActiveSection(id)}
+                                style={{
+                                    flex: 1,
+                                    minWidth: '140px',
+                                    background: active ? 'rgba(0, 255, 255, 0.05)' : 'transparent',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: '14px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: 10,
+                                    fontFamily: 'Orbitron, monospace',
+                                    fontSize: '11px',
+                                    letterSpacing: '0.1em',
+                                    position: 'relative',
+                                    transition: 'all 0.2s ease',
+                                    color: active ? 'var(--neon-cyan)' : 'var(--text-muted)',
+                                    borderRadius: '2px'
+                                }}
+                            >
+                                <span style={{ fontSize: 16, filter: active ? 'drop-shadow(0 0 5px var(--neon-cyan))' : 'none' }}>
+                                    {icon}
+                                </span>
+                                <span style={{ textShadow: active ? '0 0 8px rgba(0, 255, 255, 0.5)' : 'none' }}>
+                                    {label}
+                                </span>
+                                {active && (
+                                    <div
+                                        style={{
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            left: '10%',
+                                            right: '10%',
+                                            height: '2px',
+                                            background: 'var(--neon-cyan)',
+                                            boxShadow: '0 0 10px var(--neon-cyan)',
+                                            borderRadius: '2px'
+                                        }}
+                                    />
+                                )}
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
 
-            {/* Alerts */}
-            {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
-            {error   && <Alert type="error"   onClose={() => setError('')}>{error}</Alert>}
-
-            <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-                {/* Section sidebar */}
+            {/* SCROLLABLE FORM BODY */}
+            <form onSubmit={handleSave} style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
                 <div
-                    className="cp-panel"
-                    style={{ padding: '12px', width: 180, flexShrink: 0, position: 'sticky', top: 80 }}
+                    className="cp-panel custom-scrollbar"
+                    style={{
+                        flex: 1,
+                        overflowY: 'auto',
+                        padding: '32px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        background: 'rgba(10, 11, 14, 0.6)'
+                    }}
                 >
-                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-disabled)', letterSpacing: '0.15em', padding: '8px 4px 8px', marginBottom: 4 }}>
-                        SECTIONS
-                    </div>
-                    {SECTIONS.map(({ id, label, icon }) => (
-                        <button
-                            key={id}
-                            onClick={() => setActiveSection(id)}
-                            className={`cp-nav-item ${activeSection === id ? 'active' : ''}`}
-                            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', marginBottom: 2, textAlign: 'left' }}
-                        >
-                            <span style={{ fontSize: 16 }}>{icon}</span>
-                            <span>{label}</span>
-                        </button>
-                    ))}
-                </div>
-
-                {/* Form */}
-                <form onSubmit={handleSave} style={{ flex: 1, minWidth: 0 }}>
-                    <div className="cp-panel" style={{ padding: '28px' }}>
-                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 24 }}>
-                            {SECTIONS.find(s => s.id === activeSection)?.icon}{' '}
-                            {activeSection.toUpperCase()}_DATA
+                    <div style={{ flex: 1 }}>
+                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <span style={{ color: 'var(--neon-cyan)', textShadow: '0 0 5px var(--neon-cyan)' }}>◈</span> {activeSection.toUpperCase()}_DATA
                         </div>
 
-                        {/* ── Personal ───────────────────────────────────────────────── */}
                         {activeSection === 'personal' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                    <Input label="First Name" value={form.firstName ?? ''} onChange={setStr('firstName')} placeholder="Ada" />
-                                    <Input label="Last Name"  value={form.lastName  ?? ''} onChange={setStr('lastName')}  placeholder="Lovelace" />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                    <Input label="First Name" value={form.firstName ?? ''} onChange={setStr('firstName')} />
+                                    <Input label="Last Name"  value={form.lastName  ?? ''} onChange={setStr('lastName')} />
                                 </div>
-                                <Input label="Phone" value={form.phone ?? ''} onChange={setStr('phone')} placeholder="+91-9876543210" />
-                                <Textarea label="Bio" value={form.bio ?? ''} onChange={setStr('bio')} placeholder="Tell the community about yourself..." />
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-                                    <Input label="City"    value={form.city    ?? ''} onChange={setStr('city')}    placeholder="Mumbai" />
-                                    <Input label="State"   value={form.state   ?? ''} onChange={setStr('state')}   placeholder="Maharashtra" />
-                                    <Input label="Country" value={form.country ?? ''} onChange={setStr('country')} placeholder="India" />
+                                <Input label="Phone" value={form.phone ?? ''} onChange={setStr('phone')} />
+                                <Textarea label="Bio" value={form.bio ?? ''} onChange={setStr('bio')} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
+                                    <Input label="City" value={form.city ?? ''} onChange={setStr('city')} />
+                                    <Input label="State" value={form.state ?? ''} onChange={setStr('state')} />
+                                    <Input label="Country" value={form.country ?? ''} onChange={setStr('country')} />
                                 </div>
                                 <Input label="Date of Birth" type="date" value={form.dateOfBirth ?? ''} onChange={setStr('dateOfBirth')} />
                             </div>
                         )}
 
-                        {/* ── Academic ───────────────────────────────────────────────── */}
                         {activeSection === 'academic' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                    <Input
-                                        label="Student ID"
-                                        value={form.studentId ?? ''}
-                                        onChange={setStr('studentId')}
-                                        placeholder="2020CS001"
-                                    />
-                                    <Select
-                                        label="Graduation Year"
-                                        value={form.graduationYear ?? ''}
-                                        onChange={setNum('graduationYear')}
-                                        options={YEAR_OPTIONS}
-                                        placeholder="Select year..."
-                                    />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                    <Input label="Student ID" value={form.studentId ?? ''} onChange={setStr('studentId')} />
+                                    <Select label="Graduation Year" value={form.graduationYear ?? ''} onChange={setNum('graduationYear')} options={YEAR_OPTIONS} />
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                    <Select
-                                        label="Degree"
-                                        value={form.degree ?? ''}
-                                        onChange={setStr('degree')}
-                                        options={DEGREE_OPTIONS}
-                                        placeholder="Select degree..."
-                                    />
-                                    <Input
-                                        label="Department"
-                                        value={form.department ?? ''}
-                                        onChange={setStr('department')}
-                                        placeholder="Computer Science"
-                                    />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                    <Select label="Degree" value={form.degree ?? ''} onChange={setStr('degree')} options={DEGREE_OPTIONS} />
+                                    <Input label="Department" value={form.department ?? ''} onChange={setStr('department')} />
                                 </div>
-                                <Input
-                                    label="Specialization"
-                                    value={form.specialization ?? ''}
-                                    onChange={setStr('specialization')}
-                                    placeholder="Machine Learning, Web Dev..."
-                                />
+                                <Input label="Specialization" value={form.specialization ?? ''} onChange={setStr('specialization')} />
                             </div>
                         )}
 
-                        {/* ── Professional ───────────────────────────────────────────── */}
                         {activeSection === 'professional' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                    <Input
-                                        label="Job Title"
-                                        value={form.currentJobTitle ?? ''}
-                                        onChange={setStr('currentJobTitle')}
-                                        placeholder="Senior Engineer"
-                                    />
-                                    <Input
-                                        label="Company"
-                                        value={form.currentCompany ?? ''}
-                                        onChange={setStr('currentCompany')}
-                                        placeholder="Acme Corp"
-                                    />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                    <Input label="Job Title" value={form.currentJobTitle ?? ''} onChange={setStr('currentJobTitle')} />
+                                    <Input label="Company" value={form.currentCompany ?? ''} onChange={setStr('currentCompany')} />
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                    <Select
-                                        label="Industry"
-                                        value={form.industry ?? ''}
-                                        onChange={setStr('industry')}
-                                        options={INDUSTRY_OPTIONS}
-                                        placeholder="Select industry..."
-                                    />
-                                    <Input
-                                        label="Years of Experience"
-                                        type="number"
-                                        min={0}
-                                        max={60}
-                                        value={form.experienceYears ?? ''}
-                                        onChange={setNum('experienceYears')}
-                                        placeholder="5"
-                                    />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                    <Select label="Industry" value={form.industry ?? ''} onChange={setStr('industry')} options={INDUSTRY_OPTIONS} />
+                                    <Input label="Experience Years" type="number" value={form.experienceYears ?? ''} onChange={setNum('experienceYears')} />
                                 </div>
-                                <Input
-                                    label="LinkedIn URL"
-                                    type="url"
-                                    value={form.linkedinUrl ?? ''}
-                                    onChange={setStr('linkedinUrl')}
-                                    placeholder="https://linkedin.com/in/username"
-                                />
-                                <Input
-                                    label="GitHub URL"
-                                    type="url"
-                                    value={form.githubUrl ?? ''}
-                                    onChange={setStr('githubUrl')}
-                                    placeholder="https://github.com/username"
-                                />
-                                <Input
-                                    label="Portfolio URL"
-                                    type="url"
-                                    value={form.portfolioUrl ?? ''}
-                                    onChange={setStr('portfolioUrl')}
-                                    placeholder="https://mysite.dev"
-                                />
-                                <div>
-                                    <div className="cp-label" style={{ marginBottom: 10 }}>Skills</div>
-                                    <SkillsInput
-                                        skills={form.skills ?? []}
-                                        onChange={(skills) => setForm(prev => ({ ...prev, skills }))}
-                                    />
-                                </div>
+                                <Input label="LinkedIn URL" value={form.linkedinUrl ?? ''} onChange={setStr('linkedinUrl')} />
+                                <Input label="GitHub URL" value={form.githubUrl ?? ''} onChange={setStr('githubUrl')} />
+                                <Input label="Portfolio URL" value={form.portfolioUrl ?? ''} onChange={setStr('portfolioUrl')} />
+                                <SkillsInput skills={form.skills ?? []} onChange={(skills) => setForm(prev => ({ ...prev, skills }))} />
                             </div>
                         )}
 
-                        {/* ── Visibility ─────────────────────────────────────────────── */}
                         {activeSection === 'visibility' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                                <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginBottom: 8 }}>
-                                    Control how you appear in the alumni network.
-                                </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                                 {[
-                                    {
-                                        field: 'profilePublic' as const,
-                                        label: 'Public Profile',
-                                        desc: 'Allow other alumni to view your full profile',
-                                    },
-                                    {
-                                        field: 'openToMentor' as const,
-                                        label: 'Open to Mentoring',
-                                        desc: 'Show that you are available to mentor others',
-                                    },
-                                    {
-                                        field: 'openToHire' as const,
-                                        label: 'Open to Opportunities',
-                                        desc: 'Signal that you are open to job opportunities',
-                                    },
+                                    { field: 'profilePublic' as const, label: 'PUBLIC_PROFILE', desc: 'Allow others to view your profile' },
+                                    { field: 'openToMentor' as const, label: 'OPEN_TO_MENTORING', desc: 'Available to guide others' },
+                                    { field: 'openToHire' as const, label: 'OPEN_TO_OPPORTUNITIES', desc: 'Open to job offers' },
                                 ].map(({ field, label, desc }) => (
-                                    <div
-                                        key={field}
-                                        className="cp-card"
-                                        style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20 }}
-                                    >
+                                    <div key={field} className="cp-card" style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-subtle)' }}>
                                         <div>
-                                            <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '16px', color: 'var(--text-primary)', marginBottom: 4 }}>
-                                                {label}
-                                            </div>
-                                            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)' }}>
-                                                {desc}
-                                            </div>
+                                            <div style={{ color: 'var(--neon-cyan)', fontSize: '13px', fontFamily: 'Orbitron, monospace' }}>{label}</div>
+                                            <div style={{ color: 'var(--text-muted)', fontSize: '12px', fontFamily: 'Share Tech Mono, monospace' }}>{desc}</div>
                                         </div>
-                                        <Toggle
-                                            checked={(form[field] as boolean) ?? false}
-                                            onChange={setBool(field)}
-                                        />
+                                        <Toggle checked={(form[field] as boolean) ?? false} onChange={setBool(field)} />
                                     </div>
                                 ))}
                             </div>
                         )}
-
-                        {/* Save button */}
-                        <hr className="cp-divider" style={{ margin: '28px 0 24px' }} />
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-                            <Button type="submit" loading={saving} size="lg">
-                                {saving ? 'SAVING...' : 'SAVE CHANGES'}
-                            </Button>
-                        </div>
                     </div>
-                </form>
-            </div>
+
+                    {/* FIXED SAVE AREA */}
+                    <div style={{ flexShrink: 0, marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button type="submit" loading={saving} size="lg" style={{ minWidth: '200px' }}>
+                            {saving ? 'SYNCING_DATA...' : 'UPDATE_PROFILE'}
+                        </Button>
+                    </div>
+                </div>
+            </form>
+            <style>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 4px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.02);
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: var(--neon-cyan);
+                    border-radius: 4px;
+                    box-shadow: 0 0 5px var(--neon-cyan);
+                }
+            `}</style>
         </div>
     );
 };

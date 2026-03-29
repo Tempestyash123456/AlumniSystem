@@ -183,17 +183,20 @@ export const AdminPage: React.FC = () => {
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                                            {user.roles.map((r) => (
-                                                <span
-                                                    key={r}
-                                                    className={`cp-badge ${r.includes('ADMIN') ? 'cp-badge-pink' : 'cp-badge-cyan'}`}
-                                                    style={{ cursor: 'pointer' }}
-                                                    title="Click to remove"
-                                                    onClick={() => handleRemoveRole(user, r)}
-                                                >
-                            {r.replace('ROLE_', '')} ×
-                          </span>
-                                            ))}
+                                            {user.roles.map((r) => {
+                                                const isAdminRole = r === 'ROLE_ADMIN';
+                                                return (
+                                                    <span
+                                                        key={r}
+                                                        className={`cp-badge ${isAdminRole ? 'cp-badge-pink' : 'cp-badge-cyan'}`}
+                                                        style={{ cursor: isAdminRole ? 'default' : 'pointer' }}
+                                                        title={isAdminRole ? 'Admin role cannot be revoked' : 'Click to remove'}
+                                                        onClick={() => !isAdminRole && handleRemoveRole(user, r)} // Only trigger if not admin
+                                                    >
+            {r.replace('ROLE_', '')} {!isAdminRole && '×'} {/* Only show '×' for non-admin roles */}
+        </span>
+                                                );
+                                            })}
                                             <button
                                                 onClick={() => setRoleTarget(user)}
                                                 style={{ background: 'none', border: '1px dashed var(--border-subtle)', color: 'var(--text-muted)', borderRadius: 2, padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontFamily: 'Orbitron, monospace', letterSpacing: '0.05em' }}
@@ -277,13 +280,13 @@ export const AdminPage: React.FC = () => {
             {/* Assign role modal */}
             <Modal open={!!roleTarget} title="ASSIGN_ROLE" onClose={() => setRoleTarget(null)} width={400}>
                 <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginBottom: 20 }}>
-                    Assign a role to {roleTarget?.email}
+                    Assign ADMIN role to {roleTarget?.email}
                 </p>
                 <Input
                     label="Role Name"
                     value={newRole}
                     onChange={(e) => setNewRole(e.target.value)}
-                    placeholder="ADMIN, ALUMNI, STUDENT, FACULTY"
+                    placeholder="ADMIN"
                     hint="Prefix ROLE_ will be added automatically"
                     onKeyDown={(e) => { if (e.key === 'Enter') handleAssignRole(); }}
                 />
