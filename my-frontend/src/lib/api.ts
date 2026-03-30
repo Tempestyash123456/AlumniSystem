@@ -121,6 +121,8 @@ export const adminApi = {
     deleteUser: (userId: string) => apiFetch<void>(`/admin/users/${userId}`, { method: 'DELETE' }),
     assignRole: (userId: string, roleName: string) => apiFetch<AdminUserDto>(`/admin/users/${userId}/roles`, { method: 'POST', body: JSON.stringify({ roleName }) }),
     removeRole: (userId: string, roleName: string) => apiFetch<AdminUserDto>(`/admin/users/${userId}/roles/${roleName}`, { method: 'DELETE' }),
+    sendTargetedEmail: (data: { subject: string; body: string; department?: string; degree?: string; specialization?: string; graduationYear?: number; targetUserEmail?: string; }) =>
+        apiFetch<string>('/admin/email/send', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 export const postsApi = {

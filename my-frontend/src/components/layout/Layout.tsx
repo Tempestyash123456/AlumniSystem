@@ -78,96 +78,43 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* ── SIDEBAR ────────────────────────────────────────────────── */}
             <aside style={{
-                width: 280, /* Widened slightly to fit bigger text */
+                width: 280,
                 borderRight: '1px solid var(--border-subtle)',
                 display: 'flex',
                 flexDirection: 'column',
                 background: 'var(--bg-panel)',
                 flexShrink: 0,
-                overflowY: 'auto',
+                overflow: 'hidden',
             }}>
-                {/* Logo */}
-                <div style={{ padding: '32px 24px 24px' }}>
-                    <div style={{
-                        fontFamily: 'Orbitron, monospace', fontSize: '18px', fontWeight: 800,
-                        letterSpacing: '0.12em', color: 'var(--text-primary)',
-                        display: 'flex', alignItems: 'center', gap: 12,
-                    }}>
-                        <div style={{
-                            width: 38, height: 38, flexShrink: 0,
-                            background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
-                            borderRadius: '8px', display: 'grid', placeItems: 'center',
-                            color: '#000', fontSize: '22px', boxShadow: '0 0 12px rgba(0,245,255,0.3)',
-                        }}>
-                            ◈
-                        </div>
-                        ALUMNI PORTAL
-                    </div>
+                {/* Static Logo Area */}
+                <div style={{ padding: '24px', flexShrink: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <img
+                        src="/cu-logo.png"
+                        alt="University Logo"
+                        style={{ maxHeight: '60px', maxWidth: '100%', objectFit: 'contain' }}
+                    />
                 </div>
 
-                {/* Nav */}
-                <nav style={{ flex: 1, padding: '0 12px' }}>
-                    <SectionLabel text="MAIN" />
-                    <NavItem path="/dashboard" icon="⬡" label="Dashboard" exact />
-                    <NavItem path="/profile"   icon="◉" label="My Profile" exact />
-                    <NavItem path="/posts"     icon="◇" label="Posts" exact />
-                    <NavItem path="/events"    icon="◎" label="Events" exact />
+                {/* Scrollable Nav Area */}
+                <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                    <nav style={{ flex: 1, padding: '0 12px', paddingBottom: '24px' }}>
+                        <SectionLabel text="MAIN" />
+                        <NavItem path="/dashboard" icon="⬡" label="Dashboard" exact />
+                        <NavItem path="/profile"   icon="◉" label="My Profile" exact />
+                        <NavItem path="/posts"     icon="◇" label="Posts" exact />
+                        <NavItem path="/events"    icon="◎" label="Events" exact />
 
-                    {isAdmin && (
-                        <>
-                            <SectionLabel text="ADMINISTRATION" />
-                            <NavItem path="/alumni"      icon="◈" label="Directory" exact />
-                            <NavItem path="/admin"       icon="◆" label="Users"     exact />
-                            <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />
-                            <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />
-                        </>
-                    )}
-                </nav>
-
-                {/* User pill + logout */}
-                <div style={{ padding: '16px 16px 20px', borderTop: '1px solid var(--border-subtle)' }}>
-                    {user && (
-                        <div style={{
-                            display: 'flex', alignItems: 'center', gap: 12,
-                            padding: '12px 14px', borderRadius: 6, marginBottom: 12,
-                            background: 'rgba(0,245,255,0.04)',
-                            border: '1px solid var(--border-subtle)',
-                        }}>
-                            <div style={{
-                                width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-                                background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                overflow: 'hidden',
-                                border: '1.5px solid rgba(0,245,255,0.3)',
-                            }}>
-                                {avatarContent}
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{
-                                    fontFamily: 'Rajdhani, sans-serif', fontSize: '16px', fontWeight: 600,
-                                    color: 'var(--text-primary)',
-                                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                }}>
-                                    {user.firstName} {user.lastName}
-                                </div>
-                                <div style={{
-                                    fontFamily: 'Share Tech Mono, monospace', fontSize: '11px',
-                                    color: isAdmin ? 'var(--neon-pink)' : 'var(--neon-cyan)',
-                                    letterSpacing: '0.08em',
-                                }}>
-                                    {isAdmin ? '◆ ADMIN' : '◉ ALUMNI'}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    <button
-                        onClick={handleLogout}
-                        disabled={loggingOut}
-                        className="cp-btn cp-btn-ghost cp-btn-sm"
-                        style={{ width: '100%', justifyContent: 'flex-start', gap: 10, fontSize: '14px' }}
-                    >
-                        <span>⏻</span> {loggingOut ? 'Logging out...' : 'Logout'}
-                    </button>
+                        {isAdmin && (
+                            <>
+                                <SectionLabel text="ADMINISTRATION" />
+                                <NavItem path="/alumni"    icon="◈" label="Directory" exact />
+                                <NavItem path="/admin"       icon="◆" label="Users"     exact />
+                                <NavItem path="/admin/email" icon="✉" label="Broadcast Email" exact />
+                                <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />
+                                <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />
+                            </>
+                        )}
+                    </nav>
                 </div>
             </aside>
 
@@ -185,45 +132,120 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     backdropFilter: 'blur(8px)',
                     zIndex: 10, flexShrink: 0,
                 }}>
+
+                    {/* ALUMNI PORTAL */}
                     <div style={{
-                        fontFamily: 'Share Tech Mono, monospace', fontSize: '14px',
-                        color: 'var(--text-muted)', letterSpacing: '0.05em',
+                        fontFamily: 'Orbitron, monospace', fontSize: '20px', fontWeight: 800,
+                        letterSpacing: '0.12em', color: 'var(--text-primary)',
                     }}>
-                        <span style={{ color: 'var(--neon-cyan)' }}>SYS</span>
-                        {' › '}
-                        {location.pathname
-                            .replace(/^\//, '')
-                            .split('/')
-                            .map(s => s.toUpperCase())
-                            .join(' › ') || 'DASHBOARD'}
+                        ALUMNI PORTAL
                     </div>
 
-                    {/* Theme Toggle replaces ONLINE indicator */}
-                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
-                        <button
-                            onClick={toggleTheme}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: 8,
-                                background: 'transparent',
+                    {/* Header Actions */}
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
+
+                        {/* User Pill moved to Header */}
+                        {user && (
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: 12,
+                                padding: '6px 16px 6px 6px', borderRadius: '30px',
+                                background: 'rgba(0,245,255,0.04)',
                                 border: '1px solid var(--border-subtle)',
-                                padding: '8px 14px',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                            }}
-                        >
-                            <span style={{ fontSize: '16px', color: theme === 'dark' ? 'var(--neon-amber)' : 'var(--neon-cyan)' }}>
-                                {theme === 'dark' ? '☀' : '☾'}
-                            </span>
-                            <span style={{
-                                fontFamily: 'Share Tech Mono, monospace',
-                                fontSize: '12px',
-                                color: 'var(--text-muted)',
-                                letterSpacing: '0.1em'
                             }}>
-                                {theme === 'dark' ? 'DARK MODE' : 'LIGHT MODE'}
-                            </span>
-                        </button>
+                                <div style={{
+                                    width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                                    background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    overflow: 'hidden',
+                                    border: '1.5px solid rgba(0,245,255,0.3)',
+                                }}>
+                                    {avatarContent}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                    <div style={{
+                                        fontFamily: 'Rajdhani, sans-serif', fontSize: '15px', fontWeight: 600,
+                                        color: 'var(--text-primary)', lineHeight: '1.2',
+                                        maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                                    }}>
+                                        {user.firstName} {user.lastName}
+                                    </div>
+                                    <div style={{
+                                        fontFamily: 'Share Tech Mono, monospace', fontSize: '10px',
+                                        color: isAdmin ? 'var(--neon-pink)' : 'var(--neon-cyan)',
+                                        letterSpacing: '0.08em', marginTop: '2px'
+                                    }}>
+                                        {isAdmin ? '◆ ADMIN' : '◉ ALUMNI'}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Controls Container */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingLeft: '8px', borderLeft: '1px solid var(--border-subtle)' }}>
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 8,
+                                    background: 'transparent',
+                                    border: '1px solid var(--border-subtle)',
+                                    padding: '8px 14px',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                }}
+                            >
+                                <span style={{ fontSize: '16px', color: theme === 'dark' ? 'var(--neon-amber)' : 'var(--neon-cyan)' }}>
+                                    {theme === 'dark' ? '☀' : '☾'}
+                                </span>
+                                <span style={{
+                                    fontFamily: 'Share Tech Mono, monospace',
+                                    fontSize: '12px',
+                                    color: 'var(--text-muted)',
+                                    letterSpacing: '0.1em'
+                                }}>
+                                    {theme === 'dark' ? 'DARK' : 'LIGHT'}
+                                </span>
+                            </button>
+
+                            {/* Logout Button */}
+                            <button
+                                onClick={handleLogout}
+                                disabled={loggingOut}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 8,
+                                    background: 'transparent',
+                                    border: '1px solid var(--border-subtle)',
+                                    padding: '8px 14px',
+                                    borderRadius: '4px',
+                                    cursor: loggingOut ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s',
+                                    opacity: loggingOut ? 0.5 : 1,
+                                }}
+                                onMouseEnter={e => {
+                                    if (!loggingOut) {
+                                        e.currentTarget.style.borderColor = 'var(--neon-pink)';
+                                        e.currentTarget.style.background = 'rgba(255, 45, 120, 0.05)';
+                                    }
+                                }}
+                                onMouseLeave={e => {
+                                    if (!loggingOut) {
+                                        e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                                        e.currentTarget.style.background = 'transparent';
+                                    }
+                                }}
+                            >
+                                <span style={{ fontSize: '16px', color: 'var(--neon-pink)' }}>⏻</span>
+                                <span style={{
+                                    fontFamily: 'Share Tech Mono, monospace',
+                                    fontSize: '12px',
+                                    color: 'var(--text-muted)',
+                                    letterSpacing: '0.1em'
+                                }}>
+                                    {loggingOut ? 'LOGGING OUT...' : 'LOGOUT'}
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </header>
 

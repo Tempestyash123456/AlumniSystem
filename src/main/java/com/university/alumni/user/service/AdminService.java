@@ -1,5 +1,6 @@
 package com.university.alumni.user.service;
 
+import com.university.alumni.auth.service.EmailService;
 import com.university.alumni.user.dto.AdminDtos.*;
 import com.university.alumni.user.entity.AlumniProfile;
 import com.university.alumni.user.entity.Role;
@@ -8,6 +9,7 @@ import com.university.alumni.user.repository.AlumniProfileRepository;
 import com.university.alumni.user.repository.RoleRepository;
 import com.university.alumni.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +17,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminService {
@@ -23,6 +27,7 @@ public class AdminService {
     private final UserRepository          userRepository;
     private final RoleRepository          roleRepository;
     private final AlumniProfileRepository profileRepository;
+    private final EmailService            emailService;
 
     // ── List all users ────────────────────────────────────────────────────────
 
@@ -93,9 +98,60 @@ public class AdminService {
     @Transactional
     public void deleteUser(UUID userId) {
         User user = findUserOrThrow(userId);
-//        user.softDelete();
         userRepository.delete(user);
-//        userRepository.save(user);
+    }
+
+    // ── Targeted Bulk Email ───────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public int sendTargetedEmails(BulkEmailRequest request) {
+        log.info("Starting bulk email dispatch. Subject: {}", request.subject());
+
+        List<User> targetUsers;
+
+        if (request.targetUserEmail() != null && !request.targetUserEmail().isBlank()) {
+            // Send to a single specific user by email
+            // FIX: Using findByEmailAndDeletedAtIsNull instead of findByEmail
+            User targetUser = userRepository.findByEmailAndDeletedAtIsNull(request.targetUserEmail())
+                    .filter(User::isEnabled)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Active user with email " + request.targetUserEmail() + " not found"));
+            targetUsers = List.of(targetUser);
+        } else {
+            // Find all active alumni profiles
+            List<AlumniProfile> profiles = profileRepository.findAll().stream()
+                    .filter(p -> p.getUser() != null && p.getUser().getDeletedAt() == null && p.getUser().isEnabled())
+                    .collect(Collectors.toList());
+
+            // Apply filters
+            if (request.department() != null && !request.department().isBlank()) {
+                profiles.removeIf(p -> p.getDepartment() == null || !p.getDepartment().equalsIgnoreCase(request.department()));
+            }
+            if (request.degree() != null && !request.degree().isBlank()) {
+                profiles.removeIf(p -> p.getDegree() == null || !p.getDegree().equalsIgnoreCase(request.degree()));
+            }
+            if (request.specialization() != null && !request.specialization().isBlank()) {
+                profiles.removeIf(p -> p.getSpecialization() == null || !p.getSpecialization().equalsIgnoreCase(request.specialization()));
+            }
+            if (request.graduationYear() != null) {
+                profiles.removeIf(p -> p.getGraduationYear() == null || !p.getGraduationYear().equals(request.graduationYear()));
+            }
+
+            // Extract users from the filtered profiles
+            targetUsers = profiles.stream().map(AlumniProfile::getUser).distinct().collect(Collectors.toList());
+        }
+
+        int count = 0;
+        for (User user : targetUsers) {
+            if (user.getEmail() != null) {
+                // Personalize the email slightly if needed, or just send the raw body
+                String personalizedBody = request.body().replace("{{firstName}}", user.getFirstName() != null ? user.getFirstName() : "Alumni");
+                emailService.sendEmail(user.getEmail(), request.subject(), personalizedBody);
+                count++;
+            }
+        }
+
+        log.info("Finished bulk email dispatch. Sent to {} users.", count);
+        return count;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

@@ -18,10 +18,17 @@ const DEGREE_OPTIONS = [
     'M.Sc', 'MCA', 'MBA', 'Ph.D', 'Other',
 ].map((v) => ({ value: v, label: v }));
 
-const YEAR_OPTIONS = Array.from({ length: 40 }, (_, i) => {
-    const y = new Date().getFullYear() - i;
-    return { value: y, label: String(y) };
-});
+export const DEPARTMENT_OPTIONS = [
+    'Computer Science', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering',
+    'Electronics and Communication', 'Information Technology', 'Chemical Engineering',
+    'Aerospace Engineering', 'Bio-Technology', 'Business Administration', 'Physics', 'Mathematics', 'Other'
+].map(v => ({ value: v, label: v }));
+
+export const SPECIALIZATION_OPTIONS = [
+    'Artificial Intelligence', 'Data Science', 'Machine Learning', 'Cyber Security',
+    'Cloud Computing', 'Software Engineering', 'Structural Engineering', 'Robotics',
+    'Power Systems', 'Finance', 'Marketing', 'Human Resources', 'Operations', 'Other'
+].map(v => ({ value: v, label: v }));
 
 type Section = 'personal' | 'academic' | 'professional' ;
 
@@ -276,7 +283,7 @@ export const ProfilePage: React.FC = () => {
                         display: 'flex',
                         gap: 4,
                         overflowX: 'auto',
-                        background: 'var(--bg-dark)', /* Swapped from hardcoded opacity to standard var */
+                        background: 'var(--bg-dark)',
                         borderRadius: '4px'
                     }}
                 >
@@ -342,11 +349,10 @@ export const ProfilePage: React.FC = () => {
                         padding: '32px',
                         display: 'flex',
                         flexDirection: 'column',
-                        background: 'var(--bg-panel)' /* Replaced hardcoded rgba(10, 11, 14, 0.6) */
+                        background: 'var(--bg-panel)'
                     }}
                 >
                     <div style={{ flex: 1 }}>
-                        {/* Heading updated: Larger font, var(--text-primary) color, and bold */}
                         <div style={{
                             fontFamily: 'Orbitron, monospace',
                             fontSize: '16px',
@@ -363,7 +369,6 @@ export const ProfilePage: React.FC = () => {
 
                         {activeSection === 'personal' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                                {/* Photo Upload — only shown in personal section */}
                                 <PhotoUpload
                                     currentUrl={profile?.profilePhotoUrl}
                                     userId={user?.id ?? 'XX'}
@@ -391,14 +396,14 @@ export const ProfilePage: React.FC = () => {
                         {activeSection === 'academic' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                                    <Input label="Student ID/ Employee ID" value={form.studentId ?? ''} onChange={setStr('studentId')} />
-                                    <Select label="Graduation Year" value={form.graduationYear ?? ''} onChange={setNum('graduationYear')} options={YEAR_OPTIONS} />
+                                    <Input label="Student ID" value={form.studentId ?? ''} onChange={setStr('studentId')} />
+                                    <Input label="Graduation Year" type="number" placeholder="YYYY" value={form.graduationYear ?? ''} onChange={setNum('graduationYear')} />
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                                    <Select label="Degree" value={form.degree ?? ''} onChange={setStr('degree')} options={DEGREE_OPTIONS} />
-                                    <Input label="Department" value={form.department ?? ''} onChange={setStr('department')} />
+                                    <Select label="Degree" value={form.degree ?? ''} onChange={setStr('degree')} options={DEGREE_OPTIONS} placeholder="Select Degree" />
+                                    <Select label="Department" value={form.department ?? ''} onChange={setStr('department')} options={DEPARTMENT_OPTIONS} placeholder="Select Department" />
                                 </div>
-                                <Input label="Specialization" value={form.specialization ?? ''} onChange={setStr('specialization')} />
+                                <Select label="Specialization" value={form.specialization ?? ''} onChange={setStr('specialization')} options={SPECIALIZATION_OPTIONS} placeholder="Select Specialization" />
                             </div>
                         )}
 

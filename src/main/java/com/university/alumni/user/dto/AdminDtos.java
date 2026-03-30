@@ -41,4 +41,17 @@ public final class AdminDtos {
     public record LockAccountRequest(
             boolean lock   // true = lock, false = unlock
     ) {}
+
+    // ── Targeted Bulk Email Request ───────────────────────────────────────────
+    public record BulkEmailRequest(
+            @NotBlank(message = "Subject is required") String subject,
+            @NotBlank(message = "Body is required") String body,
+
+            // Optional filters to target specific alumni
+            String department,
+            String degree,
+            String specialization,
+            Integer graduationYear,
+            String targetUserEmail // Send to one specific user by email if provided
+    ) {}
 }

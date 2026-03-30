@@ -1,0 +1,173 @@
+import React, { useState } from 'react';
+// @ts-ignore
+import { adminApi } from '../../lib/api';
+import { Button, Alert, Input, Select, Textarea } from '../../components/ui';
+import { DEPARTMENT_OPTIONS, SPECIALIZATION_OPTIONS } from '../profile/ProfilePage';
+
+export const AdminEmailPage: React.FC = () => {
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+
+    const [emailForm, setEmailForm] = useState({
+        subject: '',
+        body: 'Hello {{firstName}},\n\n',
+        department: '',
+        degree: '',
+        specialization: '',
+        graduationYear: '',
+        targetUserEmail: ''
+    });
+    const [sendingEmail, setSendingEmail] = useState(false);
+
+    const showSuccess = (msg: string) => {
+        setSuccess(msg);
+        setTimeout(() => setSuccess(''), 4000);
+    };
+
+    const showError = (msg: string) => {
+        setError(msg);
+        setTimeout(() => setError(''), 4000);
+    };
+
+    const handleSendBulkEmail = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!emailForm.subject.trim() || !emailForm.body.trim()) {
+            showError('Subject and Body are required.');
+            return;
+        }
+
+        setSendingEmail(true);
+        const payload = {
+            subject: emailForm.subject,
+            body: emailForm.body,
+            department: emailForm.department || undefined,
+            degree: emailForm.degree || undefined,
+            specialization: emailForm.specialization || undefined,
+            graduationYear: emailForm.graduationYear ? Number(emailForm.graduationYear) : undefined,
+            targetUserEmail: emailForm.targetUserEmail.trim() || undefined
+        };
+
+        // @ts-ignore
+        const res = await adminApi.sendTargetedEmail(payload);
+        if (res.success) {
+            showSuccess(res.data || 'Emails dispatched successfully.');
+            setEmailForm({ ...emailForm, subject: '', body: 'Hello {{firstName}},\n\n', targetUserEmail: '' });
+        } else {
+            showError(res.error?.message || 'Failed to dispatch emails.');
+        }
+        setSendingEmail(false);
+    };
+
+    const DEGREE_OPTIONS = [
+        'B.Tech', 'B.E.', 'B.Sc', 'BCA', 'M.Tech', 'M.E.',
+        'M.Sc', 'MCA', 'MBA', 'Ph.D', 'Other',
+    ].map((v) => ({ value: v, label: v }));
+
+    return (
+        <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
+            {/* ── Header ── */}
+            <div style={{ flexShrink: 0 }}>
+                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.15em', marginBottom: 6 }}>
+                    ADMIN_CONSOLE
+                </div>
+                <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
+                    Broadcast Email
+                </h1>
+            </div>
+
+            {/* ── Alerts ── */}
+            {success && <Alert type="success" onClose={() => setSuccess('')} style={{ flexShrink: 0 }}>{success}</Alert>}
+            {error   && <Alert type="error"   onClose={() => setError('')}   style={{ flexShrink: 0 }}>{error}</Alert>}
+
+            {/* ── Content ── */}
+            <div className="cp-panel" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '32px' }}>
+                <div style={{ marginBottom: '24px' }}>
+                    <h2 style={{ color: 'var(--neon-cyan)', fontFamily: 'Orbitron, monospace', fontSize: '18px', marginBottom: '8px' }}>Targeted Communications Engine</h2>
+                    <p style={{ color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
+                        Dispatch bulk emails to specific alumni cohorts based on their profile data. Leave filters blank to send to ALL enabled alumni users.
+                    </p>
+                </div>
+
+                <form onSubmit={handleSendBulkEmail} style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
+
+                    <div style={{ background: 'var(--bg-dark)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                        <h3 style={{ color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'Orbitron, monospace', marginBottom: '16px' }}>Target Selection</h3>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
+                            <Input
+                                label="Direct To User Email (Overrides other filters)"
+                                type="email"
+                                placeholder="E.g. user@example.com"
+                                value={emailForm.targetUserEmail}
+                                onChange={(e) => setEmailForm({...emailForm, targetUserEmail: e.target.value})}
+                            />
+                            <Input
+                                label="Graduation Year"
+                                type="number"
+                                placeholder="E.g. 2026"
+                                value={emailForm.graduationYear}
+                                onChange={(e) => setEmailForm({...emailForm, graduationYear: e.target.value})}
+                                disabled={!!emailForm.targetUserEmail}
+                            />
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+                            <Select
+                                label="Department"
+                                options={DEPARTMENT_OPTIONS}
+                                placeholder="Any Department"
+                                value={emailForm.department}
+                                onChange={(e) => setEmailForm({...emailForm, department: e.target.value})}
+                                disabled={!!emailForm.targetUserEmail}
+                            />
+                            <Select
+                                label="Degree"
+                                options={DEGREE_OPTIONS}
+                                placeholder="Any Degree"
+                                value={emailForm.degree}
+                                onChange={(e) => setEmailForm({...emailForm, degree: e.target.value})}
+                                disabled={!!emailForm.targetUserEmail}
+                            />
+                            <Select
+                                label="Specialization"
+                                options={SPECIALIZATION_OPTIONS}
+                                placeholder="Any Specialization"
+                                value={emailForm.specialization}
+                                onChange={(e) => setEmailForm({...emailForm, specialization: e.target.value})}
+                                disabled={!!emailForm.targetUserEmail}
+                            />
+                        </div>
+                    </div>
+
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <Input
+                            label="Subject Line"
+                            placeholder="E.g. Invitation to the Annual Department Meetup"
+                            value={emailForm.subject}
+                            onChange={(e) => setEmailForm({...emailForm, subject: e.target.value})}
+                        />
+
+                        <div className="cp-input-wrap" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <label className="cp-label">Email Body (Plain Text)</label>
+                                <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace' }}>Use {'{{firstName}}'} for personalization</span>
+                            </div>
+                            <Textarea
+                                style={{ flex: 1, minHeight: '200px' }}
+                                placeholder={`Hello {{firstName}},\n\nWrite your message here...`}
+                                value={emailForm.body}
+                                onChange={(e) => setEmailForm({...emailForm, body: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', flexShrink: 0 }}>
+                        <Button type="submit" size="lg" loading={sendingEmail} style={{ minWidth: '200px' }}>
+                            DISPATCH MAILS 🚀
+                        </Button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};

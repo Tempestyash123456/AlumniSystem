@@ -74,4 +74,13 @@ public class AdminController {
             @RequestParam boolean enabled) {
         return ResponseEntity.ok(ApiResponse.success(adminService.setAccountEnabled(userId, enabled)));
     }
+
+    // ── Bulk Email Tool ───────────────────────────────────────────────────────
+
+    @PostMapping("/email/send")
+    public ResponseEntity<ApiResponse<String>> sendTargetedEmail(
+            @Valid @RequestBody BulkEmailRequest request) {
+        int emailsSent = adminService.sendTargetedEmails(request);
+        return ResponseEntity.ok(ApiResponse.success("Dispatched " + emailsSent + " emails successfully."));
+    }
 }

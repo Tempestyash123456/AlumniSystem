@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { adminApi } from '../../lib/api.ts';
+// @ts-ignore
+import { adminApi } from '../../lib/api';
 import type { AdminUserDto } from '../../types';
 import { Button, Badge, Spinner, Alert, Confirm, Modal, Input } from '../../components/ui';
+// @ts-ignore
 import { getImageUrl } from '../../lib/api';
 
 export const AdminPage: React.FC = () => {
@@ -29,6 +31,11 @@ export const AdminPage: React.FC = () => {
     const showSuccess = (msg: string) => {
         setSuccess(msg);
         setTimeout(() => setSuccess(''), 4000);
+    };
+
+    const showError = (msg: string) => {
+        setError(msg);
+        setTimeout(() => setError(''), 4000);
     };
 
     const filtered = users.filter((u) => {
@@ -82,7 +89,7 @@ export const AdminPage: React.FC = () => {
             setUsers((prev) => prev.map((u) => (u.id === roleTarget.id ? res.data! : u)));
             showSuccess(`Role assigned`);
         } else {
-            setError(res.error?.message || 'Failed to assign role');
+            showError(res.error?.message || 'Failed to assign role');
         }
         setRoleTarget(null);
         setNewRole('');
@@ -106,9 +113,7 @@ export const AdminPage: React.FC = () => {
         admins: users.filter((u) => u.roles.includes('ROLE_ADMIN')).length,
     };
 
-    // @ts-ignore
     return (
-        // height + minHeight: 0 fills the Layout flex column
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
 
             {/* ── Header ── */}
@@ -120,6 +125,10 @@ export const AdminPage: React.FC = () => {
                     User Management
                 </h1>
             </div>
+
+            {/* ── Alerts ── */}
+            {success && <Alert type="success" onClose={() => setSuccess('')} style={{ flexShrink: 0 }}>{success}</Alert>}
+            {error   && <Alert type="error"   onClose={() => setError('')}   style={{ flexShrink: 0 }}>{error}</Alert>}
 
             {/* ── Stat cards ── */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, flexShrink: 0 }}>
@@ -136,13 +145,8 @@ export const AdminPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* ── Alerts ── */}
-            {success && <Alert type="success" onClose={() => setSuccess('')} style={{ flexShrink: 0 }}>{success}</Alert>}
-            {error   && <Alert type="error"   onClose={() => setError('')}   style={{ flexShrink: 0 }}>{error}</Alert>}
-
             {/* ── Scrollable table panel ── */}
             <div className="cp-panel" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                {/* Search + controls bar — stays fixed */}
                 <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
                     <div style={{ flex: 1, maxWidth: 340 }}>
                         <Input
@@ -158,7 +162,6 @@ export const AdminPage: React.FC = () => {
                     <Button variant="outline" size="sm" onClick={load}>🔄 Refresh</Button>
                 </div>
 
-                {/* Scrollable table body */}
                 <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'auto' }}>
                     {loading ? (
                         <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>

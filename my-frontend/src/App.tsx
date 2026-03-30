@@ -1,5 +1,3 @@
-// my-frontend/src/App.tsx
-
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/authStore.ts';
@@ -14,11 +12,12 @@ import { DashboardPage } from './pages/dashboard/DashboardPage.tsx';
 import { AlumniDirectoryPage, AlumniProfileViewPage } from './pages/alumni/AlumniDirectory.tsx';
 import { ProfilePage } from './pages/profile/ProfilePage.tsx';
 import { AdminPage } from './pages/admin/AdminPage.tsx';
+import { AdminEmailPage } from './pages/admin/AdminEmailPage.tsx';
 import { PostsPage } from './pages/admin/PostsPage.tsx';
 import { EventsPage } from './pages/admin/EventsPage.tsx';
 import { PostsFeedPage } from './pages/posts/PostsFeedPage.tsx';
+import { AlumniEventsPage } from './pages/alumni/AlumniEventsPage.tsx';
 import { OAuth2Callback } from './pages/auth/OAuth2Callback.tsx';
-import { AlumniEventsPage } from './pages/alumni/AlumniEventsPage';
 
 // ── Guards ──────────────────────────────────────────────────────────────────
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -43,14 +42,10 @@ const RedirectIfAuth: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 // ── Bootstrap ────────────────────────────────────────────────────────────────
-// Runs once on every hard load. If a token exists (persisted or just set by
-// OAuth2Callback), it fetches /me and populates the user, then calls onDone.
 const AppBootstrap: React.FC<{ onDone: () => void }> = ({ onDone }) => {
     const { setUser, clearAuth } = useAuthStore();
 
     useEffect(() => {
-        // If this is the OAuth callback page, the token isn't in storage yet.
-        // OAuth2Callback will handle it — skip bootstrap entirely.
         if (window.location.pathname === '/oauth2/callback') {
             onDone();
             return;
@@ -82,8 +77,6 @@ const AppBootstrap: React.FC<{ onDone: () => void }> = ({ onDone }) => {
 const App: React.FC = () => {
     const [booting, setBooting] = useState(true);
 
-    // Always show loader + run bootstrap until /me resolves.
-    // This covers both normal page load AND the OAuth2 redirect land.
     if (booting) {
         return (
             <BrowserRouter>
@@ -108,7 +101,7 @@ const App: React.FC = () => {
                 <Route path="/dashboard"    element={<RequireAuth><Layout><DashboardPage /></Layout></RequireAuth>} />
                 <Route path="/profile"      element={<RequireAuth><Layout><ProfilePage /></Layout></RequireAuth>} />
                 <Route path="/posts"        element={<RequireAuth><Layout><PostsFeedPage /></Layout></RequireAuth>} />
-                <Route path="/events"        element={<RequireAuth><Layout><AlumniEventsPage /></Layout></RequireAuth>} />
+                <Route path="/events"       element={<RequireAuth><Layout><AlumniEventsPage /></Layout></RequireAuth>} />
 
                 {/* Alumni directory */}
                 <Route path="/alumni"         element={<RequireAuth><Layout><AlumniDirectoryPage /></Layout></RequireAuth>} />
@@ -116,6 +109,7 @@ const App: React.FC = () => {
 
                 {/* Admin-only */}
                 <Route path="/admin"       element={<RequireAdmin><Layout><AdminPage /></Layout></RequireAdmin>} />
+                <Route path="/admin/email" element={<RequireAdmin><Layout><AdminEmailPage /></Layout></RequireAdmin>} />
                 <Route path="/admin/posts" element={<RequireAdmin><Layout><PostsPage /></Layout></RequireAdmin>} />
                 <Route path="/admin/events" element={<RequireAdmin><Layout><EventsPage /></Layout></RequireAdmin>} />
 
