@@ -5,6 +5,7 @@ import com.university.alumni.user.entity.Role;
 import com.university.alumni.user.entity.User;
 import com.university.alumni.user.repository.RoleRepository;
 import com.university.alumni.user.repository.UserRepository;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +57,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String accessToken = jwtService.generateAccessToken(user);
 
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/oauth2/callback")
+        String baseUrl = request.getScheme() + "://" + request.getServerName();
+        if (request.getServerPort() != 80 && request.getServerPort() != 443) {
+            baseUrl += ":" + request.getServerPort();
+        }
+
+        String targetUrl = UriComponentsBuilder.fromUriString(baseUrl + "/oauth2/callback")
                 .queryParam("token", accessToken)
                 .build().toUriString();
 

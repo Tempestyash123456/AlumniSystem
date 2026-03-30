@@ -1,12 +1,7 @@
 version: '3.9'
 
-# ── Local development infrastructure ─────────────────────────────────────────
-# Run: docker-compose up -d
-# Stop: docker-compose down
-# Nuke volumes: docker-compose down -v
-
 services:
-
+  # ── Core Infrastructure ───────────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: alumni_postgres
@@ -40,6 +35,47 @@ services:
       retries: 5
     restart: unless-stopped
 
+  # ── Application Services ──────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alumni_backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/alumni_dev
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - FRONTEND_URL=http://localhost
+      - APP_CORS_ALLOWED_ORIGINS=http://localhost,http://localhost:5173
+      - APP_UPLOAD_DIR=/app/uploads
+      - SERVER_FORWARD_HEADERS_STRATEGY=framework
+    ports:
+      # Optional: Map backend port directly on host for testing API explicitly
+      - "8080:8080"
+    volumes:
+      - alumni_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./my-frontend
+      dockerfile: Dockerfile
+    container_name: alumni_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # ── Optional GUIs ─────────────────────────────────────────────────────────
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: alumni_pgadmin
@@ -53,7 +89,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # ── Optional: Redis Commander (Redis GUI) ────────────────────────────────
   redis-commander:
     image: rediscommander/redis-commander:latest
     container_name: alumni_redis_commander
@@ -69,3 +104,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  alumni_uploads:

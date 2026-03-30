@@ -3,7 +3,7 @@ import { postsApi } from '../../lib/api';
 import type { PostDto } from '../../types';
 import { Button, Alert, Input, Spinner, Confirm, Modal } from '../../components/ui';
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = '';
 
 // ── Minimal Markdown Renderer ─────────────────────────────────────────────────
 const renderMarkdown = (md: string): string => {
@@ -333,8 +333,8 @@ export const PostsPage: React.FC = () => {
             </div>
 
             {/* ── Alerts ── */}
-            {success && <Alert type="success" onClose={() => setSuccess('')} style={{ flexShrink: 0 }}>{success}</Alert>}
-            {error   && <Alert type="error"   onClose={() => setError('')}   style={{ flexShrink: 0 }}>{error}</Alert>}
+            {success && <div style={{ flexShrink: 0 }}><Alert type="success" onClose={() => setSuccess('')}>{success}</Alert></div>}
+            {error   && <div style={{ flexShrink: 0 }}><Alert type="error"   onClose={() => setError('')}>{error}</Alert></div>}
 
             {/* ── Search ── */}
             <div style={{ maxWidth: 380, flexShrink: 0 }}>

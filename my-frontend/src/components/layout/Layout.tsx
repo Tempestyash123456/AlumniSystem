@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { authApi, tokenStorage } from '../../lib/api';
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = '';
 
 interface LayoutProps {
     children: React.ReactNode;

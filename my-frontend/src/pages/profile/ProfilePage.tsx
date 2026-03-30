@@ -5,7 +5,7 @@ import type { ProfileResponse, UpdateProfileRequest } from '../../types';
 // @ts-ignore
 import { Input, Textarea, Select, Button, Alert, ProgressBar, Toggle, SkillsInput, Spinner } from '../../components/ui';
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = '';
 
 // --- Static options ---
 const INDUSTRY_OPTIONS = [
@@ -30,12 +30,12 @@ export const SPECIALIZATION_OPTIONS = [
     'Power Systems', 'Finance', 'Marketing', 'Human Resources', 'Operations', 'Other'
 ].map(v => ({ value: v, label: v }));
 
-type Section = 'personal' | 'academic' | 'professional' ;
+type Section = 'personal' | 'academic' | 'professional';
 
 const SECTIONS: { id: Section; label: string; icon: string }[] = [
-    { id: 'personal',     label: 'PERSONAL',     icon: '👤' },
-    { id: 'academic',     label: 'ACADEMIC',      icon: '🎓' },
-    { id: 'professional', label: 'PROFESSIONAL',  icon: '💼' },
+    { id: 'personal', label: 'PERSONAL', icon: '👤' },
+    { id: 'academic', label: 'ACADEMIC', icon: '🎓' },
+    { id: 'professional', label: 'PROFESSIONAL', icon: '💼' },
 ];
 
 // ── Photo Upload Section ──────────────────────────────────────────────────────
@@ -46,7 +46,7 @@ const PhotoUpload: React.FC<{
 }> = ({ currentUrl, userId, onSuccess }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
-    const [error, setError]         = useState('');
+    const [error, setError] = useState('');
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     const displayUrl = previewUrl
@@ -58,7 +58,7 @@ const PhotoUpload: React.FC<{
 
     const handleFile = async (file: File) => {
         if (!file.type.startsWith('image/')) { setError('Only image files allowed'); return; }
-        if (file.size > 5 * 1024 * 1024)   { setError('File exceeds 5 MB'); return; }
+        if (file.size > 5 * 1024 * 1024) { setError('File exceeds 5 MB'); return; }
 
         // Optimistic preview
         const objectUrl = URL.createObjectURL(file);
@@ -96,8 +96,8 @@ const PhotoUpload: React.FC<{
                     }}>
                         {displayUrl ? (
                             <img src={displayUrl} alt="Profile"
-                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
                         ) : (
                             <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '24px', fontWeight: 700, color: 'var(--bg-void)' }}>
@@ -131,10 +131,10 @@ const PhotoUpload: React.FC<{
                         </Button>
                         {(currentUrl || previewUrl) && !uploading && (
                             <Button variant="ghost" size="sm"
-                                    onClick={() => {
-                                        setPreviewUrl(null);
-                                        onSuccess('');
-                                    }}
+                                onClick={() => {
+                                    setPreviewUrl(null);
+                                    onSuccess('');
+                                }}
                             >
                                 Remove
                             </Button>
@@ -167,10 +167,10 @@ const PhotoUpload: React.FC<{
 export const ProfilePage: React.FC = () => {
     const { user, updateUser } = useAuthStore();
     const [profile, setProfile] = useState<ProfileResponse | null>(null);
-    const [loading, setLoading]   = useState(true);
-    const [saving, setSaving]      = useState(false);
-    const [success, setSuccess]   = useState('');
-    const [error, setError]       = useState('');
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [success, setSuccess] = useState('');
+    const [error, setError] = useState('');
     const [activeSection, setActiveSection] = useState<Section>('personal');
     const [form, setForm] = useState<UpdateProfileRequest>({});
 
@@ -180,30 +180,30 @@ export const ProfilePage: React.FC = () => {
         if (res.data) {
             setProfile(res.data);
             setForm({
-                firstName:       res.data.firstName,
-                lastName:        res.data.lastName,
-                phone:           res.data.phone           ?? '',
-                bio:             res.data.bio             ?? '',
-                city:            res.data.city            ?? '',
-                state:           res.data.state           ?? '',
-                country:         res.data.country         ?? '',
-                dateOfBirth:     res.data.dateOfBirth     ?? '',
-                studentId:       res.data.studentId       ?? '',
-                graduationYear:  res.data.graduationYear  ?? undefined,
-                degree:          res.data.degree          ?? '',
-                department:      res.data.department      ?? '',
-                specialization:  res.data.specialization  ?? '',
+                firstName: res.data.firstName,
+                lastName: res.data.lastName,
+                phone: res.data.phone ?? '',
+                bio: res.data.bio ?? '',
+                city: res.data.city ?? '',
+                state: res.data.state ?? '',
+                country: res.data.country ?? '',
+                dateOfBirth: res.data.dateOfBirth ?? '',
+                studentId: res.data.studentId ?? '',
+                graduationYear: res.data.graduationYear ?? undefined,
+                degree: res.data.degree ?? '',
+                department: res.data.department ?? '',
+                specialization: res.data.specialization ?? '',
                 currentJobTitle: res.data.currentJobTitle ?? '',
-                currentCompany:  res.data.currentCompany  ?? '',
-                industry:        res.data.industry        ?? '',
+                currentCompany: res.data.currentCompany ?? '',
+                industry: res.data.industry ?? '',
                 experienceYears: res.data.experienceYears ?? undefined,
-                linkedinUrl:     res.data.linkedinUrl     ?? '',
-                githubUrl:       res.data.githubUrl       ?? '',
-                portfolioUrl:    res.data.portfolioUrl    ?? '',
-                skills:          res.data.skills          ?? [],
-                profilePublic:   res.data.profilePublic,
-                openToMentor:    res.data.openToMentor,
-                openToHire:      res.data.openToHire,
+                linkedinUrl: res.data.linkedinUrl ?? '',
+                githubUrl: res.data.githubUrl ?? '',
+                portfolioUrl: res.data.portfolioUrl ?? '',
+                skills: res.data.skills ?? [],
+                profilePublic: res.data.profilePublic,
+                openToMentor: res.data.openToMentor,
+                openToHire: res.data.openToHire,
             });
         }
         setLoading(false);
@@ -272,7 +272,7 @@ export const ProfilePage: React.FC = () => {
                 </div>
 
                 {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
-                {error   && <Alert type="error"   onClose={() => setError('')}>{error}</Alert>}
+                {error && <Alert type="error" onClose={() => setError('')}>{error}</Alert>}
 
                 {/* HORIZONTAL NAVIGATION */}
                 <div
@@ -380,7 +380,7 @@ export const ProfilePage: React.FC = () => {
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <Input label="First Name" value={form.firstName ?? ''} onChange={setStr('firstName')} />
-                                    <Input label="Last Name"  value={form.lastName  ?? ''} onChange={setStr('lastName')} />
+                                    <Input label="Last Name" value={form.lastName ?? ''} onChange={setStr('lastName')} />
                                 </div>
                                 <Input label="Phone" value={form.phone ?? ''} onChange={setStr('phone')} />
                                 <Textarea label="Bio" value={form.bio ?? ''} onChange={setStr('bio')} />
@@ -396,7 +396,7 @@ export const ProfilePage: React.FC = () => {
                         {activeSection === 'academic' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                                    <Input label="Student ID" value={form.studentId ?? ''} onChange={setStr('studentId')} />
+                                    <Input label="Student ID/ Employee ID" value={form.studentId ?? ''} onChange={setStr('studentId')} />
                                     <Input label="Graduation Year" type="number" placeholder="YYYY" value={form.graduationYear ?? ''} onChange={setNum('graduationYear')} />
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>

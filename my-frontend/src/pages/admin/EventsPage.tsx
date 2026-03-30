@@ -4,7 +4,7 @@ import { eventsApi, getImageUrl } from '../../lib/api';
 import type { EventDto } from '../../types';
 import { Button, Alert, Input, Spinner, Confirm, Modal } from '../../components/ui';
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = '';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const fmtDate = (iso: string) =>

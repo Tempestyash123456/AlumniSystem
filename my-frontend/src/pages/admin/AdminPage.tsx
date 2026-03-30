@@ -127,8 +127,8 @@ export const AdminPage: React.FC = () => {
             </div>
 
             {/* ── Alerts ── */}
-            {success && <Alert type="success" onClose={() => setSuccess('')} style={{ flexShrink: 0 }}>{success}</Alert>}
-            {error   && <Alert type="error"   onClose={() => setError('')}   style={{ flexShrink: 0 }}>{error}</Alert>}
+            {success && <div style={{ flexShrink: 0 }}><Alert type="success" onClose={() => setSuccess('')}>{success}</Alert></div>}
+            {error   && <div style={{ flexShrink: 0 }}><Alert type="error"   onClose={() => setError('')}>{error}</Alert></div>}
 
             {/* ── Stat cards ── */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, flexShrink: 0 }}>

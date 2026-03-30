@@ -3,7 +3,7 @@ import type {
     UpdateProfileRequest, AdminUserListResponse, AdminUserDto, AlumniDto, PostDto, EventDto
 } from '../types';
 
-const BASE_URL = 'http://localhost:8080/api/v1';
+const BASE_URL = '/api/v1';
 
 export const tokenStorage = {
     getAccess: () => localStorage.getItem('accessToken'),
@@ -179,5 +179,5 @@ export const eventsApi = {
 export const getImageUrl = (path: string | null | undefined) => {
     if (!path) return null;
     if (path.startsWith('http')) return path;
-    return `http://localhost:8080${path}`;
+    return path;
 };
