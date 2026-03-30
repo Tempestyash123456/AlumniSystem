@@ -106,6 +106,7 @@ export const AdminPage: React.FC = () => {
         admins: users.filter((u) => u.roles.includes('ROLE_ADMIN')).length,
     };
 
+    // @ts-ignore
     return (
         // height + minHeight: 0 fills the Layout flex column
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>

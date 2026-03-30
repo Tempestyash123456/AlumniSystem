@@ -49,6 +49,57 @@ public class FileStorageService {
         return store(file, dir, filename, "/uploads/posts/");
     }
 
+    // ── ADD these two methods inside FileStorageService.java ──────────────────────
+// Place them after the existing storePostImage() method.
+
+    // ── Event Media (image OR video) ──────────────────────────────────────────
+
+    public String storeEventMedia(MultipartFile file) {
+        // Allow images and common video types
+        List<String> allowed = List.of(
+                "image/jpeg", "image/png", "image/webp", "image/gif",
+                "video/mp4", "video/webm", "video/ogg", "video/quicktime"
+        );
+        long maxSize = 100L * 1024 * 1024; // 100 MB for video
+
+        if (file == null || file.isEmpty())
+            throw new IllegalArgumentException("File is empty");
+        if (!allowed.contains(file.getContentType()))
+            throw new IllegalArgumentException("File type not allowed: " + file.getContentType());
+        if (file.getSize() > maxSize)
+            throw new IllegalArgumentException("File exceeds 100 MB limit");
+
+        String ext      = getExtension(file.getOriginalFilename());
+        String filename = "event_media_" + UUID.randomUUID() + ext;
+        Path   dir      = Paths.get(uploadDir, "events", "media");
+        return store(file, dir, filename, "/uploads/events/media/");
+    }
+
+    // ── Event Documents (PDF / DOCX / PPTX) ──────────────────────────────────
+
+    public String storeEventDocument(MultipartFile file) {
+        List<String> allowed = List.of(
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/vnd.ms-powerpoint",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        );
+        long maxSize = 50L * 1024 * 1024; // 50 MB
+
+        if (file == null || file.isEmpty())
+            throw new IllegalArgumentException("File is empty");
+        if (!allowed.contains(file.getContentType()))
+            throw new IllegalArgumentException("Document type not allowed: " + file.getContentType());
+        if (file.getSize() > maxSize)
+            throw new IllegalArgumentException("Document exceeds 50 MB limit");
+
+        String ext      = getExtension(file.getOriginalFilename());
+        String filename = "event_doc_" + UUID.randomUUID() + ext;
+        Path   dir      = Paths.get(uploadDir, "events", "docs");
+        return store(file, dir, filename, "/uploads/events/docs/");
+    }
+
     // ── Internal ──────────────────────────────────────────────────────────────
 
     private String store(MultipartFile file, Path dir, String filename, String urlPrefix) {

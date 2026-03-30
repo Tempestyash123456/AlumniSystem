@@ -1,6 +1,6 @@
 import type {
     ApiResponse, AuthResponse, UserInfo, ProfileResponse,
-    UpdateProfileRequest, AdminUserListResponse, AdminUserDto, AlumniDto, PostDto
+    UpdateProfileRequest, AdminUserListResponse, AdminUserDto, AlumniDto, PostDto, EventDto
 } from '../types';
 
 const BASE_URL = 'http://localhost:8080/api/v1';
@@ -47,7 +47,6 @@ async function apiFetch<T>(
     const headers: Record<string, string> = {
         ...(options.headers as Record<string, string>),
     };
-    // Only set Content-Type for non-FormData requests
     if (!(options.body instanceof FormData)) {
         headers['Content-Type'] = 'application/json';
     }
@@ -142,8 +141,41 @@ export const postsApi = {
     delete: (postId: string) => apiFetch<void>(`/posts/${postId}`, { method: 'DELETE' }),
 };
 
+export const eventsApi = {
+    getAll: () => apiFetch<EventDto[]>('/events'),
+
+    getOne: (id: string) => apiFetch<EventDto>(`/events/${id}`),
+
+    create: (
+        data: { name: string; startTime: string; endTime?: string | null; place: string; description?: string | null },
+        media?: File | null,
+        document?: File | null
+    ) => {
+        const form = new FormData();
+        form.append('data', JSON.stringify(data));
+        if (media)    form.append('media',    media);
+        if (document) form.append('document', document);
+        return apiFetch<EventDto>('/events', { method: 'POST', body: form });
+    },
+
+    update: (
+        id: string,
+        data: { name?: string; startTime?: string; endTime?: string | null; place?: string; description?: string | null },
+        media?: File | null,
+        document?: File | null
+    ) => {
+        const form = new FormData();
+        form.append('data', JSON.stringify(data));
+        if (media)    form.append('media',    media);
+        if (document) form.append('document', document);
+        return apiFetch<EventDto>(`/events/${id}`, { method: 'PUT', body: form });
+    },
+
+    delete: (id: string) => apiFetch<void>(`/events/${id}`, { method: 'DELETE' }),
+};
+
 export const getImageUrl = (path: string | null | undefined) => {
     if (!path) return null;
-    if (path.startsWith('http')) return path; // Already absolute
+    if (path.startsWith('http')) return path;
     return `http://localhost:8080${path}`;
 };

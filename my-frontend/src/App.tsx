@@ -15,6 +15,7 @@ import { AlumniDirectoryPage, AlumniProfileViewPage } from './pages/alumni/Alumn
 import { ProfilePage } from './pages/profile/ProfilePage.tsx';
 import { AdminPage } from './pages/admin/AdminPage.tsx';
 import { PostsPage } from './pages/admin/PostsPage.tsx';
+import { EventsPage } from './pages/admin/EventsPage.tsx';
 import { PostsFeedPage } from './pages/posts/PostsFeedPage.tsx';
 import { OAuth2Callback } from './pages/auth/OAuth2Callback.tsx';
 
@@ -114,6 +115,7 @@ const App: React.FC = () => {
                 {/* Admin-only */}
                 <Route path="/admin"       element={<RequireAdmin><Layout><AdminPage /></Layout></RequireAdmin>} />
                 <Route path="/admin/posts" element={<RequireAdmin><Layout><PostsPage /></Layout></RequireAdmin>} />
+                <Route path="/admin/events" element={<RequireAdmin><Layout><EventsPage /></Layout></RequireAdmin>} />
 
                 {/* Fallbacks */}
                 <Route path="/"  element={<Navigate to="/dashboard" replace />} />

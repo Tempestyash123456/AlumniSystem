@@ -139,3 +139,21 @@ export interface PostDto {
     createdAt: string;
     updatedAt: string;
 }
+
+// -- Events ---------------------------------------------------------------------
+export interface EventDto {
+    id: string;
+    name: string;
+    startTime: string;        // ISO string
+    endTime?: string;         // ISO string, optional
+    place: string;
+    description?: string;     // Raw Markdown, optional
+    mediaUrl?: string;        // Relative or absolute URL
+    mediaType?: string;       // "IMAGE" | "VIDEO"
+    documentUrl?: string;     // Relative URL
+    documentName?: string;    // Original filename
+    authorFirstName: string;
+    authorLastName: string;
+    createdAt: string;
+    updatedAt: string;
+}
