@@ -236,7 +236,8 @@ export const Modal: React.FC<ModalProps> = ({ open, title, onClose, children, wi
                         justifyContent: 'space-between',
                     }}
                 >
-                    <h3 style={{ fontSize: '14px', color: 'var(--neon-cyan)', letterSpacing: '0.08em' }}>
+                    {/* Controlled by CSS variable now */}
+                    <h3 style={{ fontSize: '16px', color: 'var(--modal-title-color)', letterSpacing: '0.08em', transition: 'color 0.25s' }}>
                         {title}
                     </h3>
                     <button

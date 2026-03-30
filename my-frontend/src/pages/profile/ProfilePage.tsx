@@ -276,7 +276,7 @@ export const ProfilePage: React.FC = () => {
                         display: 'flex',
                         gap: 4,
                         overflowX: 'auto',
-                        background: 'rgba(0,0,0,0.3)',
+                        background: 'var(--bg-dark)', /* Swapped from hardcoded opacity to standard var */
                         borderRadius: '4px'
                     }}
                 >
@@ -342,11 +342,22 @@ export const ProfilePage: React.FC = () => {
                         padding: '32px',
                         display: 'flex',
                         flexDirection: 'column',
-                        background: 'rgba(10, 11, 14, 0.6)'
+                        background: 'var(--bg-panel)' /* Replaced hardcoded rgba(10, 11, 14, 0.6) */
                     }}
                 >
                     <div style={{ flex: 1 }}>
-                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 32, display: 'flex', alignItems: 'center', gap: 10 }}>
+                        {/* Heading updated: Larger font, var(--text-primary) color, and bold */}
+                        <div style={{
+                            fontFamily: 'Orbitron, monospace',
+                            fontSize: '16px',
+                            color: 'var(--text-primary)',
+                            fontWeight: 'bold',
+                            letterSpacing: '0.15em',
+                            marginBottom: 32,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 10
+                        }}>
                             <span style={{ color: 'var(--neon-cyan)', textShadow: '0 0 5px var(--neon-cyan)' }}>◈</span> {activeSection.toUpperCase()}_DATA
                         </div>
 
@@ -380,7 +391,7 @@ export const ProfilePage: React.FC = () => {
                         {activeSection === 'academic' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                                    <Input label="Student ID" value={form.studentId ?? ''} onChange={setStr('studentId')} />
+                                    <Input label="Student ID/ Employee ID" value={form.studentId ?? ''} onChange={setStr('studentId')} />
                                     <Select label="Graduation Year" value={form.graduationYear ?? ''} onChange={setNum('graduationYear')} options={YEAR_OPTIONS} />
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>

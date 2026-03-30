@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { useThemeStore } from '../../store/themeStore';
 import { authApi, tokenStorage } from '../../lib/api';
 
 const BASE_URL = 'http://localhost:8080';
@@ -11,6 +12,7 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
     const { user, isAdmin, clearAuth } = useAuthStore();
+    const { theme, toggleTheme } = useThemeStore();
     const location = useLocation();
     const navigate = useNavigate();
     const [loggingOut, setLoggingOut] = useState(false);
@@ -33,7 +35,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             : location.pathname === path || location.pathname.startsWith(path + '/');
         return (
             <Link to={path} className={`cp-nav-item ${active ? 'active' : ''}`}>
-                <span style={{ fontSize: 16 }}>{icon}</span>
+                <span style={{ fontSize: 20 }}>{icon}</span>
                 <span style={{ flex: 1 }}>{label}</span>
             </Link>
         );
@@ -41,8 +43,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     const SectionLabel = ({ text }: { text: string }) => (
         <div style={{
-            padding: '24px 12px 8px',
-            fontSize: '9px',
+            padding: '24px 16px 8px',
+            fontSize: '12px',
             fontFamily: 'Orbitron, monospace',
             color: 'var(--text-disabled)',
             letterSpacing: '0.18em',
@@ -54,8 +56,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
     // Avatar initials / photo
     const photoUrl = user?.profilePhotoUrl
         ? user.profilePhotoUrl.startsWith('http')
-            ? user.profilePhotoUrl          // Google / absolute URL — use as-is
-            : `${BASE_URL}${user.profilePhotoUrl}`  // local upload — prepend host
+            ? user.profilePhotoUrl
+            : `${BASE_URL}${user.profilePhotoUrl}`
         : null;
 
     const avatarContent = photoUrl ? (
@@ -66,7 +68,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
     ) : (
-        <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', fontWeight: 700, color: 'var(--bg-void)' }}>
+        <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '14px', fontWeight: 700, color: 'var(--bg-void)' }}>
         {`${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase()}
     </span>
     );
@@ -76,7 +78,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* ── SIDEBAR ────────────────────────────────────────────────── */}
             <aside style={{
-                width: 256,
+                width: 280, /* Widened slightly to fit bigger text */
                 borderRight: '1px solid var(--border-subtle)',
                 display: 'flex',
                 flexDirection: 'column',
@@ -85,17 +87,17 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 overflowY: 'auto',
             }}>
                 {/* Logo */}
-                <div style={{ padding: '28px 20px 20px' }}>
+                <div style={{ padding: '32px 24px 24px' }}>
                     <div style={{
-                        fontFamily: 'Orbitron, monospace', fontSize: '15px', fontWeight: 800,
+                        fontFamily: 'Orbitron, monospace', fontSize: '18px', fontWeight: 800,
                         letterSpacing: '0.12em', color: 'var(--text-primary)',
-                        display: 'flex', alignItems: 'center', gap: 10,
+                        display: 'flex', alignItems: 'center', gap: 12,
                     }}>
                         <div style={{
-                            width: 34, height: 34, flexShrink: 0,
+                            width: 38, height: 38, flexShrink: 0,
                             background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
                             borderRadius: '8px', display: 'grid', placeItems: 'center',
-                            color: '#000', fontSize: '18px', boxShadow: '0 0 12px rgba(0,245,255,0.3)',
+                            color: '#000', fontSize: '22px', boxShadow: '0 0 12px rgba(0,245,255,0.3)',
                         }}>
                             ◈
                         </div>
@@ -104,12 +106,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
 
                 {/* Nav */}
-                <nav style={{ flex: 1, padding: '0 10px' }}>
+                <nav style={{ flex: 1, padding: '0 12px' }}>
                     <SectionLabel text="MAIN" />
                     <NavItem path="/dashboard" icon="⬡" label="Dashboard" exact />
                     <NavItem path="/profile"   icon="◉" label="My Profile" exact />
                     <NavItem path="/posts"     icon="◇" label="Posts" exact />
-                    <NavItem path="/events"     icon="◇" label="Events" exact />
+                    <NavItem path="/events"    icon="◎" label="Events" exact />
 
                     {isAdmin && (
                         <>
@@ -123,16 +125,16 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </nav>
 
                 {/* User pill + logout */}
-                <div style={{ padding: '12px 12px 16px', borderTop: '1px solid var(--border-subtle)' }}>
+                <div style={{ padding: '16px 16px 20px', borderTop: '1px solid var(--border-subtle)' }}>
                     {user && (
                         <div style={{
-                            display: 'flex', alignItems: 'center', gap: 10,
-                            padding: '10px 12px', borderRadius: 6, marginBottom: 10,
+                            display: 'flex', alignItems: 'center', gap: 12,
+                            padding: '12px 14px', borderRadius: 6, marginBottom: 12,
                             background: 'rgba(0,245,255,0.04)',
                             border: '1px solid var(--border-subtle)',
                         }}>
                             <div style={{
-                                width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                                width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
                                 background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 overflow: 'hidden',
@@ -142,14 +144,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{
-                                    fontFamily: 'Rajdhani, sans-serif', fontSize: '13px', fontWeight: 600,
+                                    fontFamily: 'Rajdhani, sans-serif', fontSize: '16px', fontWeight: 600,
                                     color: 'var(--text-primary)',
                                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                                 }}>
                                     {user.firstName} {user.lastName}
                                 </div>
                                 <div style={{
-                                    fontFamily: 'Share Tech Mono, monospace', fontSize: '9px',
+                                    fontFamily: 'Share Tech Mono, monospace', fontSize: '11px',
                                     color: isAdmin ? 'var(--neon-pink)' : 'var(--neon-cyan)',
                                     letterSpacing: '0.08em',
                                 }}>
@@ -162,7 +164,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                         onClick={handleLogout}
                         disabled={loggingOut}
                         className="cp-btn cp-btn-ghost cp-btn-sm"
-                        style={{ width: '100%', justifyContent: 'flex-start', gap: 10 }}
+                        style={{ width: '100%', justifyContent: 'flex-start', gap: 10, fontSize: '14px' }}
                     >
                         <span>⏻</span> {loggingOut ? 'Logging out...' : 'Logout'}
                     </button>
@@ -176,15 +178,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             }}>
                 {/* Top bar */}
                 <header style={{
-                    height: 60, padding: '0 28px',
+                    height: 68, padding: '0 32px',
                     display: 'flex', alignItems: 'center',
                     borderBottom: '1px solid var(--border-subtle)',
-                    background: 'rgba(10, 11, 14, 0.85)',
+                    background: 'var(--header-bg)',
                     backdropFilter: 'blur(8px)',
                     zIndex: 10, flexShrink: 0,
                 }}>
                     <div style={{
-                        fontFamily: 'Share Tech Mono, monospace', fontSize: '11px',
+                        fontFamily: 'Share Tech Mono, monospace', fontSize: '14px',
                         color: 'var(--text-muted)', letterSpacing: '0.05em',
                     }}>
                         <span style={{ color: 'var(--neon-cyan)' }}>SYS</span>
@@ -195,24 +197,38 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                             .map(s => s.toUpperCase())
                             .join(' › ') || 'DASHBOARD'}
                     </div>
-                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{
-                            width: 7, height: 7, borderRadius: '50%',
-                            background: 'var(--neon-green)',
-                            boxShadow: '0 0 6px var(--neon-green)',
-                            animation: 'pulse-glow 2s ease-in-out infinite',
-                        }} />
-                        <span style={{
-                            fontFamily: 'Share Tech Mono, monospace', fontSize: '10px',
-                            color: 'var(--text-muted)', letterSpacing: '0.1em',
-                        }}>
-                            ONLINE
-                        </span>
+
+                    {/* Theme Toggle replaces ONLINE indicator */}
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+                        <button
+                            onClick={toggleTheme}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 8,
+                                background: 'transparent',
+                                border: '1px solid var(--border-subtle)',
+                                padding: '8px 14px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            <span style={{ fontSize: '16px', color: theme === 'dark' ? 'var(--neon-amber)' : 'var(--neon-cyan)' }}>
+                                {theme === 'dark' ? '☀' : '☾'}
+                            </span>
+                            <span style={{
+                                fontFamily: 'Share Tech Mono, monospace',
+                                fontSize: '12px',
+                                color: 'var(--text-muted)',
+                                letterSpacing: '0.1em'
+                            }}>
+                                {theme === 'dark' ? 'DARK MODE' : 'LIGHT MODE'}
+                            </span>
+                        </button>
                     </div>
                 </header>
 
                 {/* Scrollable content */}
-                <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '28px 32px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '32px 36px', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ maxWidth: 1400, margin: '0 auto', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', width: '100%' }}>
                         {children}
                     </div>
