@@ -33,6 +33,7 @@ public final class PostDtos {
 
     public record UpdatePostRequest(
             @Size(max = 300) String title,
-            String description
+            String description,
+            Boolean removeImage
     ) {}
 }

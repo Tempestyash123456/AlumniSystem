@@ -18,6 +18,7 @@ import { PostsPage } from './pages/admin/PostsPage.tsx';
 import { EventsPage } from './pages/admin/EventsPage.tsx';
 import { PostsFeedPage } from './pages/posts/PostsFeedPage.tsx';
 import { OAuth2Callback } from './pages/auth/OAuth2Callback.tsx';
+import { AlumniEventsPage } from './pages/alumni/AlumniEventsPage';
 
 // ── Guards ──────────────────────────────────────────────────────────────────
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -107,6 +108,7 @@ const App: React.FC = () => {
                 <Route path="/dashboard"    element={<RequireAuth><Layout><DashboardPage /></Layout></RequireAuth>} />
                 <Route path="/profile"      element={<RequireAuth><Layout><ProfilePage /></Layout></RequireAuth>} />
                 <Route path="/posts"        element={<RequireAuth><Layout><PostsFeedPage /></Layout></RequireAuth>} />
+                <Route path="/events"        element={<RequireAuth><Layout><AlumniEventsPage /></Layout></RequireAuth>} />
 
                 {/* Alumni directory */}
                 <Route path="/alumni"         element={<RequireAuth><Layout><AlumniDirectoryPage /></Layout></RequireAuth>} />

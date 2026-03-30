@@ -50,6 +50,8 @@ public final class EventDtos {
             Instant startTime,
             Instant endTime,
             @Size(max = 500) String place,
-            String description
+            String description,
+            Boolean removeMedia,
+            Boolean removeDocument
     ) {}
 }

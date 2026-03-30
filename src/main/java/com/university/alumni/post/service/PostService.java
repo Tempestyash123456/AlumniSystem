@@ -64,7 +64,9 @@ public class PostService {
         if (request.title()       != null && !request.title().isBlank())       post.setTitle(request.title());
         if (request.description() != null && !request.description().isBlank()) post.setDescription(request.description());
 
-        if (image != null && !image.isEmpty()) {
+        if (Boolean.TRUE.equals(request.removeImage())) {
+            post.setImageUrl(null);
+        } else if (image != null && !image.isEmpty()) {
             post.setImageUrl(fileStorageService.storePostImage(image));
         }
 

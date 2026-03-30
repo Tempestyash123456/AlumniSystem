@@ -109,6 +109,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <NavItem path="/dashboard" icon="⬡" label="Dashboard" exact />
                     <NavItem path="/profile"   icon="◉" label="My Profile" exact />
                     <NavItem path="/posts"     icon="◇" label="Posts" exact />
+                    <NavItem path="/events"     icon="◇" label="Events" exact />
 
                     {isAdmin && (
                         <>
@@ -116,7 +117,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                             <NavItem path="/alumni"      icon="◈" label="Directory" exact />
                             <NavItem path="/admin"       icon="◆" label="Users"     exact />
                             <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />
-                            <NavItem path="/admin/events" icon="◎" label="Events" exact />
+                            <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />
                         </>
                     )}
                 </nav>

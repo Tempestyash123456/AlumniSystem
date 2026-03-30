@@ -156,7 +156,7 @@ const MarkdownEditor: React.FC<{ value: string; onChange: (v: string) => void; l
 };
 
 // ── Image Upload Zone ─────────────────────────────────────────────────────────
-const ImageUploadZone: React.FC<{ current?: string | null; onFile: (f: File | null) => void; pendingFile?: File | null }> = ({ current, onFile, pendingFile }) => {
+const ImageUploadZone: React.FC<{ current?: string | null; onFile: (f: File | null) => void; pendingFile?: File | null; onRemove?: () => void }> = ({ current, onFile, pendingFile, onRemove }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [dragging, setDragging] = useState(false);
 
@@ -205,7 +205,7 @@ const ImageUploadZone: React.FC<{ current?: string | null; onFile: (f: File | nu
                 )}
             </div>
             {(pendingFile || current) && (
-                <button type="button" onClick={() => onFile(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', textAlign: 'left' }}>
+                <button type="button" onClick={() => onRemove ? onRemove() : onFile(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', textAlign: 'left' }}>
                     ✕ Remove image
                 </button>
             )}
@@ -248,6 +248,7 @@ export const PostsPage: React.FC = () => {
     const [title, setTitle]               = useState('');
     const [body, setBody]                 = useState('');
     const [imageFile, setImageFile]       = useState<File | null>(null);
+    const [removeImage, setRemoveImage]   = useState(false);
 
     const load = async () => {
         setLoading(true);
@@ -260,12 +261,12 @@ export const PostsPage: React.FC = () => {
     useEffect(() => { load(); }, []);
 
     const openCreate = () => {
-        setEditTarget(null); setTitle(''); setBody(''); setImageFile(null);
+        setEditTarget(null); setTitle(''); setBody(''); setImageFile(null); setRemoveImage(false);
         setEditorOpen(true);
     };
 
     const openEdit = (post: PostDto) => {
-        setEditTarget(post); setTitle(post.title); setBody(post.description); setImageFile(null);
+        setEditTarget(post); setTitle(post.title); setBody(post.description); setImageFile(null); setRemoveImage(false);
         setEditorOpen(true);
     };
 
@@ -274,7 +275,7 @@ export const PostsPage: React.FC = () => {
         setSaving(true); setError('');
         let res;
         if (editTarget) {
-            res = await postsApi.update(editTarget.id, title, body, imageFile);
+            res = await postsApi.update(editTarget.id, title, body, imageFile, removeImage);
         } else {
             res = await postsApi.create(title, body, imageFile);
         }
@@ -380,7 +381,12 @@ export const PostsPage: React.FC = () => {
                     {error && <Alert type="error" onClose={() => setError('')}>{error}</Alert>}
                     <Input label="Title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Post title..." />
                     <MarkdownEditor label="Content (Markdown)" value={body} onChange={setBody} />
-                    <ImageUploadZone current={editTarget?.imageUrl} pendingFile={imageFile} onFile={setImageFile} />
+                    <ImageUploadZone
+                        current={removeImage ? null : editTarget?.imageUrl}
+                        pendingFile={imageFile}
+                        onFile={f => { setImageFile(f); if (f) setRemoveImage(false); }}
+                        onRemove={() => { setImageFile(null); setRemoveImage(true); }}
+                    />
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 8, borderTop: '1px solid var(--border-subtle)' }}>
                         <Button variant="ghost" onClick={() => setEditorOpen(false)}>Cancel</Button>
                         <Button loading={saving} onClick={handleSave}>

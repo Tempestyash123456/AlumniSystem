@@ -33,8 +33,9 @@ public class EventController {
     private final ObjectMapper  objectMapper;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<EventResponse>>> getAll() {
-        return ResponseEntity.ok(ApiResponse.success(eventService.getAllEvents()));
+    public ResponseEntity<ApiResponse<List<EventResponse>>> getAll(
+            @AuthenticationPrincipal CachedUserDetails currentUser) {
+        return ResponseEntity.ok(ApiResponse.success(eventService.getAllEvents(currentUser)));
     }
 
     @GetMapping("/{eventId}")
