@@ -111,18 +111,18 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                         )}
 
                         {(() => {
-                            const showAdminSection = hasPermission('USER_VIEW') || hasPermission('POST_VIEW') || hasPermission('EVENT_VIEW') || hasPermission('PORTAL_SETTINGS');
+                            const showAdminSection = isAdmin && (hasPermission('USER_VIEW') || hasPermission('POST_VIEW') || hasPermission('EVENT_VIEW') || hasPermission('PERMISSION_MANAGE'));
                             if (!showAdminSection) return null;
 
                             return (
                                 <>
                                     <SectionLabel text="ADMINISTRATION" />
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                        {hasPermission('USER_VIEW') && <NavItem path="/admin/users/status" icon="👥" label="Manage User Status" exact />}
-                                        {hasPermission('PERMISSION_MANAGE') && <NavItem path="/admin/users/permissions" icon="🛡️" label="Admin Permissions" exact />}
+                                        {hasPermission('USER_VIEW') && <NavItem path="/alumni" icon="👥" label="Users directory" exact />}
+                                        {hasPermission('USER_ADMIN_ACCESS') && <NavItem path="/admin/users/status" icon="🛡️" label="Manage Permissions" exact />}
                                         {hasPermission('PERMISSION_MANAGE') && <NavItem path="/admin/email" icon="✉" label="Broadcast Email" exact />}
-                                        {hasPermission('POST_VIEW') && <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />}
-                                        {hasPermission('EVENT_VIEW') && <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />}
+                                        {hasPermission('POST_MANAGE') && <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />}
+                                        {hasPermission('EVENT_MANAGE') && <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />}
                                     </div>
                                 </>
                             );

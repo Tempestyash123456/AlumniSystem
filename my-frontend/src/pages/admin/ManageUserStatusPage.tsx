@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 // @ts-ignore
 import { adminApi } from '../../lib/api';
-import type { AdminUserDto } from '../../types';
-import { Button, Badge, Spinner, Input } from '../../components/ui';
+import type { AdminUserDto, PermissionDto } from '../../types';
+import { Button, Badge, Spinner, Input, Modal, Checkbox } from '../../components/ui';
 // @ts-ignore
 import { getImageUrl } from '../../lib/api';
 import { toast } from '../../store/toastStore';
@@ -20,6 +20,9 @@ export const ManageUserStatusPage: React.FC = () => {
     const [filterTab, setFilterTab] = useState<'ALL' | 'ALUMNI' | 'ADMINS'>('ALL');
 
     const [actionLoading, setActionLoading] = useState(false);
+    const [permissionsTarget, setPermissionsTarget] = useState<AdminUserDto | null>(null);
+    const [availablePermissions, setAvailablePermissions] = useState<PermissionDto[]>([]);
+    const [targetPermissions, setTargetPermissions] = useState<string[]>([]);
 
     const load = () => {
         setLoading(true);
@@ -94,6 +97,19 @@ export const ManageUserStatusPage: React.FC = () => {
         setActionLoading(false);
     };
 
+    const handlePermissions = async (user: AdminUserDto) => {
+        setPermissionsTarget(user);
+        setTargetPermissions(user.permissions); // Direct permissions only for editing
+        if (availablePermissions.length === 0) {
+            const res = await adminApi.getPermissions();
+            if (res.data) {
+                // Filter out default permissions
+                const filtered = res.data.filter(p => !['POST_VIEW', 'EVENT_VIEW', 'USER_VIEW'].includes(p.name));
+                setAvailablePermissions(filtered);
+            }
+        }
+    };
+
     const handleRevokeAdmin = async (user: AdminUserDto) => {
         const ok = await confirm({
             title: 'REVOKE_ADMIN',
@@ -102,14 +118,62 @@ export const ManageUserStatusPage: React.FC = () => {
         if (!ok) return;
 
         setActionLoading(true);
-        const res = await adminApi.removeRole(user.id, 'ROLE_ADMIN');
-        if (res.data) {
-            setUsers((prev) => prev.map((u) => (u.id === user.id ? res.data! : u)));
-            toast.success(`Admin role revoked from ${user.email}`);
-        } else {
-            toast.error(res.error?.message || 'Failed to revoke admin role');
+        try {
+            // First remove the role
+            const roleRes = await adminApi.removeRole(user.id, 'ROLE_ADMIN');
+            if (roleRes.data) {
+                // Then remove all granular permissions
+                const permRes = await adminApi.updatePermissions(user.id, []);
+                if (permRes.data) {
+                    setUsers((prev) => prev.map((u) => (u.id === user.id ? permRes.data! : u)));
+                    toast.success(`Admin role and permissions revoked from ${user.email}`);
+                } else {
+                    // Update user state with the role removal even if permission removal failed (unlikely)
+                    setUsers((prev) => prev.map((u) => (u.id === user.id ? roleRes.data! : u)));
+                    toast.info(`Admin role revoked, but failed to clear permissions for ${user.email}`);
+                }
+            } else {
+                toast.error(roleRes.error?.message || 'Failed to revoke admin role');
+            }
+        } catch (err) {
+            toast.error('An error occurred during admin revocation');
+        } finally {
+            setActionLoading(false);
         }
-        setActionLoading(false);
+    };
+
+    const handleUpdatePermissions = async () => {
+        if (!permissionsTarget) return;
+        setActionLoading(true);
+
+        try {
+            // Check if we need to promote to admin
+            const isCurrentlyAdmin = permissionsTarget.roles.includes('ROLE_ADMIN');
+            const isAssigningPermissions = targetPermissions.length > 0;
+
+            if (!isCurrentlyAdmin && isAssigningPermissions) {
+                await adminApi.assignRole(permissionsTarget.id, 'ROLE_ADMIN');
+            }
+
+            // Always ensure USER_VIEW is physically granted if they are an admin
+            const finalPermissions = [...targetPermissions];
+            if (finalPermissions.length > 0 && !finalPermissions.includes('USER_VIEW')) {
+                finalPermissions.push('USER_VIEW');
+            }
+
+            const res = await adminApi.updatePermissions(permissionsTarget.id, finalPermissions);
+            if (res.data) {
+                setUsers((prev) => prev.map((u) => (u.id === permissionsTarget.id ? res.data! : u)));
+                toast.success(`Permissions updated for ${permissionsTarget.email}`);
+                setPermissionsTarget(null);
+            } else {
+                toast.error(res.error?.message || 'Failed to update permissions');
+            }
+        } catch (err) {
+            toast.error('Failed to process permission updates');
+        } finally {
+            setActionLoading(false);
+        }
     };
 
     const stats = {
@@ -129,7 +193,7 @@ export const ManageUserStatusPage: React.FC = () => {
                     ADMIN_CONSOLE › USERS
                 </div>
                 <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
-                    Manage User Status
+                    Manage Users
                 </h1>
             </div>
 
@@ -229,7 +293,6 @@ export const ManageUserStatusPage: React.FC = () => {
                                 <thead>
                                 <tr>
                                     <th>User</th>
-                                    <th>Roles</th>
                                     <th>Status</th>
                                     <th>Profile Score</th>
                                     <th style={{ textAlign: 'right' }}>Actions</th>
@@ -276,15 +339,7 @@ export const ManageUserStatusPage: React.FC = () => {
                                                     </div>
                                                 </Link>
                                             </td>
-                                            <td>
-                                                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                                                    {user.roles.map(r => (
-                                                        <Badge key={r} variant={r === 'ROLE_ADMIN' ? 'pink' : 'cyan'}>
-                                                            {r.replace('ROLE_', '')}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
-                                            </td>
+
                                             <td>
                                                 <div style={{ display: 'flex', gap: 4, flexDirection: 'column' }}>
                                                     <Badge variant={user.enabled ? 'green' : 'amber'}>
@@ -306,6 +361,12 @@ export const ManageUserStatusPage: React.FC = () => {
                                                     {isAdmin && hasPermission('REVOKE_ADMIN_ACCESS') && !isSelf && (
                                                         <Button variant="outline" size="sm" onClick={() => handleRevokeAdmin(user)} disabled={actionLoading} style={{ color: 'var(--neon-pink)', borderColor: 'rgba(255, 45, 120, 0.3)' }}>
                                                             Revoke Admin
+                                                        </Button>
+                                                    )}
+                                                    
+                                                    {hasPermission('PERMISSION_MANAGE') && (
+                                                        <Button variant="ghost" size="sm" onClick={() => handlePermissions(user)} disabled={actionLoading}>
+                                                            Permissions
                                                         </Button>
                                                     )}
                                                     
@@ -338,6 +399,52 @@ export const ManageUserStatusPage: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* ── Granular Permissions Modal ── */}
+            <Modal open={!!permissionsTarget} title="GRANULAR_PERMISSIONS" onClose={() => setPermissionsTarget(null)} width={500}>
+                <div style={{ marginBottom: 20 }}>
+                    <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginBottom: 4 }}>
+                        MANAGING_ACCESS_FOR
+                    </p>
+                    <p style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '16px', color: 'var(--neon-cyan)' }}>
+                        {permissionsTarget?.email}
+                    </p>
+                </div>
+
+                <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        {availablePermissions.map((perm) => {
+                            const isInherited = !!(permissionsTarget?.allPermissions.includes(perm.name) && !permissionsTarget?.permissions.includes(perm.name));
+                            return (
+                                <div key={perm.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: 10, background: 'var(--bg-input)', borderRadius: 4, border: '1px solid var(--border-subtle)', opacity: isInherited ? 0.7 : 1 }}>
+                                    <div style={{ marginTop: 2 }}>
+                                        <Checkbox
+                                            checked={targetPermissions.includes(perm.name) || isInherited}
+                                            disabled={isInherited}
+                                            onChange={(checked: boolean) => {
+                                                if (checked) setTargetPermissions([...targetPermissions, perm.name]);
+                                                else setTargetPermissions(targetPermissions.filter(p => p !== perm.name));
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '14px', fontWeight: 600 }}>{perm.name}</span>
+                                            {isInherited && <Badge variant="cyan">INHERITED</Badge>}
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: 2 }}>{perm.description}</div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border-subtle)' }}>
+                    <Button variant="ghost" onClick={() => setPermissionsTarget(null)}>Cancel</Button>
+                    <Button loading={actionLoading} onClick={handleUpdatePermissions}>Save Permissions</Button>
+                </div>
+            </Modal>
         </div>
     );
 };

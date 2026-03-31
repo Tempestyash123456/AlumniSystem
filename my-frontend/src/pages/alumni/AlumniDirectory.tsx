@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import { adminApi, profileApi } from '../../lib/api.ts';
+import { alumniApi, profileApi } from '../../lib/api.ts';
 import { useAuthStore } from '../../store/authStore.ts';
-import type { AdminUserDto, ProfileResponse } from '../../types';
+import type { AlumniDto, ProfileResponse } from '../../types';
 import { Spinner, Input, Badge, ProgressBar } from '../../components/ui';
 import { getImageUrl } from '../../lib/api';
 
@@ -20,17 +20,11 @@ const avatarColor = (id: string) => {
     return colors[idx];
 };
 
-const initials = (u: AdminUserDto) =>
+const initials = (u: AlumniDto) =>
     `${u.firstName?.[0] ?? ''}${u.lastName?.[0] ?? ''}`.toUpperCase();
 
-const isAlumni = (u: AdminUserDto) =>
-    u.roles.includes('ROLE_ALUMNI') && !u.roles.includes('ROLE_ADMIN');
-
-const isAdmin = (u: AdminUserDto) => u.roles.includes('ROLE_ADMIN');
-
 // ── Types ─────────────────────────────────────────────────────────────────────
-type DirectoryTab = 'alumni' | 'admins';
-type ViewMode    = 'grid' | 'list';
+type ViewMode = 'grid' | 'list';
 
 interface ProfileCache {
     [userId: string]: ProfileResponse | null;
@@ -67,11 +61,10 @@ const FilterSelect: React.FC<{
 
 // ── User Card (grid) ──────────────────────────────────────────────────────────
 const UserCard: React.FC<{
-    user: AdminUserDto;
+    user: AlumniDto;
     profile: ProfileResponse | null | undefined;
     index: number;
-    showAdminBadge?: boolean;
-}> = ({ user, profile, index, showAdminBadge }) => {
+}> = ({ user, profile, index }) => {
     const [c1, c2] = avatarColor(user.id);
     return (
         <div
@@ -135,19 +128,6 @@ const UserCard: React.FC<{
                                     {profile.degree}
                                 </span>
                             )}
-                            {showAdminBadge && (
-                                <span className="cp-badge cp-badge-pink" style={{ fontSize: '8px' }}>ADMIN</span>
-                            )}
-                        </div>
-                    </div>
-                )}
-                {typeof user.profileScore === 'number' && user.profileScore > 0 && (
-                    <div style={{ marginTop: 10 }}>
-                        <div className="cp-progress">
-                            <div className="cp-progress-fill" style={{ width: `${user.profileScore}%` }} />
-                        </div>
-                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '8px', color: 'var(--text-disabled)', marginTop: 3, letterSpacing: '0.1em' }}>
-                            PROFILE {user.profileScore}%
                         </div>
                     </div>
                 )}
@@ -166,7 +146,7 @@ const UserCard: React.FC<{
 
 // ── User Row (list) ───────────────────────────────────────────────────────────
 const UserRow: React.FC<{
-    user: AdminUserDto;
+    user: AlumniDto;
     profile: ProfileResponse | null | undefined;
     index: number;
 }> = ({ user, profile, index }) => {
@@ -179,7 +159,7 @@ const UserRow: React.FC<{
                         <img
                             src={getImageUrl(user.profilePhotoUrl)!}
                             alt=""
-                            style={{ width: 60, height: 60, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${c1}` }}
+                            style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${c1}` }}
                         />
                     ) : (
                         <div style={{
@@ -235,29 +215,23 @@ const UserRow: React.FC<{
 
 // ── Main Directory Page ───────────────────────────────────────────────────────
 export const AlumniDirectoryPage: React.FC = () => {
-    const { hasPermission } = useAuthStore();
+    const [users, setUsers]                     = useState<AlumniDto[]>([]);
+    const [profileCache, setProfileCache]       = useState<ProfileCache>({});
+    const [loading, setLoading]                 = useState(true);
+    const [profilesLoading, setProfilesLoading] = useState(false);
+    const [error, setError]                     = useState('');
 
-    if (!hasPermission('USER_VIEW')) {
-        return <Navigate to="/dashboard" replace />;
-    }
-
-    const [users, setUsers]                       = useState<AdminUserDto[]>([]);
-    const [profileCache, setProfileCache]         = useState<ProfileCache>({});
-    const [loading, setLoading]                   = useState(true);
-    const [profilesLoading, setProfilesLoading]   = useState(false);
-    const [error, setError]                       = useState('');
-
-    const [tab, setTab]             = useState<DirectoryTab>('alumni');
-    const [view, setView]           = useState<ViewMode>('grid');
-    const [search, setSearch]       = useState('');
+    const [view, setView]                 = useState<ViewMode>('grid');
+    const [search, setSearch]             = useState('');
     const [filterDept, setFilterDept]     = useState('');
     const [filterDegree, setFilterDegree] = useState('');
     const [filterYear, setFilterYear]     = useState('');
 
     useEffect(() => {
-        adminApi.getAllUsers().then((res) => {
+        // Uses public /alumni endpoint — accessible to all authenticated users
+        alumniApi.getAll().then((res) => {
             if (res.data) {
-                setUsers(res.data.users);
+                setUsers(res.data);
             } else {
                 setError(res.error?.message || 'Failed to load users');
             }
@@ -267,9 +241,8 @@ export const AlumniDirectoryPage: React.FC = () => {
     useEffect(() => {
         if (users.length === 0) return;
         setProfilesLoading(true);
-        const alumniUsers = users.filter(isAlumni);
         Promise.all(
-            alumniUsers.map(u =>
+            users.map(u =>
                 profileApi.getProfileById(u.id)
                     .then(res => ({ id: u.id, profile: res.data ?? null }))
                     .catch(() => ({ id: u.id, profile: null }))
@@ -289,31 +262,19 @@ export const AlumniDirectoryPage: React.FC = () => {
         return { departments, degrees, years };
     }, [profileCache]);
 
-    const alumniUsers = useMemo(() => users.filter(u => u.enabled && isAlumni(u)), [users]);
-    const adminUsers  = useMemo(() => users.filter(u => u.enabled && isAdmin(u)), [users]);
-
-    const filteredAlumni = useMemo(() => {
+    const filteredUsers = useMemo(() => {
         const q = search.toLowerCase().trim();
-        return alumniUsers.filter(u => {
+        return users.filter(u => {
             const profile = profileCache[u.id];
             if (q && !`${u.firstName} ${u.lastName} ${u.email}`.toLowerCase().includes(q)) return false;
-            if (filterDept   && profile?.department              !== filterDept)   return false;
-            if (filterDegree && profile?.degree                  !== filterDegree) return false;
-            if (filterYear   && String(profile?.graduationYear)  !== filterYear)   return false;
+            if (filterDept   && profile?.department             !== filterDept)   return false;
+            if (filterDegree && profile?.degree                 !== filterDegree) return false;
+            if (filterYear   && String(profile?.graduationYear) !== filterYear)   return false;
             return true;
         });
-    }, [alumniUsers, profileCache, search, filterDept, filterDegree, filterYear]);
+    }, [users, profileCache, search, filterDept, filterDegree, filterYear]);
 
-    const filteredAdmins = useMemo(() => {
-        const q = search.toLowerCase().trim();
-        if (!q) return adminUsers;
-        return adminUsers.filter(u =>
-            `${u.firstName} ${u.lastName} ${u.email}`.toLowerCase().includes(q)
-        );
-    }, [adminUsers, search]);
-
-    const activeUsers = tab === 'alumni' ? filteredAlumni : filteredAdmins;
-    const hasFilters  = !!(filterDept || filterDegree || filterYear);
+    const hasFilters = !!(filterDept || filterDegree || filterYear);
 
     const resetFilters = () => {
         setFilterDept('');
@@ -322,10 +283,7 @@ export const AlumniDirectoryPage: React.FC = () => {
         setSearch('');
     };
 
-    // ── Render ──────────────────────────────────────────────────────────────────
     return (
-        // height: 100% + minHeight: 0 lets this fill the Layout's flex column
-        // so only the cards area scrolls, not the whole page
         <div
             className="animate-fade-in"
             style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}
@@ -335,13 +293,13 @@ export const AlumniDirectoryPage: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, flexShrink: 0 }}>
                 <div>
                     <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 6 }}>
-                        ADMIN_CONSOLE › NETWORK_DATABASE
+                        ALUMNI_PORTAL › NETWORK_DATABASE
                     </div>
                     <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
                         User Directory
                     </h1>
                     <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginTop: 4 }}>
-                        {loading ? '...' : `${alumniUsers.length} alumni · ${adminUsers.length} admins`}
+                        {loading ? '...' : `${users.length} members`}
                     </p>
                 </div>
 
@@ -359,121 +317,56 @@ export const AlumniDirectoryPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* ── Tab bar ── */}
-            <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
-                {([
-                    { id: 'alumni' as const, label: 'Alumni', count: alumniUsers.length, color: 'var(--neon-cyan)' },
-                    { id: 'admins' as const, label: 'Admins', count: adminUsers.length,  color: 'var(--neon-pink)' },
-                ] as const).map(({ id, label, count, color }) => (
-                    <button
-                        key={id}
-                        onClick={() => { setTab(id); resetFilters(); }}
-                        style={{
-                            padding: '12px 28px',
-                            background: 'transparent',
-                            border: 'none',
-                            borderBottom: tab === id ? `2px solid ${color}` : '2px solid transparent',
-                            color: tab === id ? color : 'var(--text-muted)',
-                            fontFamily: 'Orbitron, monospace',
-                            fontSize: '11px',
-                            letterSpacing: '0.12em',
-                            cursor: 'pointer',
-                            transition: 'all 0.15s',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 8,
-                            marginBottom: -1,
-                        }}
-                    >
-                        {label}
-                        <span style={{
-                            background: tab === id ? `${color}22` : 'var(--bg-hover)',
-                            color: tab === id ? color : 'var(--text-disabled)',
-                            border: `1px solid ${tab === id ? color + '44' : 'var(--border-subtle)'}`,
-                            borderRadius: 2,
-                            padding: '1px 7px',
-                            fontFamily: 'Share Tech Mono, monospace',
-                            fontSize: '10px',
-                        }}>
-                            {count}
-                        </span>
-                    </button>
-                ))}
-            </div>
-
             {/* ── Search + Filters ── */}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end', flexShrink: 0 }}>
                 <div style={{ flex: '1 1 220px', maxWidth: 340 }}>
                     <Input
-                        placeholder={tab === 'alumni' ? 'Search alumni...' : 'Search admins...'}
+                        placeholder="Search members..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         icon={<span style={{ fontSize: '14px' }}>⌕</span>}
                     />
                 </div>
-
-                {tab === 'alumni' && (
-                    <>
-                        <FilterSelect
-                            label="Department"
-                            value={filterDept}
-                            onChange={setFilterDept}
-                            options={filterOptions.departments}
-                            placeholder="All Departments"
-                        />
-                        <FilterSelect
-                            label="Degree"
-                            value={filterDegree}
-                            onChange={setFilterDegree}
-                            options={filterOptions.degrees}
-                            placeholder="All Degrees"
-                        />
-                        <FilterSelect
-                            label="Graduation Year"
-                            value={filterYear}
-                            onChange={setFilterYear}
-                            options={filterOptions.years}
-                            placeholder="All Years"
-                        />
-                        {hasFilters && (
-                            <button
-                                onClick={resetFilters}
-                                style={{
-                                    padding: '8px 14px',
-                                    background: 'rgba(255,45,120,0.08)',
-                                    border: '1px solid rgba(255,45,120,0.3)',
-                                    borderRadius: 4,
-                                    color: 'var(--neon-pink)',
-                                    fontFamily: 'Orbitron, monospace',
-                                    fontSize: '9px',
-                                    letterSpacing: '0.1em',
-                                    cursor: 'pointer',
-                                    alignSelf: 'flex-end',
-                                    height: 38,
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
-                                ✕ CLEAR
-                            </button>
-                        )}
-                    </>
+                <FilterSelect label="Department"      value={filterDept}   onChange={setFilterDept}   options={filterOptions.departments} placeholder="All Departments" />
+                <FilterSelect label="Degree"          value={filterDegree} onChange={setFilterDegree} options={filterOptions.degrees}     placeholder="All Degrees"     />
+                <FilterSelect label="Graduation Year" value={filterYear}   onChange={setFilterYear}   options={filterOptions.years}      placeholder="All Years"       />
+                {hasFilters && (
+                    <button
+                        onClick={resetFilters}
+                        style={{
+                            padding: '8px 14px',
+                            background: 'rgba(255,45,120,0.08)',
+                            border: '1px solid rgba(255,45,120,0.3)',
+                            borderRadius: 4,
+                            color: 'var(--neon-pink)',
+                            fontFamily: 'Orbitron, monospace',
+                            fontSize: '9px',
+                            letterSpacing: '0.1em',
+                            cursor: 'pointer',
+                            alignSelf: 'flex-end',
+                            height: 38,
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        ✕ CLEAR
+                    </button>
                 )}
             </div>
 
             {/* ── Active filter chips ── */}
-            {tab === 'alumni' && hasFilters && (
+            {hasFilters && (
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flexShrink: 0 }}>
                     {filterDept   && <span className="cp-badge cp-badge-cyan">Dept: {filterDept}</span>}
                     {filterDegree && <span className="cp-badge cp-badge-purple">Degree: {filterDegree}</span>}
                     {filterYear   && <span className="cp-badge cp-badge-amber">Year: {filterYear}</span>}
                     <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)', alignSelf: 'center' }}>
-                        → {filteredAlumni.length} result{filteredAlumni.length !== 1 ? 's' : ''}
+                        → {filteredUsers.length} result{filteredUsers.length !== 1 ? 's' : ''}
                     </span>
                 </div>
             )}
 
-            {/* ── Profiles loading indicator ── */}
-            {profilesLoading && tab === 'alumni' && (
+            {/* ── Profile loading indicator ── */}
+            {profilesLoading && (
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
                     fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)',
@@ -493,11 +386,11 @@ export const AlumniDirectoryPage: React.FC = () => {
                     <div style={{ color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace', padding: 40, textAlign: 'center' }}>
                         ⚠ {error}
                     </div>
-                ) : activeUsers.length === 0 ? (
+                ) : filteredUsers.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: 80 }}>
                         <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.3 }}>◈</div>
                         <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)' }}>
-                            {search || hasFilters ? 'No matches for current filters' : `No ${tab} found`}
+                            {search || hasFilters ? 'No matches for current filters' : 'No members found'}
                         </p>
                         {(search || hasFilters) && (
                             <button
@@ -511,108 +404,37 @@ export const AlumniDirectoryPage: React.FC = () => {
                     </div>
                 ) : view === 'grid' ? (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-                        {activeUsers.map((u, i) => (
+                        {filteredUsers.map((u, i) => (
                             <UserCard
                                 key={u.id}
                                 user={u}
                                 profile={profileCache[u.id]}
                                 index={i}
-                                showAdminBadge={tab === 'admins'}
                             />
                         ))}
                     </div>
                 ) : (
-                    /* List view */
                     <div className="cp-panel" style={{ overflow: 'hidden' }}>
                         <table className="cp-table">
                             <thead>
                             <tr>
                                 <th>Member</th>
-                                {tab === 'alumni' ? (
-                                    <>
-                                        <th>Department</th>
-                                        <th>Degree</th>
-                                        <th>Grad Year</th>
-                                        <th>Current Role</th>
-                                    </>
-                                ) : (
-                                    <>
-                                        <th>Roles</th>
-                                        <th>Last Login</th>
-                                        <th>Profile</th>
-                                        <th></th>
-                                    </>
-                                )}
+                                <th>Department</th>
+                                <th>Degree</th>
+                                <th>Grad Year</th>
+                                <th>Current Role</th>
                                 <th style={{ textAlign: 'right' }}>Action</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {tab === 'alumni'
-                                ? activeUsers.map((u, i) => (
-                                    <UserRow
-                                        key={u.id}
-                                        user={u}
-                                        profile={profileCache[u.id]}
-                                        index={i}
-                                    />
-                                ))
-                                : activeUsers.map((u, i) => (
-                                    <tr key={u.id} style={{ animation: `fadeIn 0.2s ease-out ${i * 0.02}s both` }}>
-                                        <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                                {(() => {
-                                                    const [c1, c2] = avatarColor(u.id);
-                                                    return (
-                                                        <div style={{
-                                                            width: 34, height: 34, borderRadius: '50%',
-                                                            background: `linear-gradient(135deg, ${c1}, ${c2})`,
-                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                            fontFamily: 'Orbitron, monospace', fontSize: '12px', fontWeight: 700,
-                                                            color: 'var(--bg-void)', flexShrink: 0,
-                                                        }}>
-                                                            {initials(u)}
-                                                        </div>
-                                                    );
-                                                })()}
-                                                <div>
-                                                    <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '14px' }}>
-                                                        {u.firstName} {u.lastName}
-                                                    </div>
-                                                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-                                                        {u.email}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                                                {u.roles.map(r => (
-                                                    <span key={r} className={`cp-badge ${r.includes('ADMIN') ? 'cp-badge-pink' : 'cp-badge-cyan'}`}>
-                                                        {r.replace('ROLE_', '')}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </td>
-                                        <td style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-                                            {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : '—'}
-                                        </td>
-                                        <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <div style={{ width: 50, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
-                                                    <div style={{ height: '100%', width: `${u.profileScore}%`, background: 'linear-gradient(90deg, var(--neon-cyan), var(--neon-purple))' }} />
-                                                </div>
-                                                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace' }}>{u.profileScore}%</span>
-                                            </div>
-                                        </td>
-                                        <td></td>
-                                        <td style={{ textAlign: 'right' }}>
-                                            <Link to={`/alumni/${u.id}`} className="cp-btn cp-btn-ghost cp-btn-sm">
-                                                View →
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                ))
-                            }
+                            {filteredUsers.map((u, i) => (
+                                <UserRow
+                                    key={u.id}
+                                    user={u}
+                                    profile={profileCache[u.id]}
+                                    index={i}
+                                />
+                            ))}
                             </tbody>
                         </table>
                     </div>
@@ -622,7 +444,7 @@ export const AlumniDirectoryPage: React.FC = () => {
     );
 };
 
-// ── Public / Admin Profile View ───────────────────────────────────────────────
+// ── Profile View Page ─────────────────────────────────────────────────────────
 export const AlumniProfileViewPage: React.FC = () => {
     const { userId } = useParams<{ userId: string }>();
     const { hasPermission } = useAuthStore();
