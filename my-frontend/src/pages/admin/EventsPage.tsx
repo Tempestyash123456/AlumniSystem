@@ -258,7 +258,8 @@ const DocUploadZone: React.FC<{
     );
 };
 
-// ── Event Card ────────────────────────────────────────────────────────────────
+import { useAuthStore } from '../../store/authStore';
+
 const EventCard: React.FC<{
     event: EventDto;
     onEdit: () => void;
@@ -266,6 +267,7 @@ const EventCard: React.FC<{
     onView: () => void;
     index: number;
 }> = ({ event, onEdit, onDelete, onView, index }) => {
+    const { hasPermission } = useAuthStore();
     const status = getEventStatus(event.startTime, event.endTime);
     const styleConf = STATUS_STYLES[status];
 
@@ -366,8 +368,8 @@ const EventCard: React.FC<{
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: 6, marginTop: 'auto', paddingTop: 8 }}>
                     <Button variant="ghost" size="sm" onClick={onView} style={{ flex: 1 }}>View</Button>
-                    <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>
-                    <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>
+                    {hasPermission('EVENT_EDIT') && <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>}
+                    {hasPermission('EVENT_DELETE') && <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>}
                 </div>
             </div>
         </div>
@@ -644,6 +646,7 @@ const EventEditorModal: React.FC<{
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export const EventsPage: React.FC = () => {
+    const { hasPermission } = useAuthStore();
     const [events, setEvents]           = useState<EventDto[]>([]);
     const [loading, setLoading]         = useState(true);
     const [saving, setSaving]           = useState(false);
@@ -758,7 +761,7 @@ export const EventsPage: React.FC = () => {
                         {events.length} event{events.length !== 1 ? 's' : ''} · {upcomingCount} upcoming
                     </p>
                 </div>
-                <Button onClick={openCreate} variant="primary">+ NEW EVENT</Button>
+                {hasPermission('EVENT_CREATE') && <Button onClick={openCreate} variant="primary">+ NEW EVENT</Button>}
             </div>
 
             {/* ── Stat cards ── */}
@@ -825,7 +828,7 @@ export const EventsPage: React.FC = () => {
                         <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)', marginBottom: 20 }}>
                             {search || filterStatus !== 'all' ? 'No events match your filters' : 'No events yet — create the first one'}
                         </p>
-                        {!search && filterStatus === 'all' && (
+                        {!search && filterStatus === 'all' && hasPermission('EVENT_CREATE') && (
                             <Button onClick={openCreate}>Create Event</Button>
                         )}
                     </div>

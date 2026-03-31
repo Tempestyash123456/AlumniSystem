@@ -1,6 +1,7 @@
 import type {
     ApiResponse, AuthResponse, UserInfo, ProfileResponse,
-    UpdateProfileRequest, AdminUserListResponse, AdminUserDto, AlumniDto, PostDto, EventDto
+    UpdateProfileRequest, AdminUserListResponse, AdminUserDto, AlumniDto, PostDto, EventDto,
+    PermissionDto
 } from '../types';
 
 const BASE_URL = '/api/v1';
@@ -123,6 +124,8 @@ export const adminApi = {
     removeRole: (userId: string, roleName: string) => apiFetch<AdminUserDto>(`/admin/users/${userId}/roles/${roleName}`, { method: 'DELETE' }),
     sendTargetedEmail: (data: { subject: string; body: string; department?: string; degree?: string; specialization?: string; graduationYear?: number; targetUserEmail?: string; }) =>
         apiFetch<string>('/admin/email/send', { method: 'POST', body: JSON.stringify(data) }),
+    getPermissions: () => apiFetch<PermissionDto[]>('/admin/permissions'),
+    updatePermissions: (userId: string, permissions: string[]) => apiFetch<AdminUserDto>(`/admin/users/${userId}/permissions`, { method: 'PATCH', body: JSON.stringify({ permissions }) }),
 };
 
 export const postsApi = {

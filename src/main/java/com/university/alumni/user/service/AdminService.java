@@ -8,9 +8,12 @@ import com.university.alumni.user.dto.AdminDtos.*;
 import com.university.alumni.user.entity.AlumniProfile;
 import com.university.alumni.user.entity.Role;
 import com.university.alumni.user.entity.User;
+import com.university.alumni.user.entity.Permission;
 import com.university.alumni.user.repository.AlumniProfileRepository;
 import com.university.alumni.user.repository.RoleRepository;
 import com.university.alumni.user.repository.UserRepository;
+import com.university.alumni.user.repository.PermissionRepository;
+import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -30,6 +33,7 @@ public class AdminService {
     private final UserRepository          userRepository;
     private final RoleRepository          roleRepository;
     private final AlumniProfileRepository profileRepository;
+    private final PermissionRepository    permissionRepository;
     private final EmailService            emailService;
     private final CacheManager            cacheManager;
 
@@ -114,6 +118,45 @@ public class AdminService {
         evictUserCache(user.getEmail());
     }
 
+    // ── Permission Management ────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public List<PermissionDto> getAllPermissions() {
+        return permissionRepository.findAll().stream()
+                .map(p -> new PermissionDto(p.getId(), p.getName(), p.getDescription()))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public AdminUserDto updateUserPermissions(UUID userId, UpdatePermissionsRequest request) {
+        User user = findUserOrThrow(userId);
+
+        // Fetch all requested permissions from DB
+        List<Permission> newPermissions = request.permissions().stream()
+                .map(name -> permissionRepository.findByName(name)
+                        .orElseThrow(() -> new ResponseStatusException(
+                                HttpStatus.BAD_REQUEST, "Permission not found: " + name)))
+                .toList();
+
+        // If extra permissions are given, automatically grant ROLE_ADMIN if missing
+        if (!newPermissions.isEmpty()) {
+            boolean hasAdminRole = user.getRoles().stream()
+                    .anyMatch(r -> r.getName().equals("ROLE_ADMIN"));
+            if (!hasAdminRole) {
+                log.info("Automatically granting ROLE_ADMIN to user {} due to granular permission assignment", user.getEmail());
+                Role adminRole = roleRepository.findByName("ROLE_ADMIN")
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "ROLE_ADMIN not found in database"));
+                user.addRole(adminRole);
+            }
+        }
+
+        user.setPermissions(new HashSet<>(newPermissions));
+        User saved = userRepository.save(user);
+        evictUserCache(saved.getEmail());
+
+        return toAdminDto(saved);
+    }
+
     // ── Targeted Bulk Email ───────────────────────────────────────────────────
 
     @Transactional(readOnly = true)
@@ -193,6 +236,16 @@ public class AdminService {
                 .map(Role::getName)
                 .toList();
 
+        List<String> directPermissions = user.getPermissions().stream()
+                .map(Permission::getName)
+                .toList();
+
+        List<String> allPermissions = user.getAuthorities().stream()
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                .filter(a -> !a.startsWith("ROLE_")) // Filter out roles to keep only permissions
+                .distinct()
+                .toList();
+
         return new AdminUserDto(
                 user.getId(),
                 user.getFirstName(),
@@ -201,6 +254,8 @@ public class AdminService {
                 user.getPhone(),
                 user.getProfilePhotoUrl(),
                 roles,
+                directPermissions,
+                allPermissions,
                 user.isEnabled(),
                 user.isAccountLocked(),
                 profileScore,

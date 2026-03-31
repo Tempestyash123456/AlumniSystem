@@ -19,6 +19,8 @@ public final class AdminDtos {
             String   phone,
             String   profilePhotoUrl,
             List<String> roles,
+            List<String> permissions,    // Directly assigned
+            List<String> allPermissions, // Flattened from roles + direct
             boolean  enabled,
             boolean  accountLocked,
             int      profileScore,
@@ -53,5 +55,16 @@ public final class AdminDtos {
             String specialization,
             Integer graduationYear,
             String targetUserEmail // Send to one specific user by email if provided
+    ) {}
+
+    // ── Permission Management ────────────────────────────────────────────────
+    public record PermissionDto(
+            UUID id,
+            String name,
+            String description
+    ) {}
+
+    public record UpdatePermissionsRequest(
+            @jakarta.validation.constraints.NotNull List<String> permissions // List of permission names
     ) {}
 }

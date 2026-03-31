@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { postsApi } from '../../lib/api';
 import type { PostDto } from '../../types';
 import { Button, Alert, Input, Spinner, Confirm, Modal } from '../../components/ui';
+import { useAuthStore } from '../../store/authStore';
 
 const BASE_URL = '';
 
@@ -31,6 +32,7 @@ const PostCard: React.FC<{
     onDelete: () => void;
     onView: () => void;
 }> = ({ post, onEdit, onDelete, onView }) => {
+    const { hasPermission } = useAuthStore();
     const preview = post.description.replace(/[#*`>\-\[\]]/g, '').slice(0, 180);
     return (
         <div className="cp-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -63,8 +65,8 @@ const PostCard: React.FC<{
                 </p>
                 <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                     <Button variant="ghost" size="sm" onClick={onView} style={{ flex: 1 }}>Read</Button>
-                    <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>
-                    <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>
+                    {hasPermission('POST_EDIT') && <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>}
+                    {hasPermission('POST_DELETE') && <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>}
                 </div>
             </div>
         </div>
@@ -235,6 +237,7 @@ const PostViewModal: React.FC<{ post: PostDto | null; onClose: () => void }> = (
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export const PostsPage: React.FC = () => {
+    const { hasPermission } = useAuthStore();
     const [posts, setPosts]               = useState<PostDto[]>([]);
     const [loading, setLoading]           = useState(true);
     const [saving, setSaving]             = useState(false);
@@ -329,7 +332,7 @@ export const PostsPage: React.FC = () => {
                         {posts.length} post{posts.length !== 1 ? 's' : ''} published
                     </p>
                 </div>
-                <Button onClick={openCreate} variant="primary">+ NEW POST</Button>
+                {hasPermission('POST_CREATE') && <Button onClick={openCreate} variant="primary">+ NEW POST</Button>}
             </div>
 
             {/* ── Alerts ── */}
@@ -358,7 +361,7 @@ export const PostsPage: React.FC = () => {
                         <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)', marginBottom: 20 }}>
                             {search ? 'No posts match your search' : 'No posts yet — create the first one'}
                         </p>
-                        {!search && <Button onClick={openCreate}>Create Post</Button>}
+                        {!search && hasPermission('POST_CREATE') && <Button onClick={openCreate}>Create Post</Button>}
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>

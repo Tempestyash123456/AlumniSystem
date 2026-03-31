@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Core User entity.
@@ -69,6 +70,16 @@ public class User extends BaseEntity implements UserDetails {
     @Builder.Default
     private Set<Role> roles = new HashSet<>();
 
+    // ── Permissions (direct assignment) ──────────────────────────────────────
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_permissions",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "permission_id")
+    )
+    @Builder.Default
+    private Set<Permission> permissions = new HashSet<>();
+
     // ── Convenience helpers ──────────────────────────────────────────────────
 
     public String getFullName() {
@@ -94,9 +105,20 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
+        // Flattened authorities: Roles (ROLE_*) + Permissions inherited from Roles + Direct Permissions
+        Set<SimpleGrantedAuthority> authorities = roles.stream()
+                .flatMap(role -> Stream.concat(
+                        Stream.of(new SimpleGrantedAuthority(role.getName())),
+                        role.getPermissions().stream().map(p -> new SimpleGrantedAuthority(p.getName()))
+                ))
                 .collect(Collectors.toSet());
+
+        // Add direct permissions
+        permissions.stream()
+                .map(p -> new SimpleGrantedAuthority(p.getName()))
+                .forEach(authorities::add);
+
+        return authorities;
     }
 
     @Override

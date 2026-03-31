@@ -235,9 +235,9 @@ const UserRow: React.FC<{
 
 // ── Main Directory Page ───────────────────────────────────────────────────────
 export const AlumniDirectoryPage: React.FC = () => {
-    const { isAdmin: currentUserIsAdmin } = useAuthStore();
+    const { hasPermission } = useAuthStore();
 
-    if (!currentUserIsAdmin) {
+    if (!hasPermission('USER_VIEW')) {
         return <Navigate to="/dashboard" replace />;
     }
 
@@ -625,7 +625,8 @@ export const AlumniDirectoryPage: React.FC = () => {
 // ── Public / Admin Profile View ───────────────────────────────────────────────
 export const AlumniProfileViewPage: React.FC = () => {
     const { userId } = useParams<{ userId: string }>();
-    const { isAdmin: currentUserIsAdmin } = useAuthStore();
+    const { hasPermission } = useAuthStore();
+    const canViewDirectory = hasPermission('USER_VIEW');
     const [profile, setProfile] = useState<ProfileResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError]     = useState('');
@@ -656,10 +657,10 @@ export const AlumniProfileViewPage: React.FC = () => {
         <div className="animate-fade-in" style={{ maxWidth: 820 }}>
             <div style={{ marginBottom: 24 }}>
                 <Link
-                    to={currentUserIsAdmin ? '/alumni' : '/dashboard'}
+                    to={canViewDirectory ? '/alumni' : '/dashboard'}
                     style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--neon-cyan)', textDecoration: 'none' }}
                 >
-                    ← {currentUserIsAdmin ? 'Back to Directory' : 'Back to Dashboard'}
+                    ← {canViewDirectory ? 'Back to Directory' : 'Back to Dashboard'}
                 </Link>
             </div>
 

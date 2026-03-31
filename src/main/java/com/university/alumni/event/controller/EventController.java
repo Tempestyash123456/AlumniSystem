@@ -20,9 +20,9 @@ import java.util.UUID;
 /**
  * GET    /api/v1/events          — list all (any authenticated user)
  * GET    /api/v1/events/{id}     — single event
- * POST   /api/v1/events          — create  (ADMIN only, multipart)
- * PUT    /api/v1/events/{id}     — update  (ADMIN only, multipart)
- * DELETE /api/v1/events/{id}     — delete  (ADMIN only)
+ * POST   /api/v1/events          — create  (EVENT_CREATE)
+ * PUT    /api/v1/events/{id}     — update  (EVENT_EDIT)
+ * DELETE /api/v1/events/{id}     — delete  (EVENT_DELETE)
  */
 @RestController
 @RequestMapping("/api/v1/events")
@@ -44,7 +44,7 @@ public class EventController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EVENT_CREATE')")
     public ResponseEntity<ApiResponse<EventResponse>> create(
             @RequestPart("data")                              String dataJson,
             @RequestPart(value = "media",    required = false) MultipartFile media,
@@ -58,7 +58,7 @@ public class EventController {
     }
 
     @PutMapping(value = "/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EVENT_EDIT')")
     public ResponseEntity<ApiResponse<EventResponse>> update(
             @PathVariable UUID eventId,
             @RequestPart("data")                              String dataJson,
@@ -71,7 +71,7 @@ public class EventController {
     }
 
     @DeleteMapping("/{eventId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('EVENT_DELETE')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID eventId) {
         eventService.deleteEvent(eventId);
         return ResponseEntity.ok(ApiResponse.success());

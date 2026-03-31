@@ -21,6 +21,7 @@ export interface UserInfo {
     lastName: string;
     profilePhotoUrl?: string;
     roles: string[];
+    permissions: string[];
     accountLocked: boolean;
 }
 
@@ -117,6 +118,8 @@ export interface AdminUserDto {
     phone?: string;
     profilePhotoUrl?: string;
     roles: string[];
+    permissions: string[];
+    allPermissions: string[];
     enabled: boolean;
     accountLocked: boolean;
     profileScore: number;
@@ -127,6 +130,16 @@ export interface AdminUserDto {
 export interface AdminUserListResponse {
     users: AdminUserDto[];
     totalCount: number;
+}
+
+export interface PermissionDto {
+    id: string;
+    name: string;
+    description: string;
+}
+
+export interface UpdatePermissionsRequest {
+    permissions: string[];
 }
 
 // ── Posts ─────────────────────────────────────────────────────────────────────

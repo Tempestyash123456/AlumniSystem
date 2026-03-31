@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { authApi, tokenStorage } from '../../lib/api';
+import { ToastContainer, GlobalConfirmContainer } from '../ui';
 
 const BASE_URL = '';
 
@@ -11,7 +12,7 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const { user, isAdmin, clearAuth } = useAuthStore();
+    const { user, isAdmin, clearAuth, hasPermission } = useAuthStore();
     const { theme, toggleTheme } = useThemeStore();
     const location = useLocation();
     const navigate = useNavigate();
@@ -109,16 +110,23 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                             </>
                         )}
 
-                        {isAdmin && (
-                            <>
-                                <SectionLabel text="ADMINISTRATION" />
-                                <NavItem path="/alumni"    icon="◈" label="Directory" exact />
-                                <NavItem path="/admin"       icon="◆" label="Users"     exact />
-                                <NavItem path="/admin/email" icon="✉" label="Broadcast Email" exact />
-                                <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />
-                                <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />
-                            </>
-                        )}
+                        {(() => {
+                            const showAdminSection = hasPermission('USER_VIEW') || hasPermission('POST_VIEW') || hasPermission('EVENT_VIEW') || hasPermission('PORTAL_SETTINGS');
+                            if (!showAdminSection) return null;
+
+                            return (
+                                <>
+                                    <SectionLabel text="ADMINISTRATION" />
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                        {hasPermission('USER_VIEW') && <NavItem path="/admin/users/status" icon="👥" label="Manage User Status" exact />}
+                                        {hasPermission('PERMISSION_MANAGE') && <NavItem path="/admin/users/permissions" icon="🛡️" label="Admin Permissions" exact />}
+                                        {hasPermission('PERMISSION_MANAGE') && <NavItem path="/admin/email" icon="✉" label="Broadcast Email" exact />}
+                                        {hasPermission('POST_VIEW') && <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />}
+                                        {hasPermission('EVENT_VIEW') && <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />}
+                                    </div>
+                                </>
+                            );
+                        })()}
                     </nav>
                 </div>
             </aside>
@@ -261,6 +269,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     </div>
                 </div>
             </main>
+            <ToastContainer />
+            <GlobalConfirmContainer />
         </div>
     );
 };

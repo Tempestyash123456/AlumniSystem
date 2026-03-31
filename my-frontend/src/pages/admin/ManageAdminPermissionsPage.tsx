@@ -2,89 +2,45 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 // @ts-ignore
 import { adminApi } from '../../lib/api';
-import type { AdminUserDto } from '../../types';
-import { Button, Badge, Spinner, Alert, Confirm, Modal, Input } from '../../components/ui';
+import type { AdminUserDto, PermissionDto } from '../../types';
+import { Button, Badge, Spinner, Modal, Input, Checkbox } from '../../components/ui';
 // @ts-ignore
 import { getImageUrl } from '../../lib/api';
+import { toast } from '../../store/toastStore';
 
-export const AdminPage: React.FC = () => {
+import { useAuthStore } from '../../store/authStore';
+
+export const ManageAdminPermissionsPage: React.FC = () => {
+    const { hasPermission } = useAuthStore();
     const [users, setUsers] = useState<AdminUserDto[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [search, setSearch] = useState('');
-    const [filterLock, setFilterLock] = useState<'ALL' | 'LOCKED' | 'UNLOCKED'>('ALL');
 
-    const [deleteTarget, setDeleteTarget] = useState<AdminUserDto | null>(null);
     const [roleTarget, setRoleTarget] = useState<AdminUserDto | null>(null);
     const [newRole, setNewRole] = useState('');
     const [actionLoading, setActionLoading] = useState(false);
+
+    const [permissionsTarget, setPermissionsTarget] = useState<AdminUserDto | null>(null);
+    const [availablePermissions, setAvailablePermissions] = useState<PermissionDto[]>([]);
+    const [targetPermissions, setTargetPermissions] = useState<string[]>([]);
 
     const load = () => {
         setLoading(true);
         adminApi.getAllUsers().then((res) => {
             if (res.data) setUsers(res.data.users);
-            else setError(res.error?.message || 'Failed to load users');
+            else toast.error(res.error?.message || 'Failed to load users');
         }).finally(() => setLoading(false));
     };
 
     useEffect(() => { load(); }, []);
 
-    const showSuccess = (msg: string) => {
-        setSuccess(msg);
-        setTimeout(() => setSuccess(''), 4000);
-    };
-
-    const showError = (msg: string) => {
-        setError(msg);
-        setTimeout(() => setError(''), 4000);
-    };
-
     const filtered = users.filter((u) => {
         const q = search.toLowerCase();
-        const matchesSearch = !q ||
+        return !q ||
             `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
             u.email.toLowerCase().includes(q) ||
             u.roles.some((r) => r.toLowerCase().includes(q));
-
-        if (!matchesSearch) return false;
-        
-        if (filterLock === 'LOCKED') return u.accountLocked;
-        if (filterLock === 'UNLOCKED') return !u.accountLocked;
-        return true;
     });
-
-    const handleLock = async (user: AdminUserDto) => {
-        setActionLoading(true);
-        const res = await adminApi.setLock(user.id, !user.accountLocked);
-        if (res.data) {
-            setUsers((prev) => prev.map((u) => (u.id === user.id ? res.data! : u)));
-            showSuccess(`Account ${res.data.accountLocked ? 'locked' : 'unlocked'}`);
-        }
-        setActionLoading(false);
-    };
-
-    const handleEnable = async (user: AdminUserDto) => {
-        setActionLoading(true);
-        const res = await adminApi.setEnabled(user.id, !user.enabled);
-        if (res.data) {
-            setUsers((prev) => prev.map((u) => (u.id === user.id ? res.data! : u)));
-            showSuccess(`Account ${res.data.enabled ? 'enabled' : 'disabled'}`);
-        }
-        setActionLoading(false);
-    };
-
-    const handleDelete = async () => {
-        if (!deleteTarget) return;
-        setActionLoading(true);
-        const res = await adminApi.deleteUser(deleteTarget.id);
-        if (res.success) {
-            setUsers((prev) => prev.filter((u) => u.id !== deleteTarget.id));
-            showSuccess(`User ${deleteTarget.email} deleted`);
-        }
-        setDeleteTarget(null);
-        setActionLoading(false);
-    };
 
     const handleAssignRole = async () => {
         if (!roleTarget || !newRole.trim()) return;
@@ -93,12 +49,12 @@ export const AdminPage: React.FC = () => {
         const res = await adminApi.assignRole(roleTarget.id, roleName);
         if (res.data) {
             setUsers((prev) => prev.map((u) => (u.id === roleTarget.id ? res.data! : u)));
-            showSuccess(`Role assigned`);
+            toast.success(`Role assigned to ${roleTarget.email}`);
+            setRoleTarget(null);
+            setNewRole('');
         } else {
-            showError(res.error?.message || 'Failed to assign role');
+            toast.error(res.error?.message || 'Failed to assign role');
         }
-        setRoleTarget(null);
-        setNewRole('');
         setActionLoading(false);
     };
 
@@ -107,15 +63,38 @@ export const AdminPage: React.FC = () => {
         const res = await adminApi.removeRole(user.id, role);
         if (res.data) {
             setUsers((prev) => prev.map((u) => (u.id === user.id ? res.data! : u)));
-            showSuccess(`Role removed`);
+            toast.success(`Role ${role} removed from ${user.email}`);
+        } else {
+            toast.error(res.error?.message || 'Failed to remove role');
+        }
+        setActionLoading(false);
+    };
+
+    const handlePermissions = async (user: AdminUserDto) => {
+        setPermissionsTarget(user);
+        setTargetPermissions(user.permissions); // Direct permissions only for editing
+        if (availablePermissions.length === 0) {
+            const res = await adminApi.getPermissions();
+            if (res.data) setAvailablePermissions(res.data);
+        }
+    };
+
+    const handleUpdatePermissions = async () => {
+        if (!permissionsTarget) return;
+        setActionLoading(true);
+        const res = await adminApi.updatePermissions(permissionsTarget.id, targetPermissions);
+        if (res.data) {
+            setUsers((prev) => prev.map((u) => (u.id === permissionsTarget.id ? res.data! : u)));
+            toast.success(`Permissions updated for ${permissionsTarget.email}`);
+            setPermissionsTarget(null);
+        } else {
+            toast.error(res.error?.message || 'Failed to update permissions');
         }
         setActionLoading(false);
     };
 
     const stats = {
         total: users.length,
-        enabled: users.filter((u) => u.enabled).length,
-        locked: users.filter((u) => u.accountLocked).length,
         admins: users.filter((u) => u.roles.includes('ROLE_ADMIN')).length,
     };
 
@@ -125,24 +104,18 @@ export const AdminPage: React.FC = () => {
             {/* ── Header ── */}
             <div style={{ flexShrink: 0 }}>
                 <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.15em', marginBottom: 6 }}>
-                    ADMIN_CONSOLE
+                    ADMIN_CONSOLE › PERMISSIONS
                 </div>
                 <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
-                    User Management
+                    Manage Admin Permissions
                 </h1>
             </div>
 
-            {/* ── Alerts ── */}
-            {success && <div style={{ flexShrink: 0 }}><Alert type="success" onClose={() => setSuccess('')}>{success}</Alert></div>}
-            {error   && <div style={{ flexShrink: 0 }}><Alert type="error"   onClose={() => setError('')}>{error}</Alert></div>}
-
             {/* ── Stat cards ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, flexShrink: 0 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, flexShrink: 0 }}>
                 {[
                     { label: 'Total Users', value: stats.total,   color: 'cyan'   },
-                    { label: 'Enabled',     value: stats.enabled, color: 'green'  },
-                    { label: 'Locked',      value: stats.locked,  color: 'pink'   },
-                    { label: 'Admins',      value: stats.admins,  color: 'purple' },
+                    { label: 'System Admins', value: stats.admins,  color: 'purple' },
                 ].map(({ label, value, color }) => (
                     <div key={label} className={`cp-stat-card ${color}`}>
                         <div className={`cp-stat-value text-neon-${color}`}>{value}</div>
@@ -156,36 +129,13 @@ export const AdminPage: React.FC = () => {
                 <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0, flexWrap: 'wrap' }}>
                     <div style={{ flex: 1, minWidth: 200, maxWidth: 340 }}>
                         <Input
-                            placeholder="Search users..."
+                            placeholder="Search users/roles..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             icon={<span>🔍</span>}
                         />
                     </div>
                     
-                    <div style={{ display: 'flex', gap: 4, background: 'var(--bg-input)', padding: 4, borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
-                        {(['ALL', 'LOCKED', 'UNLOCKED'] as const).map(option => (
-                            <button
-                                key={option}
-                                onClick={() => setFilterLock(option)}
-                                style={{
-                                    padding: '6px 14px',
-                                    borderRadius: 4,
-                                    border: 'none',
-                                    fontSize: '11px',
-                                    fontFamily: 'Share Tech Mono, monospace',
-                                    cursor: 'pointer',
-                                    background: filterLock === option ? 'var(--bg-hover)' : 'transparent',
-                                    color: filterLock === option ? 'var(--neon-pink)' : 'var(--text-muted)',
-                                    fontWeight: filterLock === option ? 700 : 400,
-                                    transition: 'all 0.2s'
-                                }}
-                            >
-                                {option}
-                            </button>
-                        ))}
-                    </div>
-
                     <div style={{ flex: 1 }} />
                     <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
                         {filtered.length} of {users.length}
@@ -205,8 +155,7 @@ export const AdminPage: React.FC = () => {
                                 <tr>
                                     <th>User</th>
                                     <th>Roles</th>
-                                    <th>Status</th>
-                                    <th>Profile</th>
+                                    <th>Direct Permissions</th>
                                     <th style={{ textAlign: 'right' }}>Actions</th>
                                 </tr>
                                 </thead>
@@ -251,52 +200,58 @@ export const AdminPage: React.FC = () => {
                                             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                                                 {user.roles.map((r) => {
                                                     const isAdminRole = r === 'ROLE_ADMIN';
+                                                    const canRemove = hasPermission('PERMISSION_MANAGE') && !isAdminRole;
                                                     return (
                                                         <span
                                                             key={r}
                                                             className={`cp-badge ${isAdminRole ? 'cp-badge-pink' : 'cp-badge-cyan'}`}
-                                                            style={{ cursor: isAdminRole ? 'default' : 'pointer' }}
-                                                            title={isAdminRole ? 'Admin role cannot be revoked' : 'Click to remove'}
-                                                            onClick={() => !isAdminRole && handleRemoveRole(user, r)}
+                                                            style={{ cursor: canRemove ? 'pointer' : 'default' }}
+                                                            title={isAdminRole ? 'Admin role cannot be revoked' : canRemove ? 'Click to remove' : ''}
+                                                            onClick={() => canRemove && handleRemoveRole(user, r)}
                                                         >
-                                                            {r.replace('ROLE_', '')} {!isAdminRole && '×'}
+                                                            {r.replace('ROLE_', '')} {canRemove && '×'}
                                                         </span>
                                                     );
                                                 })}
-                                                <button
-                                                    onClick={() => setRoleTarget(user)}
-                                                    style={{ background: 'none', border: '1px dashed var(--border-subtle)', color: 'var(--text-muted)', borderRadius: 2, padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontFamily: 'Orbitron, monospace' }}
-                                                >
-                                                    + ADD
-                                                </button>
+                                                {hasPermission('PERMISSION_MANAGE') && (
+                                                    <button
+                                                        onClick={() => setRoleTarget(user)}
+                                                        style={{ background: 'none', border: '1px dashed var(--border-subtle)', color: 'var(--text-muted)', borderRadius: 2, padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontFamily: 'Orbitron, monospace' }}
+                                                    >
+                                                        + ADD
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                         <td>
-                                            <div style={{ display: 'flex', gap: 4, flexDirection: 'column' }}>
-                                                <Badge variant={user.enabled ? 'green' : 'amber'}>
-                                                    {user.enabled ? 'ENABLED' : 'DISABLED'}
-                                                </Badge>
-                                                {user.accountLocked && <Badge variant="pink">LOCKED</Badge>}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                                <div style={{ width: 50, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
-                                                    <div style={{ height: '100%', width: `${user.profileScore}%`, background: 'linear-gradient(90deg, var(--neon-cyan), var(--neon-purple))' }} />
+                                            <div style={{ display: 'flex', gap: 4, flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                                                    {user.allPermissions.slice(0, 3).map(p => (
+                                                        <span key={p} style={{ fontSize: '9px', color: 'var(--neon-cyan)', border: '1px solid var(--neon-cyan)', padding: '1px 4px', borderRadius: 2 }}>
+                                                            {p}
+                                                        </span>
+                                                    ))}
+                                                    {user.allPermissions.length > 3 && (
+                                                        <span style={{ fontSize: '9px', color: 'var(--text-muted)' }}>+{user.allPermissions.length - 3}</span>
+                                                    )}
                                                 </div>
-                                                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{user.profileScore}%</span>
+                                                {hasPermission('PERMISSION_MANAGE') && (
+                                                    <button
+                                                        onClick={() => handlePermissions(user)}
+                                                        style={{ background: 'none', border: 'none', color: 'var(--neon-pink)', padding: 0, cursor: 'pointer', fontSize: '10px', fontFamily: 'Share Tech Mono, monospace', textDecoration: 'underline' }}
+                                                    >
+                                                        MANAGE_PERMISSIONS
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
-                                        <td>
-                                            <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                                                <Button variant="ghost" size="sm" onClick={() => handleEnable(user)} disabled={actionLoading}>
-                                                    {user.enabled ? 'Disable' : 'Enable'}
+                                        <td style={{ textAlign: 'right' }}>
+                                            <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                                                <Button variant="ghost" size="sm" onClick={() => handlePermissions(user)} disabled={actionLoading}>
+                                                    Permissions
                                                 </Button>
-                                                <Button variant={user.accountLocked ? 'outline' : 'ghost'} size="sm" onClick={() => handleLock(user)} disabled={actionLoading}>
-                                                    {user.accountLocked ? 'Unlock' : 'Lock'}
-                                                </Button>
-                                                <Button variant="danger" size="sm" onClick={() => setDeleteTarget(user)} disabled={actionLoading}>
-                                                    Delete
+                                                <Button variant="ghost" size="sm" onClick={() => setRoleTarget(user)} disabled={actionLoading}>
+                                                    Roles
                                                 </Button>
                                             </div>
                                         </td>
@@ -315,15 +270,6 @@ export const AdminPage: React.FC = () => {
             </div>
 
             {/* ── Modals ── */}
-            <Confirm
-                open={!!deleteTarget}
-                title="DELETE_USER"
-                message={`Permanently delete ${deleteTarget?.email}? This action cannot be undone.`}
-                danger
-                onConfirm={handleDelete}
-                onCancel={() => setDeleteTarget(null)}
-            />
-
             <Modal open={!!roleTarget} title="ASSIGN_ROLE" onClose={() => setRoleTarget(null)} width={400}>
                 <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginBottom: 20 }}>
                     Manage roles for {roleTarget?.email}
@@ -339,6 +285,51 @@ export const AdminPage: React.FC = () => {
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
                     <Button variant="ghost" onClick={() => setRoleTarget(null)}>Cancel</Button>
                     <Button loading={actionLoading} onClick={handleAssignRole}>Assign</Button>
+                </div>
+            </Modal>
+
+            <Modal open={!!permissionsTarget} title="GRANULAR_PERMISSIONS" onClose={() => setPermissionsTarget(null)} width={500}>
+                <div style={{ marginBottom: 20 }}>
+                    <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginBottom: 4 }}>
+                        MANAGING_ACCESS_FOR
+                    </p>
+                    <p style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '16px', color: 'var(--neon-cyan)' }}>
+                        {permissionsTarget?.email}
+                    </p>
+                </div>
+
+                <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        {availablePermissions.map((perm) => {
+                            const isInherited = !!(permissionsTarget?.allPermissions.includes(perm.name) && !permissionsTarget?.permissions.includes(perm.name));
+                            return (
+                                <div key={perm.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: 10, background: 'var(--bg-input)', borderRadius: 4, border: '1px solid var(--border-subtle)', opacity: isInherited ? 0.7 : 1 }}>
+                                    <div style={{ marginTop: 2 }}>
+                                        <Checkbox
+                                            checked={targetPermissions.includes(perm.name) || isInherited}
+                                            disabled={isInherited}
+                                            onChange={(checked: boolean) => {
+                                                if (checked) setTargetPermissions([...targetPermissions, perm.name]);
+                                                else setTargetPermissions(targetPermissions.filter(p => p !== perm.name));
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '14px', fontWeight: 600 }}>{perm.name}</span>
+                                            {isInherited && <Badge variant="cyan">INHERITED</Badge>}
+                                        </div>
+                                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: 2 }}>{perm.description}</div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border-subtle)' }}>
+                    <Button variant="ghost" onClick={() => setPermissionsTarget(null)}>Cancel</Button>
+                    <Button loading={actionLoading} onClick={handleUpdatePermissions}>Save Permissions</Button>
                 </div>
             </Modal>
         </div>

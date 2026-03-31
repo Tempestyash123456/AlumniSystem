@@ -17,13 +17,12 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     // Existing method
     Optional<User> findByEmailAndDeletedAtIsNull(String email);
 
-    // NEW: Fetch with roles eagerly
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.email = :email AND u.deletedAt IS NULL")
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles LEFT JOIN FETCH u.permissions WHERE u.email = :email AND u.deletedAt IS NULL")
     Optional<User> findByEmailWithRoles(@Param("email") String email);
 
     boolean existsByEmailAndDeletedAtIsNull(String email);
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.id = :id AND u.deletedAt IS NULL")
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles LEFT JOIN FETCH u.permissions WHERE u.id = :id AND u.deletedAt IS NULL")
     Optional<User> findByIdWithRoles(@Param("id") UUID id);
 
     @Modifying

@@ -25,6 +25,7 @@ public class CachedUserDetails implements UserDetails {
     private final boolean accountLocked;
 
     private final List<String> roles;
+    private final List<String> permissions;
 
     @JsonCreator
     public CachedUserDetails(
@@ -35,8 +36,9 @@ public class CachedUserDetails implements UserDetails {
             @JsonProperty("lastName")        String  lastName,
             @JsonProperty("profilePhotoUrl") String  profilePhotoUrl,
             @JsonProperty("enabled")         boolean enabled,
-            @JsonProperty("accountLocked")   boolean accountLocked,
-            @JsonProperty("roles")           List<String> roles
+             @JsonProperty("accountLocked")   boolean accountLocked,
+            @JsonProperty("roles")           List<String> roles,
+            @JsonProperty("permissions")     List<String> permissions
     ) {
         this.id              = id;
         this.email           = email;
@@ -47,6 +49,7 @@ public class CachedUserDetails implements UserDetails {
         this.enabled         = enabled;
         this.accountLocked   = accountLocked;
         this.roles           = roles != null ? List.copyOf(roles) : List.of();
+        this.permissions     = permissions != null ? List.copyOf(permissions) : List.of();
     }
 
     // ── Factory ───────────────────────────────────────────────────────────────
@@ -65,7 +68,8 @@ public class CachedUserDetails implements UserDetails {
                 user.getProfilePhotoUrl(),
                 user.isEnabled(),
                 user.isAccountLocked(),
-                roles
+                roles,
+                user.getPermissions().stream().map(p -> p.getName()).toList()
         );
     }
 
@@ -74,8 +78,15 @@ public class CachedUserDetails implements UserDetails {
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
+        var authorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
+                .toList();
+
+        var directPermissions = permissions.stream()
+                .map(SimpleGrantedAuthority::new)
+                .toList();
+
+        return java.util.stream.Stream.concat(authorities.stream(), directPermissions.stream())
                 .toList();
     }
 
@@ -110,6 +121,7 @@ public class CachedUserDetails implements UserDetails {
     public String getLastName()        { return lastName; }
     public String getProfilePhotoUrl() { return profilePhotoUrl; }
     public List<String> getRoles()     { return roles; }
+    public List<String> getPermissions() { return permissions; }
 
     // FIX: These two getters tell Jackson to save the password and locked status into Redis
     public String getPasswordHash()    { return passwordHash; }

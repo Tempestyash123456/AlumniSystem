@@ -83,6 +83,7 @@ public class AuthController {
                 currentUser.getLastName(),
                 currentUser.getProfilePhotoUrl(),
                 currentUser.getRoles(),
+                currentUser.getPermissions(),
                 currentUser.getAccountLocked()
         );
         return ResponseEntity.ok(ApiResponse.success(info));

@@ -19,9 +19,9 @@ import java.util.UUID;
 
 /**
  * POST /api/v1/posts         — list all (authenticated users)
- * POST /api/v1/posts/create  — create (admin only, multipart)
- * PUT  /api/v1/posts/{id}    — update (admin only, multipart)
- * DELETE /api/v1/posts/{id}  — soft-delete (admin only)
+ * POST /api/v1/posts/create  — create (POST_CREATE)
+ * PUT  /api/v1/posts/{id}    — update (POST_EDIT)
+ * DELETE /api/v1/posts/{id}  — soft-delete (POST_DELETE)
  */
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -47,7 +47,7 @@ public class PostController {
      *  - image: (optional) image file
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('POST_CREATE')")
     public ResponseEntity<ApiResponse<PostResponse>> create(
             @RequestPart("data") String dataJson,
             @RequestPart(value = "image", required = false) MultipartFile image,
@@ -59,7 +59,7 @@ public class PostController {
     }
 
     @PutMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('POST_EDIT')")
     public ResponseEntity<ApiResponse<PostResponse>> update(
             @PathVariable UUID postId,
             @RequestPart("data") String dataJson,
@@ -70,7 +70,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('POST_DELETE')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID postId) {
         postService.deletePost(postId);
         return ResponseEntity.ok(ApiResponse.success());

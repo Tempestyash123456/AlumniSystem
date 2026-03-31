@@ -208,8 +208,25 @@ public class AuthService {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private AuthResponse buildAuthResponse(User user, String accessToken, String refreshToken) {
-        List<String> roles = user.getAuthorities().stream().map(a -> a.getAuthority()).toList();
-        UserInfo userInfo = new UserInfo(user.getId().toString(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getProfilePhotoUrl(), roles, user.isAccountLocked());
+        List<String> roles = user.getRoles().stream()
+                .map(Role::getName)
+                .toList();
+
+        List<String> permissions = user.getAuthorities().stream()
+                .map(org.springframework.security.core.GrantedAuthority::getAuthority)
+                .filter(a -> !a.startsWith("ROLE_"))
+                .toList();
+
+        UserInfo userInfo = new UserInfo(
+                user.getId().toString(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getProfilePhotoUrl(),
+                roles,
+                permissions,
+                user.isAccountLocked()
+        );
         return new AuthResponse(accessToken, refreshToken, "Bearer", appProperties.getJwt().getAccessTokenExpiryMs() / 1000, userInfo);
     }
 

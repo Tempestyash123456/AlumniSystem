@@ -11,7 +11,8 @@ import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './pages/
 import { DashboardPage } from './pages/dashboard/DashboardPage.tsx';
 import { AlumniDirectoryPage, AlumniProfileViewPage } from './pages/alumni/AlumniDirectory.tsx';
 import { ProfilePage } from './pages/profile/ProfilePage.tsx';
-import { AdminPage } from './pages/admin/AdminPage.tsx';
+import { ManageUserStatusPage } from './pages/admin/ManageUserStatusPage.tsx';
+import { ManageAdminPermissionsPage } from './pages/admin/ManageAdminPermissionsPage.tsx';
 import { AdminEmailPage } from './pages/admin/AdminEmailPage.tsx';
 import { PostsPage } from './pages/admin/PostsPage.tsx';
 import { EventsPage } from './pages/admin/EventsPage.tsx';
@@ -35,11 +36,20 @@ const RequireUnlocked: React.FC<{ children: React.ReactNode }> = ({ children }) 
     return <>{children}</>;
 };
 
-const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isAuthenticated, isAdmin } = useAuthStore();
+const RequirePermission: React.FC<{ children: React.ReactNode; permission?: string }> = ({ children, permission }) => {
+    const { isAuthenticated, isAdmin, hasPermission } = useAuthStore();
     const location = useLocation();
     if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />;
-    if (!isAdmin) return <Navigate to="/dashboard" replace />;
+    
+    if (permission && !hasPermission(permission)) {
+        return <Navigate to="/dashboard" replace />;
+    }
+    
+    if (!permission && !isAdmin) {
+        // Fallback for generic admin routes if no specific permission provided
+        return <Navigate to="/dashboard" replace />;
+    }
+    
     return <>{children}</>;
 };
 
@@ -116,10 +126,11 @@ const App: React.FC = () => {
                 <Route path="/alumni/:userId" element={<RequireUnlocked><Layout><AlumniProfileViewPage /></Layout></RequireUnlocked>} />
 
                 {/* Admin-only */}
-                <Route path="/admin"       element={<RequireAdmin><Layout><AdminPage /></Layout></RequireAdmin>} />
-                <Route path="/admin/email" element={<RequireAdmin><Layout><AdminEmailPage /></Layout></RequireAdmin>} />
-                <Route path="/admin/posts" element={<RequireAdmin><Layout><PostsPage /></Layout></RequireAdmin>} />
-                <Route path="/admin/events" element={<RequireAdmin><Layout><EventsPage /></Layout></RequireAdmin>} />
+                <Route path="/admin/users/status"      element={<RequirePermission permission="USER_VIEW"><Layout><ManageUserStatusPage /></Layout></RequirePermission>} />
+                <Route path="/admin/users/permissions" element={<RequirePermission permission="PERMISSION_MANAGE"><Layout><ManageAdminPermissionsPage /></Layout></RequirePermission>} />
+                <Route path="/admin/email"             element={<RequirePermission permission="PERMISSION_MANAGE"><Layout><AdminEmailPage /></Layout></RequirePermission>} />
+                <Route path="/admin/posts"             element={<RequirePermission permission="POST_VIEW"><Layout><PostsPage /></Layout></RequirePermission>} />
+                <Route path="/admin/events"            element={<RequirePermission permission="EVENT_VIEW"><Layout><EventsPage /></Layout></RequirePermission>} />
 
                 {/* Fallbacks */}
                 <Route path="/"  element={<Navigate to="/dashboard" replace />} />

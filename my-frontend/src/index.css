@@ -370,3 +370,124 @@ h4, h5, h6 { font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spaci
 .cp-skill-tag:hover { background: rgba(191, 90, 242, 0.15); border-color: var(--neon-purple); }
 .theme-light .cp-skill-tag { background: rgba(66, 66, 66, 0.08); border-color: rgba(66, 66, 66, 0.25); }
 .theme-light .cp-skill-tag:hover { background: rgba(66, 66, 66, 0.15); }
+
+/* ── Toast Notifications ─────────────────────────────────────────────────────── */
+.cp-toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.cp-toast {
+    pointer-events: auto;
+    width: 320px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: var(--shadow-panel);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    animation: toast-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.cp-toast:hover {
+    transform: translateY(-2px);
+}
+
+.cp-toast-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.cp-toast-message {
+    flex: 1;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.cp-toast-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.2s;
+}
+
+.cp-toast-close:hover {
+    color: var(--neon-pink);
+}
+
+.cp-toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: var(--neon-cyan);
+    animation: toast-progress 5s linear forwards;
+}
+
+/* Toast Variants */
+.cp-toast-success { border-left: 4px solid var(--neon-green); }
+.cp-toast-success .cp-toast-icon { background: rgba(57, 255, 20, 0.1); color: var(--neon-green); }
+.cp-toast-success .cp-toast-progress { background: var(--neon-green); }
+
+.cp-toast-error { border-left: 4px solid var(--neon-pink); }
+.cp-toast-error .cp-toast-icon { background: rgba(255, 45, 120, 0.1); color: var(--neon-pink); }
+.cp-toast-error .cp-toast-progress { background: var(--neon-pink); }
+
+.cp-toast-info { border-left: 4px solid var(--neon-cyan); }
+.cp-toast-info .cp-toast-icon { background: rgba(0, 245, 255, 0.1); color: var(--neon-cyan); }
+.cp-toast-info .cp-toast-progress { background: var(--neon-cyan); }
+
+@keyframes toast-in {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toast-progress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* ── Confirm Dialog ──────────────────────────────────────────────────────────── */
+.cp-confirm-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.cp-confirm-message {
+    color: var(--text-secondary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.cp-confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}

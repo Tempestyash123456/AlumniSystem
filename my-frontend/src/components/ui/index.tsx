@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useToastStore } from '../../store/toastStore';
+import { useConfirmStore } from '../../store/confirmStore';
+import type { ToastType } from '../../store/toastStore';
 
 // ── Input ─────────────────────────────────────────────────────────────────────
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -103,14 +106,14 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     loading?: boolean;
 }
 export const Button: React.FC<ButtonProps> = ({
-                                                  variant = 'primary',
-                                                  size = 'md',
-                                                  loading,
-                                                  children,
-                                                  disabled,
-                                                  className = '',
-                                                  ...props
-                                              }) => (
+                                                   variant = 'primary',
+                                                   size = 'md',
+                                                   loading,
+                                                   children,
+                                                   disabled,
+                                                   className = '',
+                                                   ...props
+                                               }) => (
     <button
         className={`cp-btn cp-btn-${variant} ${size !== 'md' ? `cp-btn-${size}` : ''} ${className}`}
         disabled={disabled || loading}
@@ -275,18 +278,33 @@ interface ConfirmProps {
     danger?: boolean;
 }
 export const Confirm: React.FC<ConfirmProps> = ({
-                                                    open, title, message, onConfirm, onCancel, danger,
-                                                }) => (
+                                                     open, title, message, onConfirm, onCancel, danger,
+                                                 }) => (
     <Modal open={open} title={title} onClose={onCancel} width={400}>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: 24, fontFamily: 'Rajdhani, sans-serif' }}>
-            {message}
-        </p>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-            <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>Confirm</Button>
+        <div className="cp-confirm-content">
+            <p className="cp-confirm-message">{message}</p>
+            <div className="cp-confirm-actions">
+                <Button variant="ghost" onClick={onCancel}>Cancel</Button>
+                <Button variant={danger ? 'danger' : 'primary'} onClick={onConfirm}>Confirm</Button>
+            </div>
         </div>
     </Modal>
 );
+
+export const GlobalConfirmContainer: React.FC = () => {
+    const { isOpen, title, message, danger, close } = useConfirmStore();
+    if (!isOpen) return null;
+    return (
+        <Confirm
+            open={isOpen}
+            title={title}
+            message={message}
+            danger={danger}
+            onConfirm={() => close(true)}
+            onCancel={() => close(false)}
+        />
+    );
+};
 
 // ── Toggle Switch ─────────────────────────────────────────────────────────────
 interface ToggleProps {
@@ -332,6 +350,32 @@ export const Toggle: React.FC<ToggleProps> = ({ checked, onChange, label }) => (
         )}
     </label>
 );
+
+// ── Toast Notifications ───────────────────────────────────────────────────────
+export const Toast: React.FC<{ id: string; message: string; type: ToastType; onClose: (id: string) => void }> = ({ id, message, type, onClose }) => {
+    const icons = { success: '✓', error: '✕', info: 'ℹ' };
+    
+    return (
+        <div className={`cp-toast cp-toast-${type}`} onClick={() => onClose(id)}>
+            <div className="cp-toast-icon">{icons[type]}</div>
+            <div className="cp-toast-message">{message}</div>
+            <button className="cp-toast-close" onClick={(e) => { e.stopPropagation(); onClose(id); }}>×</button>
+            <div className="cp-toast-progress" />
+        </div>
+    );
+};
+
+export const ToastContainer: React.FC = () => {
+    const { toasts, removeToast } = useToastStore();
+    
+    return (
+        <div className="cp-toast-container">
+            {toasts.map(t => (
+                <Toast key={t.id} {...t} onClose={removeToast} />
+            ))}
+        </div>
+    );
+};
 
 // ── Progress Bar ──────────────────────────────────────────────────────────────
 export const ProgressBar: React.FC<{ value: number; label?: string }> = ({ value, label }) => (
@@ -406,3 +450,40 @@ export const SkillsInput: React.FC<SkillsInputProps> = ({ skills, onChange }) =>
         </div>
     );
 };
+
+// ── Checkbox ──────────────────────────────────────────────────────────────────
+interface CheckboxProps {
+    checked: boolean;
+    onChange: (checked: boolean) => void;
+    label?: string;
+    disabled?: boolean;
+}
+export const Checkbox: React.FC<CheckboxProps> = ({ checked, onChange, label, disabled }) => (
+    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: disabled ? 'not-allowed' : 'pointer', userSelect: 'none' }}>
+        <div
+            onClick={() => !disabled && onChange(!checked)}
+            style={{
+                width: 18,
+                height: 18,
+                borderRadius: 4,
+                border: `1px solid ${checked ? 'var(--neon-cyan)' : 'var(--border-subtle)'}`,
+                background: checked ? 'var(--neon-cyan)' : 'var(--bg-input)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s',
+                boxShadow: checked ? '0 0 8px rgba(0,245,255,0.3)' : 'none',
+                opacity: disabled ? 0.5 : 1,
+            }}
+        >
+            {checked && (
+                <span style={{ color: 'var(--bg-void)', fontSize: 12, fontWeight: 900 }}>✓</span>
+            )}
+        </div>
+        {label && (
+            <span style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '14px', color: checked ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                {label}
+            </span>
+        )}
+    </label>
+);
