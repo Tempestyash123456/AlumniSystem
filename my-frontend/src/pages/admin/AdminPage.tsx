@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 // @ts-ignore
 import { adminApi } from '../../lib/api';
 import type { AdminUserDto } from '../../types';
@@ -12,6 +13,7 @@ export const AdminPage: React.FC = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [search, setSearch] = useState('');
+    const [filterLock, setFilterLock] = useState<'ALL' | 'LOCKED' | 'UNLOCKED'>('ALL');
 
     const [deleteTarget, setDeleteTarget] = useState<AdminUserDto | null>(null);
     const [roleTarget, setRoleTarget] = useState<AdminUserDto | null>(null);
@@ -40,12 +42,16 @@ export const AdminPage: React.FC = () => {
 
     const filtered = users.filter((u) => {
         const q = search.toLowerCase();
-        return (
-            !q ||
+        const matchesSearch = !q ||
             `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
             u.email.toLowerCase().includes(q) ||
-            u.roles.some((r) => r.toLowerCase().includes(q))
-        );
+            u.roles.some((r) => r.toLowerCase().includes(q));
+
+        if (!matchesSearch) return false;
+        
+        if (filterLock === 'LOCKED') return u.accountLocked;
+        if (filterLock === 'UNLOCKED') return !u.accountLocked;
+        return true;
     });
 
     const handleLock = async (user: AdminUserDto) => {
@@ -147,8 +153,8 @@ export const AdminPage: React.FC = () => {
 
             {/* ── Scrollable table panel ── */}
             <div className="cp-panel" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
-                    <div style={{ flex: 1, maxWidth: 340 }}>
+                <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0, flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: 200, maxWidth: 340 }}>
                         <Input
                             placeholder="Search users..."
                             value={search}
@@ -156,6 +162,31 @@ export const AdminPage: React.FC = () => {
                             icon={<span>🔍</span>}
                         />
                     </div>
+                    
+                    <div style={{ display: 'flex', gap: 4, background: 'var(--bg-input)', padding: 4, borderRadius: 6, border: '1px solid var(--border-subtle)' }}>
+                        {(['ALL', 'LOCKED', 'UNLOCKED'] as const).map(option => (
+                            <button
+                                key={option}
+                                onClick={() => setFilterLock(option)}
+                                style={{
+                                    padding: '6px 14px',
+                                    borderRadius: 4,
+                                    border: 'none',
+                                    fontSize: '11px',
+                                    fontFamily: 'Share Tech Mono, monospace',
+                                    cursor: 'pointer',
+                                    background: filterLock === option ? 'var(--bg-hover)' : 'transparent',
+                                    color: filterLock === option ? 'var(--neon-pink)' : 'var(--text-muted)',
+                                    fontWeight: filterLock === option ? 700 : 400,
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {option}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div style={{ flex: 1 }} />
                     <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
                         {filtered.length} of {users.length}
                     </span>
@@ -176,7 +207,6 @@ export const AdminPage: React.FC = () => {
                                     <th>Roles</th>
                                     <th>Status</th>
                                     <th>Profile</th>
-                                    <th>Last Login</th>
                                     <th style={{ textAlign: 'right' }}>Actions</th>
                                 </tr>
                                 </thead>
@@ -184,7 +214,10 @@ export const AdminPage: React.FC = () => {
                                 {filtered.map((user) => (
                                     <tr key={user.id}>
                                         <td>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                            <Link
+                                                to={`/alumni/${user.id}`}
+                                                style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: 'inherit' }}
+                                            >
                                                 <div style={{
                                                     width: 36, height: 36, borderRadius: '50%',
                                                     overflow: 'hidden', border: '1px solid var(--border-subtle)',
@@ -193,7 +226,8 @@ export const AdminPage: React.FC = () => {
                                                     {user.profilePhotoUrl ? (
                                                         <img
                                                             src={getImageUrl(user.profilePhotoUrl)!}
-                                                            alt=""
+                                                            alt={user.firstName}
+                                                            referrerPolicy="no-referrer"
                                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                             onError={(e) => {
                                                                 (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`;
@@ -211,7 +245,7 @@ export const AdminPage: React.FC = () => {
                                                     </div>
                                                     <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{user.email}</div>
                                                 </div>
-                                            </div>
+                                            </Link>
                                         </td>
                                         <td>
                                             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -252,9 +286,6 @@ export const AdminPage: React.FC = () => {
                                                 </div>
                                                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{user.profileScore}%</span>
                                             </div>
-                                        </td>
-                                        <td style={{ color: 'var(--text-muted)', fontSize: '11px' }}>
-                                            {user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString() : 'Never'}
                                         </td>
                                         <td>
                                             <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>

@@ -1,5 +1,6 @@
 package com.university.alumni.post.service;
 
+import com.university.alumni.audit.service.AuditLogService;
 import com.university.alumni.common.exception.ResourceNotFoundException;
 import com.university.alumni.common.service.FileStorageService;
 import com.university.alumni.post.dto.PostDtos.*;
@@ -8,11 +9,9 @@ import com.university.alumni.post.repository.PostRepository;
 import com.university.alumni.user.entity.User;
 import com.university.alumni.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +23,7 @@ public class PostService {
     private final PostRepository      postRepository;
     private final UserRepository      userRepository;
     private final FileStorageService  fileStorageService;
+    private final AuditLogService     auditLogService;
 
     @Transactional(readOnly = true)
     public List<PostResponse> getAllPosts() {
@@ -54,7 +54,9 @@ public class PostService {
                 .author(author)
                 .build();
 
-        return toResponse(postRepository.save(post));
+        PostResponse saved = toResponse(postRepository.save(post));
+        auditLogService.record("CREATED_POST", author.getFirstName(), author.getLastName(), post.getTitle());
+        return saved;
     }
 
     @Transactional
@@ -70,14 +72,20 @@ public class PostService {
             post.setImageUrl(fileStorageService.storePostImage(image));
         }
 
-        return toResponse(postRepository.save(post));
+        PostResponse saved = toResponse(postRepository.save(post));
+        User author = post.getAuthor();
+        auditLogService.record("UPDATED_POST", author.getFirstName(), author.getLastName(), post.getTitle());
+        return saved;
     }
 
     @Transactional
     public void deletePost(UUID postId) {
         Post post = findOrThrow(postId);
+        String title = post.getTitle();
+        User author = post.getAuthor();
         post.softDelete();
         postRepository.save(post);
+        auditLogService.record("DELETED_POST", author.getFirstName(), author.getLastName(), title);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

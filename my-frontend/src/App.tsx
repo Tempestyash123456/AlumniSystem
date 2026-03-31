@@ -27,6 +27,14 @@ const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     return <>{children}</>;
 };
 
+const RequireUnlocked: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { isAuthenticated, user, isAdmin } = useAuthStore();
+    const location = useLocation();
+    if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />;
+    if (user?.accountLocked && !isAdmin) return <Navigate to="/dashboard" replace />;
+    return <>{children}</>;
+};
+
 const RequireAdmin: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated, isAdmin } = useAuthStore();
     const location = useLocation();
@@ -100,12 +108,12 @@ const App: React.FC = () => {
                 {/* Protected – all authenticated users */}
                 <Route path="/dashboard"    element={<RequireAuth><Layout><DashboardPage /></Layout></RequireAuth>} />
                 <Route path="/profile"      element={<RequireAuth><Layout><ProfilePage /></Layout></RequireAuth>} />
-                <Route path="/posts"        element={<RequireAuth><Layout><PostsFeedPage /></Layout></RequireAuth>} />
-                <Route path="/events"       element={<RequireAuth><Layout><AlumniEventsPage /></Layout></RequireAuth>} />
+                <Route path="/posts"        element={<RequireUnlocked><Layout><PostsFeedPage /></Layout></RequireUnlocked>} />
+                <Route path="/events"       element={<RequireUnlocked><Layout><AlumniEventsPage /></Layout></RequireUnlocked>} />
 
                 {/* Alumni directory */}
-                <Route path="/alumni"         element={<RequireAuth><Layout><AlumniDirectoryPage /></Layout></RequireAuth>} />
-                <Route path="/alumni/:userId" element={<RequireAuth><Layout><AlumniProfileViewPage /></Layout></RequireAuth>} />
+                <Route path="/alumni"         element={<RequireUnlocked><Layout><AlumniDirectoryPage /></Layout></RequireUnlocked>} />
+                <Route path="/alumni/:userId" element={<RequireUnlocked><Layout><AlumniProfileViewPage /></Layout></RequireUnlocked>} />
 
                 {/* Admin-only */}
                 <Route path="/admin"       element={<RequireAdmin><Layout><AdminPage /></Layout></RequireAdmin>} />

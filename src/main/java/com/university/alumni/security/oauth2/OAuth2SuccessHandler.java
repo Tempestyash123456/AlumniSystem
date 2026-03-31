@@ -5,6 +5,7 @@ import com.university.alumni.user.entity.Role;
 import com.university.alumni.user.entity.User;
 import com.university.alumni.user.repository.RoleRepository;
 import com.university.alumni.user.repository.UserRepository;
+import com.university.alumni.audit.service.AuditLogService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final AuditLogService auditLogService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -42,7 +44,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                             .profilePhotoUrl(googlePictureUrl)
                             .passwordHash("{noop}" + UUID.randomUUID())
                             .enabled(true)
+                            .accountLocked(true)
                             .build();
+
+                    auditLogService.record("REGISTERED", newUser.getFirstName(), newUser.getLastName(), "Google OAuth");
 
                     Role alumniRole = roleRepository.findByName(Role.ALUMNI)
                             .orElseThrow(() -> new RuntimeException("ROLE_ALUMNI not found"));
@@ -54,6 +59,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             user.setProfilePhotoUrl(googlePictureUrl);
             userRepository.save(user);
         }
+
+        auditLogService.record("LOGGED_IN", user.getFirstName(), user.getLastName(), "Google OAuth");
 
         String accessToken = jwtService.generateAccessToken(user);
 

@@ -1,6 +1,7 @@
 package com.university.alumni.user.service;
 
 import com.university.alumni.user.dto.ProfileDtos.*;
+import com.university.alumni.audit.service.AuditLogService;
 import com.university.alumni.user.entity.AlumniProfile;
 import com.university.alumni.user.entity.User;
 import com.university.alumni.user.repository.AlumniProfileRepository;
@@ -19,6 +20,7 @@ public class ProfileService {
 
     private final UserRepository          userRepository;
     private final AlumniProfileRepository profileRepository;
+    private final AuditLogService         auditLogService;
 
     // ── GET own profile ───────────────────────────────────────────────────────
 
@@ -58,6 +60,8 @@ public class ProfileService {
         applyUpdates(profile, req);
         profile.recomputeScore();
         profileRepository.save(profile);
+
+        auditLogService.record("UPDATED_PROFILE", user.getFirstName(), user.getLastName(), null);
 
         return toResponse(user, profile);
     }

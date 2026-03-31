@@ -1,5 +1,6 @@
 package com.university.alumni.event.service;
 
+import com.university.alumni.audit.service.AuditLogService;
 import com.university.alumni.common.exception.ResourceNotFoundException;
 import com.university.alumni.common.service.FileStorageService;
 import com.university.alumni.event.dto.EventDtos.*;
@@ -24,6 +25,7 @@ public class EventService {
     private final EventRepository    eventRepository;
     private final UserRepository     userRepository;
     private final FileStorageService fileStorageService;
+    private final AuditLogService    auditLogService;
 
     @Transactional(readOnly = true)
     public List<EventResponse> getAllEvents(CachedUserDetails currentUser) {
@@ -83,7 +85,9 @@ public class EventService {
             event.setDocumentName(document.getOriginalFilename());
         }
 
-        return toResponse(eventRepository.save(event));
+        EventResponse saved = toResponse(eventRepository.save(event));
+        auditLogService.record("CREATED_EVENT", author.getFirstName(), author.getLastName(), event.getName());
+        return saved;
     }
 
     @Transactional
@@ -118,14 +122,20 @@ public class EventService {
             event.setDocumentName(document.getOriginalFilename());
         }
 
-        return toResponse(eventRepository.save(event));
+        EventResponse saved = toResponse(eventRepository.save(event));
+        User author = event.getAuthor();
+        auditLogService.record("UPDATED_EVENT", author.getFirstName(), author.getLastName(), event.getName());
+        return saved;
     }
 
     @Transactional
     public void deleteEvent(UUID eventId) {
         Event event = findOrThrow(eventId);
+        String name = event.getName();
+        User author = event.getAuthor();
         event.softDelete();
         eventRepository.save(event);
+        auditLogService.record("DELETED_EVENT", author.getFirstName(), author.getLastName(), name);
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

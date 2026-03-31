@@ -64,6 +64,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         <img
             src={photoUrl}
             alt=""
+            referrerPolicy="no-referrer"
             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
@@ -101,8 +102,12 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <SectionLabel text="MAIN" />
                         <NavItem path="/dashboard" icon="⬡" label="Dashboard" exact />
                         <NavItem path="/profile"   icon="◉" label="My Profile" exact />
-                        <NavItem path="/posts"     icon="◇" label="Posts" exact />
-                        <NavItem path="/events"    icon="◎" label="Events" exact />
+                        {(!user?.accountLocked || isAdmin) && (
+                            <>
+                                <NavItem path="/posts"     icon="◇" label="Posts" exact />
+                                <NavItem path="/events"    icon="◎" label="Events" exact />
+                            </>
+                        )}
 
                         {isAdmin && (
                             <>

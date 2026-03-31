@@ -116,7 +116,7 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !accountLocked;
+        return true; // Decoupled from accountLocked flag to allow restricted login
     }
 
     @Override

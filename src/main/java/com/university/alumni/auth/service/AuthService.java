@@ -28,6 +28,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
+import com.university.alumni.audit.service.AuditLogService;
+
 import static com.university.alumni.common.config.RedisConfig.CacheNames.USER_DETAILS;
 
 @Slf4j
@@ -45,6 +47,7 @@ public class AuthService {
     private final EmailService emailService;
     private final AppProperties appProperties;
     private final CacheManager cacheManager;
+    private final AuditLogService auditLogService;
 
     // ── Register ─────────────────────────────────────────────────────────────
 
@@ -64,10 +67,13 @@ public class AuthService {
                 .lastName(request.lastName().trim())
                 .phone(request.phone())
                 .enabled(false) // Locked until verified
+                .accountLocked(true) // Restricted UI features until admin unlocks
                 .build();
 
         user.addRole(alumniRole);
-        userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        auditLogService.record("REGISTERED", saved.getFirstName(), saved.getLastName(), null);
 
         // Generate Verification Token
         String token = UUID.randomUUID().toString();
@@ -96,6 +102,7 @@ public class AuthService {
                 request.email().toLowerCase().trim(), request.password()));
         User user = userRepository.findByEmailAndDeletedAtIsNull(request.email().toLowerCase().trim()).orElseThrow();
         userRepository.updateLastLogin(user.getId(), Instant.now());
+        auditLogService.record("LOGGED_IN", user.getFirstName(), user.getLastName(), null);
         String accessToken  = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         refreshTokenService.create(user, refreshToken, extractDeviceInfo(httpRequest));
@@ -202,7 +209,7 @@ public class AuthService {
 
     private AuthResponse buildAuthResponse(User user, String accessToken, String refreshToken) {
         List<String> roles = user.getAuthorities().stream().map(a -> a.getAuthority()).toList();
-        UserInfo userInfo = new UserInfo(user.getId().toString(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getProfilePhotoUrl(), roles);
+        UserInfo userInfo = new UserInfo(user.getId().toString(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getProfilePhotoUrl(), roles, user.isAccountLocked());
         return new AuthResponse(accessToken, refreshToken, "Bearer", appProperties.getJwt().getAccessTokenExpiryMs() / 1000, userInfo);
     }
 

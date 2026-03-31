@@ -89,7 +89,7 @@ public class CachedUserDetails implements UserDetails {
 
     @Override
     @JsonIgnore
-    public boolean isAccountNonLocked() { return !accountLocked; }
+    public boolean isAccountNonLocked() { return true; } // Decoupled
 
     @Override
     @JsonIgnore

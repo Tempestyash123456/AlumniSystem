@@ -670,7 +670,8 @@ export const AlumniProfileViewPage: React.FC = () => {
                     {profile.profilePhotoUrl ? (
                         <img
                             src={getImageUrl(profile.profilePhotoUrl)!}
-                            alt=""
+                            alt="Profile"
+                            referrerPolicy="no-referrer"
                             style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }}
                         />
                     ) : (

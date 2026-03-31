@@ -1,5 +1,8 @@
 package com.university.alumni.user.service;
 
+import static com.university.alumni.common.config.RedisConfig.CacheNames.USER_DETAILS;
+import org.springframework.cache.CacheManager;
+
 import com.university.alumni.auth.service.EmailService;
 import com.university.alumni.user.dto.AdminDtos.*;
 import com.university.alumni.user.entity.AlumniProfile;
@@ -28,6 +31,7 @@ public class AdminService {
     private final RoleRepository          roleRepository;
     private final AlumniProfileRepository profileRepository;
     private final EmailService            emailService;
+    private final CacheManager            cacheManager;
 
     // ── List all users ────────────────────────────────────────────────────────
 
@@ -60,7 +64,9 @@ public class AdminService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "Role not found: " + request.roleName()));
         user.addRole(role);
-        return toAdminDto(userRepository.save(user));
+        User saved = userRepository.save(user);
+        evictUserCache(saved.getEmail());
+        return toAdminDto(saved);
     }
 
     // ── Remove a role ─────────────────────────────────────────────────────────
@@ -69,7 +75,9 @@ public class AdminService {
     public AdminUserDto removeRole(UUID userId, String roleName) {
         User user = findUserOrThrow(userId);
         user.getRoles().removeIf(r -> r.getName().equals(roleName));
-        return toAdminDto(userRepository.save(user));
+        User saved = userRepository.save(user);
+        evictUserCache(saved.getEmail());
+        return toAdminDto(saved);
     }
 
     // ── Lock / Unlock account ─────────────────────────────────────────────────
@@ -81,7 +89,9 @@ public class AdminService {
         if (!request.lock()) {
             user.resetFailedLogin();   // Clear failed attempts on unlock
         }
-        return toAdminDto(userRepository.save(user));
+        User saved = userRepository.save(user);
+        evictUserCache(saved.getEmail());
+        return toAdminDto(saved);
     }
 
     // ── Enable / Disable account ──────────────────────────────────────────────
@@ -90,7 +100,9 @@ public class AdminService {
     public AdminUserDto setAccountEnabled(UUID userId, boolean enabled) {
         User user = findUserOrThrow(userId);
         user.setEnabled(enabled);
-        return toAdminDto(userRepository.save(user));
+        User saved = userRepository.save(user);
+        evictUserCache(saved.getEmail());
+        return toAdminDto(saved);
     }
 
     // ── Soft delete user ──────────────────────────────────────────────────────
@@ -99,6 +111,7 @@ public class AdminService {
     public void deleteUser(UUID userId) {
         User user = findUserOrThrow(userId);
         userRepository.delete(user);
+        evictUserCache(user.getEmail());
     }
 
     // ── Targeted Bulk Email ───────────────────────────────────────────────────
@@ -160,6 +173,15 @@ public class AdminService {
         return userRepository.findById(userId)
                 .filter(u -> u.getDeletedAt() == null)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    private void evictUserCache(String email) {
+        if (email != null) {
+            var cache = cacheManager.getCache(USER_DETAILS);
+            if (cache != null) {
+                cache.evict(email);
+            }
+        }
     }
 
     private AdminUserDto toAdminDto(User user) {

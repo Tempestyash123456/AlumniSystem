@@ -21,6 +21,7 @@ export interface UserInfo {
     lastName: string;
     profilePhotoUrl?: string;
     roles: string[];
+    accountLocked: boolean;
 }
 
 export interface AuthResponse {
