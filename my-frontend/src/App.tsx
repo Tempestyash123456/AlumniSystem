@@ -18,6 +18,7 @@ import { EventsPage } from './pages/admin/EventsPage.tsx';
 import { PostsFeedPage } from './pages/posts/PostsFeedPage.tsx';
 import { AlumniEventsPage } from './pages/alumni/AlumniEventsPage.tsx';
 import { OAuth2Callback } from './pages/auth/OAuth2Callback.tsx';
+import { LandingPage } from './pages/landing/LandingPage.tsx';
 
 // ── Guards ──────────────────────────────────────────────────────────────────
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -127,9 +128,9 @@ const App: React.FC = () => {
                 <Route path="/admin/posts"             element={<RequirePermission permission="POST_MANAGE"><Layout><PostsPage /></Layout></RequirePermission>} />
                 <Route path="/admin/events"            element={<RequirePermission permission="EVENT_MANAGE"><Layout><EventsPage /></Layout></RequirePermission>} />
 
-                {/* Fallbacks */}
-                <Route path="/"  element={<Navigate to="/dashboard" replace />} />
-                <Route path="*"  element={<Navigate to="/dashboard" replace />} />
+                {/* Landing / Fallbacks */}
+                <Route path="/"  element={<LandingPage />} />
+                <Route path="*"  element={<Navigate to="/" replace />} />
             </Routes>
         </BrowserRouter>
     );

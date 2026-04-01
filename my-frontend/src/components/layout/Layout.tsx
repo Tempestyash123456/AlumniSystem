@@ -25,7 +25,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             try { await authApi.logout(refreshToken); } catch {}
         }
         clearAuth();
-        navigate('/login');
+        navigate('/');
     };
 
     const NavItem = ({
@@ -90,11 +90,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             }}>
                 {/* Static Logo Area */}
                 <div style={{ padding: '24px', flexShrink: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottom: '1px solid var(--border-subtle)' }}>
-                    <img
-                        src="/cu-logo.png"
-                        alt="University Logo"
-                        style={{ maxHeight: '60px', maxWidth: '100%', objectFit: 'contain' }}
-                    />
+                    <Link to="/" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <img
+                            src="/cu-logo.png"
+                            alt="University Logo"
+                            style={{ maxHeight: '60px', maxWidth: '100%', objectFit: 'contain' }}
+                        />
+                    </Link>
                 </div>
 
                 {/* Scrollable Nav Area */}
@@ -147,12 +149,13 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 }}>
 
                     {/* ALUMNI PORTAL */}
-                    <div style={{
+                    <Link to="/" style={{
                         fontFamily: 'Orbitron, monospace', fontSize: '20px', fontWeight: 800,
                         letterSpacing: '0.12em', color: 'var(--text-primary)',
+                        textDecoration: 'none',
                     }}>
                         ALUMNI PORTAL
-                    </div>
+                    </Link>
 
                     {/* Header Actions */}
                     <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '20px' }}>
