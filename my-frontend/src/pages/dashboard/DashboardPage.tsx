@@ -2,9 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 // @ts-ignore
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { profileApi, adminApi, tokenStorage } from '../../lib/api';
-import { ProgressBar, Spinner, Badge, Button } from '../../components/ui';
-import type { ProfileResponse, AdminUserDto } from '../../types';
+import { profileApi, adminApi, tokenStorage, postsApi, eventsApi } from '../../lib/api';
+import { Spinner, Button } from '../../components/ui';
+import type { ProfileResponse, AdminUserDto, PostDto, EventDto } from '../../types';
 
 // ── Audit log type ────────────────────────────────────────────────────────────
 interface AuditEntry {
@@ -18,15 +18,15 @@ interface AuditEntry {
 
 // ── Log color + label map ─────────────────────────────────────────────────────
 const LOG_CONFIG: Record<string, { color: string; icon: string; label: string }> = {
-    REGISTERED:     { color: '#00f5ff', icon: '✦', label: 'New user registered'   },
-    LOGGED_IN:      { color: '#39ff14', icon: '▶', label: 'Logged in'              },
-    UPDATED_PROFILE:{ color: '#bf94ff', icon: '◎', label: 'Updated profile'        },
-    CREATED_POST:   { color: '#00fa9a', icon: '+', label: 'Created post'           },
-    UPDATED_POST:   { color: '#ffd700', icon: '✎', label: 'Updated post'           },
-    DELETED_POST:   { color: '#ff4d6b', icon: '✕', label: 'Deleted post'           },
-    CREATED_EVENT:  { color: '#00cfff', icon: '★', label: 'Created event'          },
-    UPDATED_EVENT:  { color: '#ffaa33', icon: '✎', label: 'Updated event'          },
-    DELETED_EVENT:  { color: '#ff4d6b', icon: '✕', label: 'Deleted event'          },
+    REGISTERED: { color: '#00f5ff', icon: '✦', label: 'New user registered' },
+    LOGGED_IN: { color: '#39ff14', icon: '▶', label: 'Logged in' },
+    UPDATED_PROFILE: { color: '#bf94ff', icon: '◎', label: 'Updated profile' },
+    CREATED_POST: { color: '#00fa9a', icon: '+', label: 'Created post' },
+    UPDATED_POST: { color: '#ffd700', icon: '✎', label: 'Updated post' },
+    DELETED_POST: { color: '#ff4d6b', icon: '✕', label: 'Deleted post' },
+    CREATED_EVENT: { color: '#00cfff', icon: '★', label: 'Created event' },
+    UPDATED_EVENT: { color: '#ffaa33', icon: '✎', label: 'Updated event' },
+    DELETED_EVENT: { color: '#ff4d6b', icon: '✕', label: 'Deleted event' },
 };
 
 const LiveLogEntry: React.FC<{ log: AuditEntry }> = ({ log }) => {
@@ -41,14 +41,14 @@ const LiveLogEntry: React.FC<{ log: AuditEntry }> = ({ log }) => {
             border: `1px solid ${cfg.color}22`,
             animation: 'fadeSlideIn 0.3s ease',
         }}>
-            <span style={{ color: cfg.color, fontSize: 13, flexShrink: 0 }}>{cfg.icon}</span>
+            <span style={{ color: cfg.color, fontSize: 'var(--font-size-base)', flexShrink: 0 }}>{cfg.icon}</span>
             <span style={{ color: cfg.color, flex: 1 }}>
                 {cfg.label}{resource} —{' '}
                 <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>
                     {log.firstName} {log.lastName}
                 </span>
             </span>
-            <span style={{ color: 'var(--text-muted)', fontSize: 11, flexShrink: 0 }}>{time}</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', flexShrink: 0 }}>{time}</span>
         </div>
     );
 };
@@ -60,6 +60,8 @@ export const DashboardPage: React.FC = () => {
     const [users, setUsers] = useState<AdminUserDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([]);
+    const [recentPost, setRecentPost] = useState<PostDto | null>(null);
+    const [recentEvent, setRecentEvent] = useState<EventDto | null>(null);
     const sseRef = useRef<EventSource | null>(null);
 
     useEffect(() => {
@@ -70,10 +72,24 @@ export const DashboardPage: React.FC = () => {
                     const userRes = await adminApi.getAllUsers();
                     if (userRes.data) setUsers(userRes.data.users);
                 }
-                
+
                 // Always load profile for the greeting/score if not strictly admin-only view
                 const profileRes = await profileApi.getMyProfile();
                 if (profileRes.data) setProfile(profileRes.data);
+
+                // Fetch recent content for alumni/dashboard
+                const [postsRes, eventsRes] = await Promise.all([
+                    postsApi.getAll(),
+                    eventsApi.getAll()
+                ]);
+
+                if (postsRes.data && postsRes.data.length > 0) {
+                    setRecentPost(postsRes.data[0]);
+                }
+                if (eventsRes.data && eventsRes.data.length > 0) {
+                    // Find most recent (upcoming) event or just the first
+                    setRecentEvent(eventsRes.data[0]);
+                }
             } finally {
                 setLoading(false);
             }
@@ -128,10 +144,10 @@ export const DashboardPage: React.FC = () => {
 
             {/* STATIC TOP SECTION (Doesn't scroll) */}
             <div style={{ flexShrink: 0 }}>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 6 }}>
+                <div style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 6, fontWeight: 700 }}>
                     {greeting}
                 </div>
-                <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.05em' }}>
+                <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.05em' }}>
                     {user?.firstName} {user?.lastName}
                 </h1>
 
@@ -149,18 +165,7 @@ export const DashboardPage: React.FC = () => {
                                 <div className="cp-stat-label">Active Users</div>
                             </div>
                         </>
-                    ) : (
-                        <>
-                            <div className="cp-stat-card cyan" style={{ flex: 1 }}>
-                                <div className="cp-stat-value text-neon-cyan">{profile?.profileScore ?? 0}%</div>
-                                <div className="cp-stat-label">Profile Score</div>
-                            </div>
-                            <div className="cp-stat-card purple" style={{ flex: 1 }}>
-                                <div className="cp-stat-value text-neon-purple">{profile?.skills?.length ?? 0}</div>
-                                <div className="cp-stat-label">Skills</div>
-                            </div>
-                        </>
-                    )}
+                    ) : null}
                 </div>
             </div>
 
@@ -176,38 +181,78 @@ export const DashboardPage: React.FC = () => {
                 {/* LEFT COLUMN - Independent Scroll */}
                 <div className="custom-scrollbar" style={{ overflowY: 'auto', paddingRight: 8 }}>
                     {!(isAdmin && hasPermission('USER_VIEW')) ? (
-                        <div className="cp-panel" style={{ padding: '24px' }}>
-                            <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 20 }}>
-                                ◈ PROFILE_DATA
+                        /* Alumni Dashboard Header Component (Quick Actions + Highlights) */
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                            {/* Alumni Quick Actions */}
+                            <div className="cp-panel" style={{ padding: '24px' }}>
+                                <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-purple)', letterSpacing: '0.15em', marginBottom: 20 }}>
+                                    ⬡ QUICK_ACCESS_NODE
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    <Button variant="outline" onClick={() => navigate('/profile')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
+                                        <span style={{ fontSize: 20 }}>👤</span>
+                                        <span>MY_PROFILE</span>
+                                    </Button>
+                                    <Button variant="outline" onClick={() => navigate('/membership')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
+                                        <span style={{ fontSize: 20 }}>💳</span>
+                                        <span>MEMBERSHIP</span>
+                                    </Button>
+                                    {hasPermission('USER_VIEW') && (
+                                        <Button variant="outline" onClick={() => navigate('/alumni')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
+                                            <span style={{ fontSize: 20 }}>🔍</span>
+                                            <span>DIRECTORY</span>
+                                        </Button>
+                                    )}
+                                    {hasPermission('POST_VIEW') && (
+                                        <Button variant="outline" onClick={() => navigate('/posts')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
+                                            <span style={{ fontSize: 20 }}>📑</span>
+                                            <span>STORIES</span>
+                                        </Button>
+                                    )}
+                                    {hasPermission('EVENT_VIEW') && (
+                                        <Button variant="outline" onClick={() => navigate('/events')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
+                                            <span style={{ fontSize: 20 }}>🗓</span>
+                                            <span>EVENTS</span>
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
-                            <ProgressBar label="COMPLETENESS" value={profile?.profileScore ?? 0} />
 
-                            {/* Dummy content to ensure it scrolls */}
-                            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 24 }}>
-                                {[
-                                    { label: 'Current Role', value: profile?.currentJobTitle },
-                                    { label: 'Company', value: profile?.currentCompany },
-                                    { label: 'Degree', value: profile?.degree },
-                                    { label: 'Industry', value: profile?.industry },
-                                    { label: 'Bio', value: profile?.bio },
-                                    { label: 'Graduation Year', value: profile?.graduationYear },
-                                ].map(item => (
-                                    <div key={item.label}>
-                                        <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: 4 }}>{item.label?.toUpperCase()}</div>
-                                        <div style={{ color: 'var(--text-primary)' }}>{item.value || 'N/A'}</div>
+                            {/* Latest Post */}
+                            <div className="cp-panel" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
+                                <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-green)', letterSpacing: '0.15em', marginBottom: 20 }}>
+                                    ✦ LATEST_STORY
+                                </div>
+                                {recentPost ? (
+                                    <div style={{ display: 'flex', gap: 20 }}>
+                                        {recentPost.imageUrl && (
+                                            <div style={{ width: 120, height: 120, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+                                                <img src={recentPost.imageUrl} alt={recentPost.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                            </div>
+                                        )}
+                                        <div style={{ flex: 1 }}>
+                                            <h3 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{recentPost.title}</h3>
+                                            <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                {recentPost.description}
+                                            </p>
+                                            <Button variant="ghost" size="sm" onClick={() => navigate('/posts')} style={{ marginTop: 12, padding: 0 }}>READ MORE →</Button>
+                                        </div>
                                     </div>
-                                ))}
+                                ) : (
+                                    <div style={{ color: 'var(--text-muted)', fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)' }}>No recent stories found.</div>
+                                )}
                             </div>
                         </div>
                     ) : (
                         <div className="cp-panel" style={{ padding: '24px', height: 'fit-content' }}>
-                            <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-green)', letterSpacing: '0.15em', marginBottom: 20 }}>
-                                ◈ QUICK_ACTIONS
+                            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-green)', letterSpacing: '0.15em', marginBottom: 20 }}>
+                                ◈ QUICK_ACTIONS_NODE
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                {isAdmin && hasPermission('PERMISSION_MANAGE') && <Button variant="primary" onClick={() => navigate('/admin/email')}>✉ Send Email</Button>}
-                                {isAdmin && hasPermission('EVENT_VIEW') && <Button variant="outline" onClick={() => navigate('/admin/events')}>+ Manage Events</Button>}
-                                {isAdmin && hasPermission('POST_VIEW') && <Button variant="outline" onClick={() => navigate('/admin/posts')}>✦ Manage Posts</Button>}
+                                {hasPermission('USER_ADMIN_ACCESS') && <Button variant="primary" onClick={() => navigate('/admin/users/status')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>👥 Manage Users</Button>}
+                                {hasPermission('PERMISSION_MANAGE') && <Button variant="primary" onClick={() => navigate('/admin/email')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>✉ Send Broadcast</Button>}
+                                {hasPermission('EVENT_MANAGE') && <Button variant="outline" onClick={() => navigate('/admin/events')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>📅 Manage Events</Button>}
+                                {hasPermission('POST_MANAGE') && <Button variant="outline" onClick={() => navigate('/admin/posts')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>✦ Manage Posts</Button>}
                             </div>
                         </div>
                     )}
@@ -218,27 +263,57 @@ export const DashboardPage: React.FC = () => {
                     {(isAdmin && hasPermission('USER_VIEW')) ? (
                         <div className="cp-panel" style={{ padding: '24px', minHeight: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-                                <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-cyan)', letterSpacing: '0.15em' }}>
-                                    ◈ LIVE_LOGS
+                                <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em' }}>
+                                    ◈ LIVE_SYSTEM_LOGS
                                 </div>
                                 <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: 'var(--neon-green)', boxShadow: '0 0 6px var(--neon-green)', animation: 'pulse 2s infinite' }} />
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontFamily: 'Share Tech Mono, monospace', fontSize: '12px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)' }}>
                                 {auditLogs.length === 0 ? (
-                                    <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>Waiting for activity...</div>
+                                    <div style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)' }}>Waiting for activity...</div>
                                 ) : (
                                     auditLogs.map(log => <LiveLogEntry key={log.id} log={log} />)
                                 )}
                             </div>
                         </div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                            <div className="cp-panel" style={{ padding: '20px' }}>
-                                <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 12 }}>
-                                    ⬡ SKILLS_LOG
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                            {/* Latest Event */}
+                            <div className="cp-panel" style={{ padding: '24px' }}>
+                                <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 20 }}>
+                                    ★ UPCOMING_EVENT
                                 </div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                                    {profile?.skills?.map(s => <Badge key={s} variant="cyan">{s}</Badge>)}
+                                {recentEvent ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                        <h3 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-base)', fontWeight: 700, color: 'var(--text-primary)' }}>{recentEvent.name}</h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif' }}>
+                                                <span style={{ color: 'var(--neon-cyan)' }}>📅</span>
+                                                {new Date(recentEvent.startTime).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                            </div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif' }}>
+                                                <span style={{ color: 'var(--neon-pink)' }}>📍</span>
+                                                {recentEvent.place}
+                                            </div>
+                                        </div>
+                                        <Button variant="outline" size="sm" onClick={() => navigate('/events')} style={{ alignSelf: 'flex-start' }}>VIEW EVENT</Button>
+                                    </div>
+                                ) : (
+                                    <div style={{ color: 'var(--text-muted)', fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)' }}>No upcoming events.</div>
+                                )}
+                            </div>
+
+                            {/* Legacy Skills Stats (Condensed) */}
+                            <div className="cp-panel" style={{ padding: '20px' }}>
+                                <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.1em', marginBottom: 12 }}>
+                                    &lt; SKILLS_INVENTORY /&gt;
+                                </div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                                    {profile?.skills?.map(s => (
+                                        <span key={s} style={{ fontSize: 'var(--font-size-xs)', padding: '2px 8px', borderRadius: 100, border: '1px solid var(--border-subtle)', color: 'var(--neon-cyan)', background: 'rgba(0,245,255,0.05)' }}>
+                                            {s}
+                                        </span>
+                                    ))}
                                 </div>
                             </div>
                         </div>

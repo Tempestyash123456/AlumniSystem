@@ -67,10 +67,10 @@ export const AdminEmailPage: React.FC = () => {
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
             {/* ── Header ── */}
             <div style={{ flexShrink: 0 }}>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.15em', marginBottom: 6 }}>
+                <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-pink)', letterSpacing: '0.1em', marginBottom: 6, fontWeight: 600 }}>
                     ADMIN_CONSOLE
                 </div>
-                <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
+                <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-2xl)', fontWeight: 700, letterSpacing: '0.05em' }}>
                     Broadcast Email
                 </h1>
             </div>
@@ -82,8 +82,8 @@ export const AdminEmailPage: React.FC = () => {
             {/* ── Content ── */}
             <div className="cp-panel" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '32px' }}>
                 <div style={{ marginBottom: '24px' }}>
-                    <h2 style={{ color: 'var(--neon-cyan)', fontFamily: 'Orbitron, monospace', fontSize: '18px', marginBottom: '8px' }}>Targeted Communications Engine</h2>
-                    <p style={{ color: 'var(--text-secondary)', fontFamily: 'Rajdhani, sans-serif' }}>
+                    <h2 style={{ color: 'var(--neon-cyan)', fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-lg)', marginBottom: '8px' }}>Targeted Communications Engine</h2>
+                    <p style={{ color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-base)' }}>
                         Dispatch bulk emails to specific alumni cohorts based on their profile data. Leave filters blank to send to ALL enabled alumni users.
                     </p>
                 </div>
@@ -91,7 +91,7 @@ export const AdminEmailPage: React.FC = () => {
                 <form onSubmit={handleSendBulkEmail} style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
 
                     <div style={{ background: 'var(--bg-dark)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
-                        <h3 style={{ color: 'var(--text-primary)', fontSize: '14px', fontFamily: 'Orbitron, monospace', marginBottom: '16px' }}>Target Selection</h3>
+                        <h3 style={{ color: 'var(--text-primary)', fontSize: 'var(--font-size-sm)', fontFamily: 'Orbitron, sans-serif', marginBottom: '16px', fontWeight: 600, letterSpacing: '0.05em' }}>Target Selection</h3>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
                             <Input
@@ -150,7 +150,7 @@ export const AdminEmailPage: React.FC = () => {
                         <div className="cp-input-wrap" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <label className="cp-label">Email Body (Plain Text)</label>
-                                <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace' }}>Use {'{{firstName}}'} for personalization</span>
+                                <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontFamily: 'Outfit, sans-serif', fontWeight: 500 }}>Use {'{{firstName}}'} for personalization</span>
                             </div>
                             <Textarea
                                 style={{ flex: 1, minHeight: '200px' }}

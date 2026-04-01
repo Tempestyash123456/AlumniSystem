@@ -189,10 +189,10 @@ export const ManageUserStatusPage: React.FC = () => {
 
             {/* ── Header ── */}
             <div style={{ flexShrink: 0 }}>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.15em', marginBottom: 6 }}>
+                <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-pink)', letterSpacing: '0.1em', marginBottom: 6, fontWeight: 600 }}>
                     ADMIN_CONSOLE › USERS
                 </div>
-                <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
+                <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-2xl)', fontWeight: 700, letterSpacing: '0.05em' }}>
                     Manage Users
                 </h1>
             </div>
@@ -225,20 +225,7 @@ export const ManageUserStatusPage: React.FC = () => {
                 ))}
             </div>
 
-            {/* ── Stat cards ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, flexShrink: 0 }}>
-                {[
-                    { label: 'Total Users', value: stats.total,   color: 'cyan'   },
-                    { label: 'Enabled Accounts', value: stats.enabled, color: 'green'  },
-                    { label: 'Locked Accounts',  value: stats.locked,  color: 'pink'   },
-                    { label: 'Admins',      value: stats.admins,  color: 'purple' },
-                ].map(({ label, value, color }) => (
-                    <div key={label} className={`cp-stat-card ${color}`}>
-                        <div className={`cp-stat-value text-neon-${color}`}>{value}</div>
-                        <div className="cp-stat-label">{label}</div>
-                    </div>
-                ))}
-            </div>
+
 
             {/* ── Scrollable table panel ── */}
             <div className="cp-panel" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -261,12 +248,12 @@ export const ManageUserStatusPage: React.FC = () => {
                                     padding: '6px 14px',
                                     borderRadius: 4,
                                     border: 'none',
-                                    fontSize: '11px',
-                                    fontFamily: 'Share Tech Mono, monospace',
+                                    fontSize: 'var(--font-size-sm)',
+                                    fontFamily: 'Outfit, sans-serif',
                                     cursor: 'pointer',
                                     background: filterLock === option ? 'var(--bg-hover)' : 'transparent',
                                     color: filterLock === option ? 'var(--neon-pink)' : 'var(--text-muted)',
-                                    fontWeight: filterLock === option ? 700 : 400,
+                                    fontWeight: filterLock === option ? 700 : 500,
                                     transition: 'all 0.2s'
                                 }}
                             >
@@ -276,7 +263,7 @@ export const ManageUserStatusPage: React.FC = () => {
                     </div>
 
                     <div style={{ flex: 1 }} />
-                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
+                    <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                         {filtered.length} of {users.length}
                     </span>
                     <Button variant="outline" size="sm" onClick={load}>🔄 Refresh</Button>
@@ -332,10 +319,10 @@ export const ManageUserStatusPage: React.FC = () => {
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '15px' }}>
+                                                        <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: 'var(--font-size-md)' }}>
                                                             {user.firstName} {user.lastName}
                                                         </div>
-                                                        <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{user.email}</div>
+                                                        <div style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', fontFamily: 'Outfit, sans-serif' }}>{user.email}</div>
                                                     </div>
                                                 </Link>
                                             </td>
@@ -353,7 +340,7 @@ export const ManageUserStatusPage: React.FC = () => {
                                                     <div style={{ width: 50, height: 4, background: 'var(--bg-hover)', borderRadius: 2, overflow: 'hidden' }}>
                                                         <div style={{ height: '100%', width: `${user.profileScore}%`, background: 'linear-gradient(90deg, var(--neon-cyan), var(--neon-purple))' }} />
                                                     </div>
-                                                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{user.profileScore}%</span>
+                                                    <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', fontFamily: 'Outfit, sans-serif' }}>{user.profileScore}%</span>
                                                 </div>
                                             </td>
                                             <td>
@@ -403,10 +390,10 @@ export const ManageUserStatusPage: React.FC = () => {
             {/* ── Granular Permissions Modal ── */}
             <Modal open={!!permissionsTarget} title="GRANULAR_PERMISSIONS" onClose={() => setPermissionsTarget(null)} width={500}>
                 <div style={{ marginBottom: 20 }}>
-                    <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginBottom: 4 }}>
+                    <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: 4, fontWeight: 600 }}>
                         MANAGING_ACCESS_FOR
                     </p>
-                    <p style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '16px', color: 'var(--neon-cyan)' }}>
+                    <p style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-lg)', color: 'var(--neon-cyan)' }}>
                         {permissionsTarget?.email}
                     </p>
                 </div>
@@ -429,10 +416,10 @@ export const ManageUserStatusPage: React.FC = () => {
                                     </div>
                                     <div style={{ flex: 1 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '14px', fontWeight: 600 }}>{perm.name}</span>
+                                            <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-base)', fontWeight: 600 }}>{perm.name}</span>
                                             {isInherited && <Badge variant="cyan">INHERITED</Badge>}
                                         </div>
-                                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: 2 }}>{perm.description}</div>
+                                        <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginTop: 2, fontFamily: 'Outfit, sans-serif' }}>{perm.description}</div>
                                     </div>
                                 </div>
                             );

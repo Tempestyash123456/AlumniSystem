@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 /* ── Dark Theme Variables (Default) ─────────────────────────────────────── */
 :root, .theme-dark {
@@ -17,10 +17,20 @@
     --cyan-dim:       #00a8b0;
     --pink-dim:       #8b0030;
 
-    --text-primary:   #e2eaf8;
-    --text-secondary: #8899bb;
-    --text-muted:     #445577;
-    --text-disabled:  #2a3a55;
+    --text-primary:   #f0f4f8;
+    --text-secondary: #a0aec0;
+    --text-muted:     #718096;
+    --text-disabled:  #4a5568;
+
+    /* Typography Scale */
+    --font-size-xs:   12px;
+    --font-size-sm:   14px;
+    --font-size-base: 16px;
+    --font-size-md:   18px;
+    --font-size-lg:   20px;
+    --font-size-xl:   24px;
+    --font-size-2xl:  32px;
+    --font-size-3xl:  40px;
 
     --border-subtle:  #1a2540;
     --border-active:  #00f5ff40;
@@ -62,10 +72,10 @@
     --cyan-dim:       #b71c1c;
     --pink-dim:       #7f0000;
 
-    --text-primary:   #050505;
-    --text-secondary: #4b4c4f;
-    --text-muted:     #65676b;
-    --text-disabled:  #bcc0c4;
+    --text-primary:   #0f172a;
+    --text-secondary: #475569;
+    --text-muted:     #64748b;
+    --text-disabled:  #94a3b8;
 
     --border-subtle:  #ced0d4;
     --border-active:  #d32f2f40;
@@ -87,8 +97,8 @@
 html { scroll-behavior: smooth; }
 
 body {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 18px;
+    font-family: 'Outfit', 'Rajdhani', sans-serif;
+    font-size: var(--font-size-base);
     line-height: 1.6;
     background-color: var(--bg-void);
     color: var(--text-primary);
@@ -107,10 +117,11 @@ body {
 /* ── Typography ──────────────────────────────────────────────────────────── */
 .font-display { font-family: 'Orbitron', monospace; }
 .font-mono    { font-family: 'Share Tech Mono', monospace; }
-.font-body    { font-family: 'Rajdhani', sans-serif; }
+.font-body    { font-family: 'Outfit', sans-serif; }
+.font-accent  { font-family: 'Rajdhani', sans-serif; }
 
-h1, h2, h3 { font-family: 'Orbitron', monospace; letter-spacing: 0.05em; }
-h4, h5, h6 { font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: 0.03em; }
+h1, h2, h3 { font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em; font-weight: 700; }
+h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 600; letter-spacing: 0.02em; }
 
 /* ── Grid / Scanline Background ──────────────────────────────────────────── */
 .bg-grid {
@@ -174,8 +185,8 @@ h4, h5, h6 { font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spaci
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 .cp-btn {
     display: inline-flex; align-items: center; justify-content: center;
-    gap: 8px; padding: 12px 28px; font-family: 'Orbitron', monospace;
-    font-size: 14px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    gap: 8px; padding: 12px 28px; font-family: 'Orbitron', sans-serif;
+    font-size: var(--font-size-sm); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
     cursor: pointer; border: none; border-radius: var(--radius-sm);
     transition: all var(--transition-base); position: relative; overflow: hidden;
     white-space: nowrap; text-decoration: none;
@@ -213,8 +224,8 @@ h4, h5, h6 { font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spaci
 .cp-input-wrap { display: flex; flex-direction: column; gap: 8px; }
 
 .cp-label {
-    font-family: 'Orbitron', monospace; font-size: 12px;
-    font-weight: 600; letter-spacing: 0.12em; color: var(--text-secondary); text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif; font-size: var(--font-size-sm);
+    font-weight: 600; letter-spacing: 0.08em; color: var(--text-secondary); text-transform: uppercase;
     transition: color var(--transition-base);
 }
 
@@ -226,8 +237,8 @@ h4, h5, h6 { font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spaci
 .cp-input {
     width: 100%; padding: 14px 18px; background: var(--bg-dark);
     border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
-    color: var(--text-primary); font-family: 'Share Tech Mono', monospace;
-    font-size: 16px; outline: none;
+    color: var(--text-primary); font-family: 'Outfit', sans-serif;
+    font-size: var(--font-size-base); outline: none;
     transition: border-color var(--transition-base), box-shadow var(--transition-base), background-color var(--transition-base), color var(--transition-base);
 }
 
@@ -239,7 +250,7 @@ h4, h5, h6 { font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spaci
 .cp-input.error:focus { box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.1); }
 .theme-light .cp-input.error:focus { box-shadow: 0 0 0 3px rgba(154, 0, 7, 0.1); }
 
-.cp-error { font-family: 'Share Tech Mono', monospace; font-size: 13px; color: var(--neon-pink); display: flex; align-items: center; gap: 6px; }
+.cp-error { font-family: 'Outfit', sans-serif; font-size: var(--font-size-sm); color: var(--neon-pink); display: flex; align-items: center; gap: 6px; }
 
 .cp-select {
     appearance: none;
@@ -317,7 +328,7 @@ h4, h5, h6 { font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spaci
 .theme-light .cp-spinner { border-color: rgba(211, 47, 47, 0.2); }
 
 /* ── Toast / Alert ───────────────────────────────────────────────────────── */
-.cp-alert { padding: 14px 18px; border-radius: var(--radius-sm); font-family: 'Share Tech Mono', monospace; font-size: 15px; border-left: 3px solid; display: flex; align-items: flex-start; gap: 10px; }
+.cp-alert { padding: 14px 18px; border-radius: var(--radius-sm); font-family: 'Outfit', sans-serif; font-size: var(--font-size-base); border-left: 3px solid; display: flex; align-items: flex-start; gap: 10px; }
 .cp-alert-error { background: rgba(255, 45, 120, 0.08); border-color: var(--neon-pink); color: #ffb3c8; }
 .theme-light .cp-alert-error { color: #9a0007; }
 .cp-alert-success { background: rgba(57, 255, 20, 0.08); border-color: var(--neon-green); color: #a8ffb0; }
@@ -326,15 +337,15 @@ h4, h5, h6 { font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spaci
 
 /* ── Table ───────────────────────────────────────────────────────────────── */
 .cp-table { width: 100%; border-collapse: collapse; }
-.cp-table th { font-family: 'Orbitron', monospace; font-size: 12px; letter-spacing: 0.1em; color: var(--text-secondary); text-transform: uppercase; padding: 14px 18px; border-bottom: 1px solid var(--border-subtle); text-align: left; white-space: nowrap; }
-.cp-table td { padding: 16px 18px; border-bottom: 1px solid rgba(26, 37, 64, 0.5); font-family: 'Share Tech Mono', monospace; font-size: 15px; color: var(--text-primary); vertical-align: middle; }
+.cp-table th { font-family: 'Orbitron', sans-serif; font-size: var(--font-size-sm); letter-spacing: 0.1em; color: var(--text-secondary); text-transform: uppercase; padding: 14px 18px; border-bottom: 2px solid var(--border-subtle); text-align: left; white-space: nowrap; }
+.cp-table td { padding: 16px 18px; border-bottom: 1px solid rgba(26, 37, 64, 0.5); font-family: 'Outfit', sans-serif; font-size: var(--font-size-base); color: var(--text-primary); vertical-align: middle; }
 .theme-light .cp-table td { border-bottom: 1px solid rgba(206, 208, 212, 0.5); }
 .cp-table tr:hover td { background: rgba(0, 245, 255, 0.02); }
 .theme-light .cp-table tr:hover td { background: rgba(211, 47, 47, 0.02); }
 .cp-table tr:last-child td { border-bottom: none; }
 
 /* ── Sidebar nav ─────────────────────────────────────────────────────────── */
-.cp-nav-item { display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition-fast); text-decoration: none; color: var(--text-secondary); font-family: 'Rajdhani', sans-serif; font-weight: 500; font-size: 17px; letter-spacing: 0.03em; border: 1px solid transparent; }
+.cp-nav-item { display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: var(--radius-sm); cursor: pointer; transition: all var(--transition-fast); text-decoration: none; color: var(--text-secondary); font-family: 'Outfit', sans-serif; font-weight: 500; font-size: var(--font-size-md); letter-spacing: 0.02em; border: 1px solid transparent; }
 .cp-nav-item:hover { color: var(--text-primary); background: var(--bg-hover); border-color: var(--border-subtle); }
 .cp-nav-item.active { color: var(--neon-cyan); background: rgba(0, 245, 255, 0.08); border-color: rgba(0, 245, 255, 0.2); box-shadow: inset 4px 0 0 var(--neon-cyan); }
 .theme-light .cp-nav-item.active { background: rgba(211, 47, 47, 0.08); border-color: rgba(211, 47, 47, 0.2); box-shadow: inset 4px 0 0 var(--neon-cyan); }
@@ -347,8 +358,8 @@ h4, h5, h6 { font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spaci
 .cp-stat-card.purple::after { background: linear-gradient(90deg, transparent, var(--neon-purple), transparent); }
 .cp-stat-card.green::after { background: linear-gradient(90deg, transparent, var(--neon-green), transparent); }
 .cp-stat-card.amber::after { background: linear-gradient(90deg, transparent, var(--neon-amber), transparent); }
-.cp-stat-value { font-family: 'Orbitron', monospace; font-size: 34px; font-weight: 700; line-height: 1.2; }
-.cp-stat-label { font-family: 'Orbitron', monospace; font-size: 12px; letter-spacing: 0.12em; color: var(--text-muted); text-transform: uppercase; margin-top: 8px; }
+.cp-stat-value { font-family: 'Orbitron', sans-serif; font-size: var(--font-size-3xl); font-weight: 700; line-height: 1.2; }
+.cp-stat-label { font-family: 'Orbitron', sans-serif; font-size: var(--font-size-sm); letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; margin-top: 8px; }
 
 /* ── Misc utilities ──────────────────────────────────────────────────────── */
 .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -419,8 +430,8 @@ h4, h5, h6 { font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spaci
 
 .cp-toast-message {
     flex: 1;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 15px;
+    font-family: 'Outfit', sans-serif;
+    font-size: var(--font-size-base);
     font-weight: 500;
     color: var(--text-primary);
 }

@@ -245,10 +245,10 @@ export const LandingPage: React.FC = () => {
     ];
 
     const stats = [
-        { value: 12400, suffix: '+', label: 'Alumni Members' },
-        { value: 98, suffix: '%', label: 'Satisfaction Rate' },
-        { value: 340, suffix: '+', label: 'Companies Hiring' },
-        { value: 28, suffix: '', label: 'Years of Legacy' },
+        { value: 12400, suffix: '+', label: 'Demo Alumni Members' },
+        { value: 98, suffix: '%', label: 'Demo satisfaction Rate' },
+        { value: 340, suffix: '+', label: 'Demo companies Hiring' },
+        { value: 28, suffix: '', label: 'Demo years of Legacy' },
     ];
 
     return (
@@ -267,10 +267,10 @@ export const LandingPage: React.FC = () => {
             <nav className={`lp-nav ${scrolled ? 'lp-nav-scrolled' : ''}`}>
                 <div className="lp-nav-inner">
                     <Link to="/" className="lp-logo">
-                        <img 
-                            src="/cu-logo.png" 
-                            alt="" 
-                            style={{ height: '32px', width: 'auto', objectFit: 'contain' }} 
+                        <img
+                            src="/cu-logo.png"
+                            alt=""
+                            style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
                         />
                         <span className="lp-logo-text">ALUMNI<span className="lp-logo-accent">_PORTAL</span></span>
                     </Link>
@@ -280,8 +280,8 @@ export const LandingPage: React.FC = () => {
                         <a href="#stats" className="lp-nav-link">Stats</a>
                     </div>
                     <div className="lp-nav-actions">
-                        <button 
-                            className="lp-theme-toggle" 
+                        <button
+                            className="lp-theme-toggle"
                             onClick={toggleTheme}
                             aria-label="Toggle Theme"
                         >
@@ -304,7 +304,7 @@ export const LandingPage: React.FC = () => {
                 <div className={`lp-hero-content ${heroVisible ? 'lp-hero-visible' : ''}`}>
                     <div className="lp-hero-tag">
                         <span className="lp-hero-tag-dot" />
-                        University Alumni Network // v2.0
+                        University Alumni Portal
                     </div>
 
                     <h1 className="lp-hero-title">
@@ -406,7 +406,7 @@ export const LandingPage: React.FC = () => {
                                 <div>
                                     <h3 className="lp-about-block-title">Join the Legacy</h3>
                                     <p className="lp-about-block-desc">
-                                        Thousands of alumni have already made this their professional home. 
+                                        Thousands of alumni have already made this their professional home.
                                         Your story is part of something bigger — come add your chapter.
                                     </p>
                                 </div>
@@ -475,7 +475,7 @@ export const LandingPage: React.FC = () => {
                     <div className="lp-section-tag" style={{ justifyContent: 'center' }}>◈ INITIATE_CONNECTION</div>
                     <h2 className="lp-cta-title">Ready to Reconnect?</h2>
                     <p className="lp-cta-sub">
-                        Join thousands of alumni who have already made their mark. 
+                        Join thousands of alumni who have already made their mark.
                         Your legacy continues here.
                     </p>
                     <div className="lp-cta-actions">
@@ -509,10 +509,6 @@ export const LandingPage: React.FC = () => {
                     <div className="lp-footer-copy">
                         © {new Date().getFullYear()} University Alumni Network. All rights reserved.
                     </div>
-                    <div className="lp-footer-links">
-                        <Link to="/login" className="lp-footer-link">Login</Link>
-                        <Link to="/register" className="lp-footer-link">Register</Link>
-                    </div>
                 </div>
             </footer>
         </div>
@@ -521,13 +517,13 @@ export const LandingPage: React.FC = () => {
 
 // ── Animated terminal lines ───────────────────────────────────────────────────
 const TERMINAL_LINES = [
-    { text: '> Initializing Alumni Portal v2.0...', color: '#00f5ff', delay: 300 },
+    { text: '> Initializing Alumni Portal...', color: '#00f5ff', delay: 300 },
     { text: '> Loading alumni database...', color: '#8899bb', delay: 800 },
-    { text: '✓ 12,400 members connected', color: '#39ff14', delay: 1400 },
-    { text: '> Establishing secure channel...', color: '#8899bb', delay: 1900 },
-    { text: '✓ TLS 1.3 encryption active', color: '#39ff14', delay: 2400 },
-    { text: '> Fetching career opportunities...', color: '#8899bb', delay: 2900 },
-    { text: '✓ 340+ companies hiring alumni', color: '#39ff14', delay: 3500 },
+    { text: '✓ Members connected', color: '#39ff14', delay: 1400 },
+    { text: '> Establishing security...', color: '#8899bb', delay: 1900 },
+    { text: '✓ Encrption active', color: '#39ff14', delay: 2400 },
+    { text: '> Fetching events ...', color: '#8899bb', delay: 2900 },
+    { text: '✓ Loaded posts ...', color: '#39ff14', delay: 3500 },
     { text: '> System ready. Welcome back.', color: '#00f5ff', delay: 4200 },
     { text: '_ ', color: '#00f5ff', delay: 4800 },
 ];

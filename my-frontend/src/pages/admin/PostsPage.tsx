@@ -49,11 +49,11 @@ const PostCard: React.FC<{
             )}
             <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--neon-cyan)', letterSpacing: '0.1em' }}>
+                    <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--neon-cyan)', letterSpacing: '0.05em' }}>
                         {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </span>
                     <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-disabled)' }} />
-                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-muted)' }}>
+                    <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
                         {post.authorFirstName} {post.authorLastName}
                     </span>
                 </div>
@@ -111,10 +111,10 @@ const MarkdownEditor: React.FC<{ value: string; onChange: (v: string) => void; l
                 {(['write', 'preview'] as const).map(t => (
                     <button key={t} onClick={() => setTab(t)} style={{
                         padding: '6px 18px', background: 'transparent', border: 'none', cursor: 'pointer',
-                        fontFamily: 'Orbitron, monospace', fontSize: '10px', letterSpacing: '0.1em',
+                        fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', letterSpacing: '0.1em',
                         color: tab === t ? 'var(--neon-cyan)' : 'var(--text-muted)',
                         borderBottom: tab === t ? '2px solid var(--neon-cyan)' : '2px solid transparent',
-                        marginBottom: -1, transition: 'all 0.15s',
+                        marginBottom: -1, transition: 'all 0.15s', fontWeight: 600,
                     }}>
                         {t.toUpperCase()}
                     </button>
@@ -141,10 +141,10 @@ const MarkdownEditor: React.FC<{ value: string; onChange: (v: string) => void; l
                         value={value}
                         onChange={e => onChange(e.target.value)}
                         placeholder="Write your post in **Markdown**..."
-                        style={{ minHeight: 280, resize: 'vertical', fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', lineHeight: 1.7 }}
+                        style={{ minHeight: 280, resize: 'vertical', fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-base)', lineHeight: 1.7 }}
                     />
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)', textAlign: 'right' }}>
-                        {value.length} chars · {value.split('\n').length} lines
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-disabled)', textAlign: 'right', marginTop: 4 }}>
+                        {value.length} characters · {value.split('\n').length} lines
                     </div>
                 </>
             ) : (
@@ -195,14 +195,14 @@ const ImageUploadZone: React.FC<{ current?: string | null; onFile: (f: File | nu
                              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
                              onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
                         >
-                            <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-cyan)' }}>CLICK TO REPLACE</span>
+                            <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--neon-cyan)', fontWeight: 700 }}>CLICK TO REPLACE</span>
                         </div>
                     </div>
                 ) : (
                     <div style={{ textAlign: 'center', padding: 20 }}>
                         <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.4 }}>⬡</div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>Drop image here or click to browse</div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)', marginTop: 4 }}>JPG / PNG / WEBP · max 5MB</div>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>Drop image here or click to browse</div>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-disabled)', marginTop: 4 }}>JPG / PNG / WEBP · max 5MB</div>
                     </div>
                 )}
             </div>
@@ -226,7 +226,7 @@ const PostViewModal: React.FC<{ post: PostDto | null; onClose: () => void }> = (
                     <img src={`${BASE_URL}${post.imageUrl}`} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
             )}
-            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-muted)', marginBottom: 16, display: 'flex', gap: 12 }}>
+            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: 16, display: 'flex', gap: 12 }}>
                 <span>By {post.authorFirstName} {post.authorLastName}</span>
                 <span>{new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
             </div>
@@ -322,13 +322,13 @@ export const PostsPage: React.FC = () => {
             {/* ── Header ── */}
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, flexShrink: 0 }}>
                 <div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.15em', marginBottom: 6 }}>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-pink)', letterSpacing: '0.1em', marginBottom: 6, fontWeight: 600 }}>
                         ADMIN_CONSOLE › CONTENT_MANAGEMENT
                     </div>
-                    <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
+                    <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-2xl)', fontWeight: 700, letterSpacing: '0.05em' }}>
                         Posts &amp; Announcements
                     </h1>
-                    <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginTop: 4 }}>
+                    <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginTop: 4 }}>
                         {posts.length} post{posts.length !== 1 ? 's' : ''} published
                     </p>
                 </div>

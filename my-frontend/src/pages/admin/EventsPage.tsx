@@ -30,8 +30,8 @@ const getEventStatus = (startTime: string, endTime?: string | null): EventStatus
 
 const STATUS_STYLES: Record<EventStatus, { bg: string; text: string; border: string }> = {
     UPCOMING: { bg: 'rgba(57,255,20,0.15)', text: 'var(--neon-green)', border: 'rgba(57,255,20,0.3)' },
-    ONGOING:  { bg: 'rgba(0,245,255,0.15)', text: 'var(--neon-cyan)', border: 'rgba(0,245,255,0.3)' },
-    PAST:     { bg: 'rgba(255,184,0,0.12)', text: 'var(--neon-amber)', border: 'rgba(255,184,0,0.3)' }
+    ONGOING: { bg: 'rgba(0,245,255,0.15)', text: 'var(--neon-cyan)', border: 'rgba(0,245,255,0.3)' },
+    PAST: { bg: 'rgba(255,184,0,0.12)', text: 'var(--neon-amber)', border: 'rgba(255,184,0,0.3)' }
 };
 
 const docIcon = (name: string | undefined) => {
@@ -49,10 +49,10 @@ const renderMarkdown = (md: string): string => {
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
         .replace(/\*(.+?)\*/g, '<em style="color:var(--neon-amber)">$1</em>')
-        .replace(/`([^`]+)`/g, '<code style="background:rgba(0,245,255,0.08);border:1px solid rgba(0,245,255,0.2);padding:2px 6px;border-radius:3px;font-family:Share Tech Mono,monospace;font-size:12px;color:var(--neon-cyan)">$1</code>')
-        .replace(/\n\n/g, '</p><p style="margin:8px 0;color:var(--text-secondary);line-height:1.7;font-family:Rajdhani,sans-serif;font-size:15px">')
+        .replace(/`([^`]+)`/g, '<code style="background:rgba(0,245,255,0.08);border:1px solid rgba(0,245,255,0.2);padding:2px 6px;border-radius:3px;font-family:Outfit,sans-serif;font-size:var(--font-size-sm);color:var(--neon-cyan)">$1</code>')
+        .replace(/\n\n/g, '</p><p style="margin:8px 0;color:var(--text-secondary);line-height:1.7;font-family:Outfit,sans-serif;font-size:var(--font-size-base)">')
         .replace(/\n/g, '<br>');
-    return `<p style="margin:8px 0;color:var(--text-secondary);line-height:1.7;font-family:Rajdhani,sans-serif;font-size:15px">${html}</p>`;
+    return `<p style="margin:8px 0;color:var(--text-secondary);line-height:1.7;font-family:Outfit,sans-serif;font-size:var(--font-size-base)">${html}</p>`;
 };
 
 // ── Media Upload Zone ─────────────────────────────────────────────────────────
@@ -63,7 +63,7 @@ const MediaUploadZone: React.FC<{
     pendingFile?: File | null;
     onRemove?: () => void;
 }> = ({ current, currentType, onFile, pendingFile, onRemove }) => {
-    const inputRef  = useRef<HTMLInputElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
     const [drag, setDrag] = useState(false);
 
     const previewUrl = pendingFile
@@ -122,7 +122,7 @@ const MediaUploadZone: React.FC<{
                             onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
                             onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
                         >
-                            <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-cyan)' }}>
+                            <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--neon-cyan)', fontWeight: 700 }}>
                                 CLICK TO REPLACE
                             </span>
                         </div>
@@ -130,10 +130,10 @@ const MediaUploadZone: React.FC<{
                 ) : (
                     <div style={{ textAlign: 'center', padding: 24 }}>
                         <div style={{ fontSize: 32, marginBottom: 8, opacity: 0.3 }}>◈</div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                             Drop image or video · click to browse
                         </div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)', marginTop: 4 }}>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-disabled)', marginTop: 4 }}>
                             JPG / PNG / WEBP · MP4 / WEBM · max 100 MB
                         </div>
                     </div>
@@ -142,8 +142,8 @@ const MediaUploadZone: React.FC<{
             {previewUrl && (
                 <button type="button" onClick={() => onRemove ? onRemove() : onFile(null)} style={{
                     background: 'none', border: 'none', cursor: 'pointer',
-                    color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace',
-                    fontSize: '11px', textAlign: 'left',
+                    color: 'var(--neon-pink)', fontFamily: 'Outfit, sans-serif',
+                    fontSize: 'var(--font-size-sm)', textAlign: 'left', fontWeight: 600
                 }}>
                     ✕ Remove media
                 </button>
@@ -168,10 +168,10 @@ const DocUploadZone: React.FC<{
     onRemove?: () => void;
 }> = ({ currentName, currentUrl, onFile, pendingFile, onRemove }) => {
     const inputRef = useRef<HTMLInputElement>(null);
-    const [drag, setDrag]   = useState(false);
+    const [drag, setDrag] = useState(false);
 
     const displayName = pendingFile ? pendingFile.name : currentName;
-    const displayUrl  = !pendingFile && currentUrl ? `${BASE_URL}${currentUrl}` : null;
+    const displayUrl = !pendingFile && currentUrl ? `${BASE_URL}${currentUrl}` : null;
 
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault(); setDrag(false);
@@ -200,13 +200,13 @@ const DocUploadZone: React.FC<{
                         <span style={{ fontSize: 28 }}>{docIcon(displayName)}</span>
                         <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{
-                                fontFamily: 'Share Tech Mono, monospace', fontSize: '13px',
+                                fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)',
                                 color: 'var(--text-primary)', overflow: 'hidden',
-                                textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600
                             }}>
                                 {displayName}
                             </div>
-                            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--neon-purple)', marginTop: 2 }}>
+                            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--neon-purple)', marginTop: 2, fontWeight: 500 }}>
                                 {pendingFile ? 'NEW FILE — not saved yet' : 'CURRENT ATTACHMENT'}
                             </div>
                         </div>
@@ -236,10 +236,10 @@ const DocUploadZone: React.FC<{
                 ) : (
                     <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: 28, marginBottom: 6, opacity: 0.3 }}>📎</div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                             Drop document here or click to browse
                         </div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)', marginTop: 3 }}>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-disabled)', marginTop: 3 }}>
                             PDF · DOCX · PPTX · max 50 MB
                         </div>
                     </div>
@@ -304,11 +304,12 @@ const EventCard: React.FC<{
                 {/* Status badge */}
                 <div style={{ position: 'absolute', top: 10, right: 10 }}>
                     <span style={{
-                        fontFamily: 'Orbitron, monospace', fontSize: '8px', letterSpacing: '0.15em',
-                        padding: '3px 8px', borderRadius: 2,
+                        fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', letterSpacing: '0.15em',
+                        padding: '4px 10px', borderRadius: 4,
                         background: styleConf.bg,
                         color: styleConf.text,
                         border: `1px solid ${styleConf.border}`,
+                        fontWeight: 700,
                     }}>
                         {status}
                     </span>
@@ -317,7 +318,7 @@ const EventCard: React.FC<{
 
             {/* Content */}
             <div style={{ padding: '16px 18px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <h3 style={{ fontFamily: 'Orbitron, monospace', fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.04em', lineHeight: 1.4 }}>
+                <h3 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-base)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.04em', lineHeight: 1.4 }}>
                     {event.name}
                 </h3>
 
@@ -327,8 +328,8 @@ const EventCard: React.FC<{
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span style={{ color: 'var(--neon-cyan)', fontSize: 10, width: 12, textAlign: 'center' }}>▶</span>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '8px', color: 'var(--text-muted)' }}>START</span>
-                                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontWeight: 600 }}>START</span>
+                                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                                     {fmtDateTime(event.startTime)}
                                 </span>
                             </div>
@@ -337,8 +338,8 @@ const EventCard: React.FC<{
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <span style={{ color: 'var(--neon-pink)', fontSize: 10, width: 12, textAlign: 'center' }}>■</span>
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '8px', color: 'var(--text-muted)' }}>END</span>
-                                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                    <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontWeight: 600 }}>END</span>
+                                    <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                                         {fmtDateTime(event.endTime)}
                                     </span>
                                 </div>
@@ -349,7 +350,7 @@ const EventCard: React.FC<{
                     {/* Place */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{ color: 'var(--neon-pink)', fontSize: 12, paddingLeft: 2 }}>📍</span>
-                        <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {event.place}
                         </span>
                     </div>
@@ -358,7 +359,7 @@ const EventCard: React.FC<{
                     {event.documentName && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <span style={{ fontSize: 11, paddingLeft: 2 }}>{docIcon(event.documentName)}</span>
-                            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--neon-purple)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140 }}>
+                            <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--neon-purple)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140, fontWeight: 500 }}>
                                 {event.documentName}
                             </span>
                         </div>
@@ -406,11 +407,12 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
             {/* Meta strip */}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
                 <span style={{
-                    fontFamily: 'Orbitron, monospace', fontSize: '8px', letterSpacing: '0.15em',
-                    padding: '3px 10px', borderRadius: 2,
+                    fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', letterSpacing: '0.15em',
+                    padding: '4px 10px', borderRadius: 4,
                     background: styleConf.bg,
                     color: styleConf.text,
                     border: `1px solid ${styleConf.border}`,
+                    fontWeight: 700,
                 }}>
                     {status}
                 </span>
@@ -419,28 +421,28 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
             {/* Info grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
                 <div>
-                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>START TIME</div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', color: 'var(--neon-cyan)' }}>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4, fontWeight: 600 }}>START TIME</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)' }}>
                         {fmtDateTime(event.startTime)}
                     </div>
                 </div>
                 {event.endTime && (
                     <div>
-                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>END TIME</div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4, fontWeight: 600 }}>END TIME</div>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                             {fmtDateTime(event.endTime)}
                         </div>
                     </div>
                 )}
                 <div style={{ gridColumn: event.endTime ? '1' : '1 / -1' }}>
-                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>LOCATION</div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4, fontWeight: 600 }}>LOCATION</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span>📍</span> {event.place}
                     </div>
                 </div>
                 <div>
-                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>POSTED BY</div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4, fontWeight: 600 }}>POSTED BY</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                         {event.authorFirstName} {event.authorLastName}
                     </div>
                 </div>
@@ -461,7 +463,7 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
             {event.documentUrl && event.documentName && (
                 <>
                     <hr className="cp-divider" style={{ marginBottom: 16 }} />
-                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 10 }}>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10, fontWeight: 600 }}>
                         ATTACHMENT
                     </div>
                     <a
@@ -482,10 +484,10 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
                     >
                         <span style={{ fontSize: 20 }}>{docIcon(event.documentName)}</span>
                         <div>
-                            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--neon-purple)' }}>
+                            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-purple)', fontWeight: 600 }}>
                                 {event.documentName}
                             </div>
-                            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)', marginTop: 2 }}>
+                            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-disabled)', marginTop: 2 }}>
                                 Click to open ↗
                             </div>
                         </div>
@@ -526,7 +528,7 @@ const EventEditorModal: React.FC<{
         name: '', startTime: '', endTime: '', place: '', description: '',
     });
     const [mediaFile, setMediaFile] = useState<File | null>(null);
-    const [docFile, setDocFile]     = useState<File | null>(null);
+    const [docFile, setDocFile] = useState<File | null>(null);
 
     const [removeMedia, setRemoveMedia] = useState(false);
     const [removeDoc, setRemoveDoc] = useState(false);
@@ -534,10 +536,10 @@ const EventEditorModal: React.FC<{
     useEffect(() => {
         if (editTarget) {
             setForm({
-                name:        editTarget.name,
-                startTime:   toLocalInput(editTarget.startTime),
-                endTime:     toLocalInput(editTarget.endTime ?? ''),
-                place:       editTarget.place,
+                name: editTarget.name,
+                startTime: toLocalInput(editTarget.startTime),
+                endTime: toLocalInput(editTarget.endTime ?? ''),
+                place: editTarget.place,
                 description: editTarget.description ?? '',
             });
         } else {
@@ -647,17 +649,17 @@ const EventEditorModal: React.FC<{
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export const EventsPage: React.FC = () => {
     const { hasPermission } = useAuthStore();
-    const [events, setEvents]           = useState<EventDto[]>([]);
-    const [loading, setLoading]         = useState(true);
-    const [saving, setSaving]           = useState(false);
-    const [error, setError]             = useState('');
-    const [success, setSuccess]         = useState('');
-    const [search, setSearch]           = useState('');
+    const [events, setEvents] = useState<EventDto[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState<'all' | 'ongoing' | 'upcoming' | 'past'>('all');
 
-    const [editorOpen, setEditorOpen]   = useState(false);
-    const [editTarget, setEditTarget]   = useState<EventDto | null>(null);
-    const [viewEvent, setViewEvent]     = useState<EventDto | null>(null);
+    const [editorOpen, setEditorOpen] = useState(false);
+    const [editTarget, setEditTarget] = useState<EventDto | null>(null);
+    const [viewEvent, setViewEvent] = useState<EventDto | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<EventDto | null>(null);
 
     const load = async () => {
@@ -671,7 +673,7 @@ export const EventsPage: React.FC = () => {
     useEffect(() => { load(); }, []);
 
     const openCreate = () => { setEditTarget(null); setEditorOpen(true); };
-    const openEdit   = (ev: EventDto) => { setEditTarget(ev); setEditorOpen(true); };
+    const openEdit = (ev: EventDto) => { setEditTarget(ev); setEditorOpen(true); };
 
     const showSuccess = (msg: string) => {
         setSuccess(msg); setTimeout(() => setSuccess(''), 4000);
@@ -685,16 +687,16 @@ export const EventsPage: React.FC = () => {
         removeDoc: boolean
     ) => {
         if (!form.name.trim()) { setError('Event name is required'); return; }
-        if (!form.startTime)   { setError('Start date & time is required'); return; }
+        if (!form.startTime) { setError('Start date & time is required'); return; }
         if (!form.place.trim()) { setError('Location is required'); return; }
 
         setSaving(true); setError('');
 
         const data = {
-            name:        form.name,
-            startTime:   new Date(form.startTime).toISOString(),
-            endTime:     form.endTime ? new Date(form.endTime).toISOString() : null,
-            place:       form.place,
+            name: form.name,
+            startTime: new Date(form.startTime).toISOString(),
+            endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
+            place: form.place,
             description: form.description || null,
         };
 
@@ -742,8 +744,6 @@ export const EventsPage: React.FC = () => {
     });
 
     const upcomingCount = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'UPCOMING').length;
-    const ongoingCount  = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'ONGOING').length;
-    const pastCount     = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'PAST').length;
 
     return (
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
@@ -751,13 +751,13 @@ export const EventsPage: React.FC = () => {
             {/* ── Header ── */}
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, flexShrink: 0 }}>
                 <div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.15em', marginBottom: 6 }}>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-pink)', letterSpacing: '0.1em', marginBottom: 6, fontWeight: 600 }}>
                         ADMIN_CONSOLE › EVENT_MANAGEMENT
                     </div>
-                    <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
+                    <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-2xl)', fontWeight: 700, letterSpacing: '0.05em' }}>
                         Events
                     </h1>
-                    <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginTop: 4 }}>
+                    <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginTop: 4 }}>
                         {events.length} event{events.length !== 1 ? 's' : ''} · {upcomingCount} upcoming
                     </p>
                 </div>
@@ -765,7 +765,7 @@ export const EventsPage: React.FC = () => {
             </div>
 
             {/* ── Stat cards ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14, flexShrink: 0 }}>
+            {/* <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14, flexShrink: 0 }}>
                 {[
                     { label: 'Total',    value: events.length, color: 'purple' },
                     { label: 'Ongoing',  value: ongoingCount,  color: 'cyan'   },
@@ -773,15 +773,15 @@ export const EventsPage: React.FC = () => {
                     { label: 'Past',     value: pastCount,     color: 'amber'  },
                 ].map(({ label, value, color }) => (
                     <div key={label} className={`cp-stat-card ${color}`}>
-                        <div className={`cp-stat-value text-neon-${color}`}>{value}</div>
-                        <div className="cp-stat-label">{label}</div>
+                        <div className={`cp-stat-value text-neon-${color}`} style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700 }}>{value}</div>
+                        <div className="cp-stat-label" style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', fontWeight: 600 }}>{label}</div>
                     </div>
                 ))}
-            </div>
+            </div> */}
 
             {/* ── Alerts ── */}
             {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
-            {error   && <Alert type="error"   onClose={() => setError('')}>{error}</Alert>}
+            {error && <Alert type="error" onClose={() => setError('')}>{error}</Alert>}
 
             {/* ── Search + Filter ── */}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', flexShrink: 0 }}>

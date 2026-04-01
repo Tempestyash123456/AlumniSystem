@@ -40,7 +40,7 @@ const FilterSelect: React.FC<{
 }> = ({ label, value, onChange, options, placeholder }) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 160 }}>
         <label style={{
-            fontFamily: 'Orbitron, monospace', fontSize: '9px',
+            fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)',
             letterSpacing: '0.12em', color: 'var(--text-muted)', textTransform: 'uppercase',
         }}>
             {label}
@@ -49,9 +49,9 @@ const FilterSelect: React.FC<{
             value={value}
             onChange={(e) => onChange(e.target.value)}
             className="cp-input cp-select"
-            style={{ padding: '8px 36px 8px 12px', fontSize: '12px' }}
+            style={{ padding: '8px 36px 8px 12px', fontSize: 'var(--font-size-sm)' }}
         >
-            <option value="">{placeholder}</option>
+            <option value="" style={{ fontSize: 'var(--font-size-sm)' }}>{placeholder}</option>
             {options.map((o) => (
                 <option key={o} value={o}>{o}</option>
             ))}
@@ -99,7 +99,7 @@ const UserCard: React.FC<{
                     {user.firstName} {user.lastName}
                 </div>
                 <div style={{
-                    fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)',
+                    fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)',
                     marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>
                     {user.email}
@@ -108,23 +108,23 @@ const UserCard: React.FC<{
                 {profile && (
                     <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 3 }}>
                         {profile.currentJobTitle && (
-                            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-cyan)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {profile.currentJobTitle}
                             </div>
                         )}
                         {profile.department && (
-                            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-muted)' }}>
+                            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                                 {profile.department}
                             </div>
                         )}
                         <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap', marginTop: 4 }}>
                             {profile.graduationYear && (
-                                <span className="cp-badge cp-badge-purple" style={{ fontSize: '8px' }}>
+                                <span className="cp-badge cp-badge-purple" style={{ fontSize: 'var(--font-size-xs)' }}>
                                     {profile.graduationYear}
                                 </span>
                             )}
                             {profile.degree && (
-                                <span className="cp-badge cp-badge-cyan" style={{ fontSize: '8px' }}>
+                                <span className="cp-badge cp-badge-cyan" style={{ fontSize: 'var(--font-size-xs)' }}>
                                     {profile.degree}
                                 </span>
                             )}
@@ -176,29 +176,29 @@ const UserRow: React.FC<{
                         <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '14px' }}>
                             {user.firstName} {user.lastName}
                         </div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                             {user.email}
                         </div>
                     </div>
                 </div>
             </td>
             <td>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                     {profile?.department || '—'}
                 </div>
             </td>
             <td>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                     {profile?.degree || '—'}
                 </div>
             </td>
             <td>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--neon-purple)' }}>
+                <div style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 600, fontSize: 'var(--font-size-sm)', color: 'var(--neon-purple)' }}>
                     {profile?.graduationYear || '—'}
                 </div>
             </td>
             <td>
-                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)' }}>
+                <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                     {profile?.currentJobTitle
                         ? `${profile.currentJobTitle}${profile.currentCompany ? ` @ ${profile.currentCompany}` : ''}`
                         : '—'}
@@ -339,8 +339,8 @@ export const AlumniDirectoryPage: React.FC = () => {
                             border: '1px solid rgba(255,45,120,0.3)',
                             borderRadius: 4,
                             color: 'var(--neon-pink)',
-                            fontFamily: 'Orbitron, monospace',
-                            fontSize: '9px',
+                            fontFamily: 'Orbitron, sans-serif',
+                            fontSize: 'var(--font-size-xs)',
                             letterSpacing: '0.1em',
                             cursor: 'pointer',
                             alignSelf: 'flex-end',
@@ -528,8 +528,8 @@ export const AlumniProfileViewPage: React.FC = () => {
 
                     <div style={{ minWidth: 120 }}>
                         <ProgressBar value={profile.profileScore} />
-                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', marginTop: 4, letterSpacing: '0.1em', textAlign: 'center' }}>
-                            PROFILE SCORE
+                        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 4, letterSpacing: '0.1em', textAlign: 'center' }}>
+                            PROFILE_SCORE
                         </div>
                     </div>
                 </div>
@@ -538,8 +538,8 @@ export const AlumniProfileViewPage: React.FC = () => {
 
                 {profile.bio && (
                     <div style={{ marginBottom: 24 }}>
-                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 8 }}>BIO</div>
-                        <p style={{ fontFamily: 'Rajdhani, sans-serif', color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: '15px' }}>{profile.bio}</p>
+                        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 8 }}>BIO</div>
+                        <p style={{ fontFamily: 'Outfit, sans-serif', color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: 'var(--font-size-base)' }}>{profile.bio}</p>
                     </div>
                 )}
 
@@ -556,10 +556,10 @@ export const AlumniProfileViewPage: React.FC = () => {
                         { label: 'Student ID',     value: profile.studentId },
                     ].filter(f => f.value).map(({ label, value }) => (
                         <div key={label}>
-                            <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>
+                            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>
                                 {label.toUpperCase()}
                             </div>
-                            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', color: 'var(--text-primary)', wordBreak: 'break-word' }}>
+                            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)', wordBreak: 'break-word' }}>
                                 {value}
                             </div>
                         </div>
@@ -568,7 +568,7 @@ export const AlumniProfileViewPage: React.FC = () => {
 
                 {profile.skills && profile.skills.length > 0 && (
                     <div style={{ marginBottom: 24 }}>
-                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>
+                        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>
                             SKILLS
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>

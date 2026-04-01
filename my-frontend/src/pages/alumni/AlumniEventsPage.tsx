@@ -96,11 +96,12 @@ const EventCard: React.FC<{
                 {/* Status badge */}
                 <div style={{ position: 'absolute', top: 10, right: 10 }}>
                     <span style={{
-                        fontFamily: 'Orbitron, monospace', fontSize: '8px', letterSpacing: '0.15em',
-                        padding: '3px 8px', borderRadius: 2,
+                        fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', letterSpacing: '0.15em',
+                        padding: '4px 10px', borderRadius: 4,
                         background: styleConf.bg,
                         color: styleConf.text,
                         border: `1px solid ${styleConf.border}`,
+                        fontWeight: 700,
                     }}>
                         {status}
                     </span>
@@ -119,8 +120,8 @@ const EventCard: React.FC<{
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span style={{ color: 'var(--neon-cyan)', fontSize: 10, width: 12, textAlign: 'center' }}>▶</span>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '8px', color: 'var(--text-muted)' }}>START</span>
-                                <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontWeight: 600 }}>START</span>
+                                <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                                     {fmtDateTime(event.startTime)}
                                 </span>
                             </div>
@@ -129,8 +130,8 @@ const EventCard: React.FC<{
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <span style={{ color: 'var(--neon-pink)', fontSize: 10, width: 12, textAlign: 'center' }}>■</span>
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '8px', color: 'var(--text-muted)' }}>END</span>
-                                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                    <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontWeight: 600 }}>END</span>
+                                    <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                                         {fmtDateTime(event.endTime)}
                                     </span>
                                 </div>
@@ -141,7 +142,7 @@ const EventCard: React.FC<{
                     {/* Place */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{ color: 'var(--neon-pink)', fontSize: 12, paddingLeft: 2 }}>📍</span>
-                        <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {event.place}
                         </span>
                     </div>
@@ -196,11 +197,12 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
             {/* Meta strip */}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
                 <span style={{
-                    fontFamily: 'Orbitron, monospace', fontSize: '8px', letterSpacing: '0.15em',
-                    padding: '3px 10px', borderRadius: 2,
+                    fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', letterSpacing: '0.15em',
+                    padding: '4px 12px', borderRadius: 4,
                     background: styleConf.bg,
                     color: styleConf.text,
                     border: `1px solid ${styleConf.border}`,
+                    fontWeight: 700,
                 }}>
                     {status}
                 </span>
@@ -209,28 +211,28 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
             {/* Info grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
                 <div>
-                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>START TIME</div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', color: 'var(--neon-cyan)' }}>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4, fontWeight: 600 }}>START TIME</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)' }}>
                         {fmtDateTime(event.startTime)}
                     </div>
                 </div>
                 {event.endTime && (
                     <div>
-                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>END TIME</div>
-                        <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4, fontWeight: 600 }}>END TIME</div>
+                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                             {fmtDateTime(event.endTime)}
                         </div>
                     </div>
                 )}
                 <div style={{ gridColumn: event.endTime ? '1' : '1 / -1' }}>
-                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>LOCATION</div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4, fontWeight: 600 }}>LOCATION</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span>📍</span> {event.place}
                     </div>
                 </div>
                 <div>
-                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>POSTED BY</div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4, fontWeight: 600 }}>POSTED BY</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
                         {event.authorFirstName} {event.authorLastName}
                     </div>
                 </div>
@@ -251,7 +253,7 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
             {event.documentUrl && event.documentName && (
                 <>
                     <hr className="cp-divider" style={{ marginBottom: 16 }} />
-                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 10 }}>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10, fontWeight: 600 }}>
                         ATTACHMENT
                     </div>
                     <a
@@ -331,13 +333,13 @@ export const AlumniEventsPage: React.FC = () => {
             {/* ── Header ── */}
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, flexShrink: 0 }}>
                 <div>
-                    <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.15em', marginBottom: 6 }}>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-pink)', letterSpacing: '0.1em', marginBottom: 6, fontWeight: 600 }}>
                         NETWORK_BROADCAST › ALUMNI_EVENTS
                     </div>
-                    <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, letterSpacing: '0.05em' }}>
+                    <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-2xl)', fontWeight: 700, letterSpacing: '0.05em' }}>
                         Alumni Events
                     </h1>
-                    <p style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)', marginTop: 4 }}>
+                    <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginTop: 4 }}>
                         {events.length} event{events.length !== 1 ? 's' : ''} · {upcomingCount} upcoming
                     </p>
                 </div>
@@ -383,9 +385,9 @@ export const AlumniEventsPage: React.FC = () => {
                                 background: filterStatus === s ? 'rgba(0,245,255,0.1)' : 'transparent',
                                 border: 'none',
                                 color: filterStatus === s ? 'var(--neon-cyan)' : 'var(--text-muted)',
-                                fontFamily: 'Orbitron, monospace', fontSize: '9px',
+                                fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)',
                                 letterSpacing: '0.1em', cursor: 'pointer',
-                                transition: 'all 0.15s', textTransform: 'uppercase',
+                                transition: 'all 0.15s', textTransform: 'uppercase', fontWeight: 600,
                             }}
                         >
                             {s}

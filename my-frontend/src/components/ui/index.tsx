@@ -39,7 +39,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 />
             </div>
             {hint && !error && (
-                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace' }}>
+                <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontFamily: 'Outfit, sans-serif' }}>
           {hint}
         </span>
             )}
@@ -177,8 +177,8 @@ export const LoadingScreen: React.FC = () => (
     >
         <div
             style={{
-                fontFamily: 'Orbitron, monospace',
-                fontSize: '18px',
+                fontFamily: 'Orbitron, sans-serif',
+                fontSize: 'var(--font-size-lg)',
                 color: 'var(--neon-cyan)',
                 letterSpacing: '0.2em',
                 animation: 'flicker 4s infinite',
@@ -189,8 +189,8 @@ export const LoadingScreen: React.FC = () => (
         <Spinner size={32} />
         <span
             style={{
-                fontFamily: 'Share Tech Mono, monospace',
-                fontSize: '12px',
+                fontFamily: 'Rajdhani, sans-serif',
+                fontSize: 'var(--font-size-sm)',
                 color: 'var(--text-muted)',
                 letterSpacing: '0.1em',
             }}
@@ -240,7 +240,7 @@ export const Modal: React.FC<ModalProps> = ({ open, title, onClose, children, wi
                     }}
                 >
                     {/* Controlled by CSS variable now */}
-                    <h3 style={{ fontSize: '16px', color: 'var(--modal-title-color)', letterSpacing: '0.08em', transition: 'color 0.25s' }}>
+                    <h3 style={{ fontSize: 'var(--font-size-md)', color: 'var(--modal-title-color)', letterSpacing: '0.08em', transition: 'color 0.25s' }}>
                         {title}
                     </h3>
                     <button
@@ -344,7 +344,7 @@ export const Toggle: React.FC<ToggleProps> = ({ checked, onChange, label }) => (
             />
         </div>
         {label && (
-            <span style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '14px', color: 'var(--text-secondary)' }}>
+            <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)' }}>
         {label}
       </span>
         )}
@@ -386,8 +386,8 @@ export const ProgressBar: React.FC<{ value: number; label?: string }> = ({ value
                     display: 'flex',
                     justifyContent: 'space-between',
                     marginBottom: 6,
-                    fontFamily: 'Orbitron, monospace',
-                    fontSize: '10px',
+                    fontFamily: 'Orbitron, sans-serif',
+                    fontSize: 'var(--font-size-xs)',
                     color: 'var(--text-muted)',
                     letterSpacing: '0.1em',
                 }}
@@ -481,7 +481,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({ checked, onChange, label, di
             )}
         </div>
         {label && (
-            <span style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '14px', color: checked ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+            <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: checked ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
                 {label}
             </span>
         )}

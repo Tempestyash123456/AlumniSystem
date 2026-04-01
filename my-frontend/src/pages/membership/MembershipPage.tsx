@@ -50,12 +50,12 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
                 padding: '12px 24px', 
                 borderLeft: `1px solid ${isDark ? '#1a2540' : 'rgba(211, 47, 47, 0.2)'}`, 
                 borderBottom: `1px solid ${isDark ? '#1a2540' : 'rgba(211, 47, 47, 0.2)'}`, 
-                fontFamily: 'Orbitron, monospace', 
-                fontSize: '12px', 
-                color: isDark ? '#00f5ff' : '#d32f2f', 
-                background: isDark ? 'rgba(0,245,255,0.08)' : 'rgba(211, 47, 47, 0.05)', 
+                fontFamily: 'Orbitron, sans-serif', 
+                fontSize: 'var(--font-size-xs)', 
+                color: isDark ? 'var(--neon-cyan)' : 'var(--neon-cyan)', 
+                background: isDark ? 'rgba(0,245,255,0.08)' : 'rgba(0,245,255,0.05)', 
                 backdropFilter: 'blur(4px)', 
-                borderBottomLeftRadius: '8px' 
+                borderBottomLeftRadius: 'var(--radius-md)' 
             }}>
                 ID: {profile?.studentId || 'N/A'}
             </div>
@@ -83,11 +83,11 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <h2 className="font-display" style={{ 
-                        fontSize: '32px', 
+                        fontSize: 'var(--font-size-2xl)', 
                         textTransform: 'uppercase', 
                         letterSpacing: '0.05em', 
                         margin: 0,
-                        color: isDark ? '#e2eaf8' : '#050505',
+                        color: 'var(--text-primary)',
                         textShadow: isDark ? '0 0 10px rgba(0, 245, 255, 0.4)' : 'none'
                     }}>
                         {profile?.firstName} {profile?.lastName}
@@ -95,12 +95,12 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ width: '40px', height: '1px', background: isDark ? '#00f5ff' : '#d32f2f' }}></div>
                         <p style={{ 
-                            color: isDark ? '#00f5ff' : '#d32f2f', 
-                            fontFamily: 'Share Tech Mono, monospace', 
-                            fontSize: '14px', 
-                            letterSpacing: '3px', 
+                            color: 'var(--neon-cyan)', 
+                            fontFamily: 'Rajdhani, sans-serif', 
+                            fontSize: 'var(--font-size-sm)', 
+                            letterSpacing: '2px', 
                             margin: 0,
-                            fontWeight: isDark ? 400 : 700
+                            fontWeight: 700
                         }}>
                             ALUMNI NETWORK MEMBER
                         </p>
@@ -111,10 +111,10 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
             {/* Details / QR Section */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', zIndex: 1 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 40px' }}>
-                    <DetailRow label="DEPARTMENT" value={profile?.department || 'N/A'} isDark={isDark} />
-                    <DetailRow label="DEGREE" value={profile?.degree || 'N/A'} isDark={isDark} />
-                    <DetailRow label="SPECIALIZATION" value={profile?.specialization || 'N/A'} isDark={isDark} />
-                    <DetailRow label="GRAD YEAR" value={profile?.graduationYear?.toString() || 'N/A'} isDark={isDark} />
+                    <DetailRow label="DEPARTMENT" value={profile?.department || 'N/A'} />
+                    <DetailRow label="DEGREE" value={profile?.degree || 'N/A'} />
+                    <DetailRow label="SPECIALIZATION" value={profile?.specialization || 'N/A'} />
+                    <DetailRow label="GRAD YEAR" value={profile?.graduationYear?.toString() || 'N/A'} />
                 </div>
 
                 <div style={{
@@ -153,18 +153,20 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
     );
 };
 
-const DetailRow: React.FC<{ label: string; value: string; isDark?: boolean }> = ({ label, value, isDark }) => (
+const DetailRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
         <span style={{ 
-            fontSize: '10px', 
-            color: isDark ? '#445577' : '#4b4c4f', 
-            fontFamily: 'Orbitron, monospace', 
-            letterSpacing: '1px' 
+            fontSize: 'var(--font-size-xs)', 
+            color: 'var(--text-secondary)', 
+            fontFamily: 'Orbitron, sans-serif', 
+            letterSpacing: '1px',
+            marginBottom: '2px'
         }}>{label}</span>
         <span style={{ 
-            fontSize: '16px', 
+            fontSize: 'var(--font-size-base)', 
             fontWeight: 600, 
-            color: isDark ? '#e2eaf8' : '#050505' 
+            color: 'var(--text-primary)',
+            fontFamily: 'Outfit, sans-serif'
         }}>{value}</span>
     </div>
 );
@@ -260,7 +262,7 @@ export const MembershipPage: React.FC = () => {
             {/* Header / Tabs */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '16px' }}>
                 <div>
-                    <h1 className="glow-cyan" style={{ fontSize: '32px', marginBottom: '8px' }}>MEMBERSHIP STATUS</h1>
+                    <h1 className="glow-cyan" style={{ fontSize: 'var(--font-size-3xl)', marginBottom: '8px' }}>MEMBERSHIP STATUS</h1>
                     <p style={{ color: 'var(--text-secondary)', fontFamily: 'Share Tech Mono, monospace' }}>
                         ID: {profile?.studentId || profile?.userId} | LEVEL: {cardType.toUpperCase()}
                     </p>
@@ -289,7 +291,7 @@ export const MembershipPage: React.FC = () => {
                     <div style={{ fontSize: '64px', color: 'var(--neon-amber)', filter: 'drop-shadow(0 0 10px var(--neon-amber))' }}>⭐</div>
                     <h2 className="font-display" style={{ color: 'var(--neon-amber)', fontSize: '36px' }}>EXCLUSIVE RIGHTS</h2>
                     <div className="cp-divider-glow" style={{ width: '200px', background: 'linear-gradient(90deg, transparent, var(--neon-amber), transparent)', boxShadow: '0 0 8px var(--neon-amber)' }}></div>
-                    <p style={{ maxWidth: '500px', color: 'var(--text-secondary)', fontSize: '18px' }}>
+                    <p style={{ maxWidth: '500px', color: 'var(--text-secondary)', fontSize: 'var(--font-size-md)' }}>
                         The Exclusive Membership Card for distinguished alumni is currently under preparation.
                         Elevated access and elite privileges are coming soon.
                     </p>
