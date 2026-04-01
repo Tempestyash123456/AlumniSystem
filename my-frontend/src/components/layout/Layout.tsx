@@ -105,10 +105,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <SectionLabel text="MAIN" />
                         <NavItem path="/dashboard" icon="⬡" label="Dashboard" exact />
                         <NavItem path="/profile"   icon="◉" label="My Profile" exact />
-                        {(!user?.accountLocked || isAdmin) && (
+                        {user?.enabled && (!user?.accountLocked || isAdmin) && (
                             <>
-                                <NavItem path="/posts"     icon="◇" label="Posts" exact />
-                                <NavItem path="/events"    icon="◎" label="Events" exact />
+                                <NavItem path="/posts"      icon="◇" label="Posts" exact />
+                                <NavItem path="/events"     icon="◎" label="Events" exact />
+                                <NavItem path="/membership" icon="🪪" label="Membership" exact />
                             </>
                         )}
 

@@ -93,7 +93,8 @@ public final class AuthDtos {
             String profilePhotoUrl,
             java.util.List<String> roles,
             java.util.List<String> permissions,
-            boolean accountLocked
+            boolean accountLocked,
+            boolean enabled
     ) {}
 
     public record MessageResponse(String message) {}

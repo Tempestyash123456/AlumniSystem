@@ -19,6 +19,7 @@ import { PostsFeedPage } from './pages/posts/PostsFeedPage.tsx';
 import { AlumniEventsPage } from './pages/alumni/AlumniEventsPage.tsx';
 import { OAuth2Callback } from './pages/auth/OAuth2Callback.tsx';
 import { LandingPage } from './pages/landing/LandingPage.tsx';
+import { MembershipPage } from './pages/membership/MembershipPage.tsx';
 
 // ── Guards ──────────────────────────────────────────────────────────────────
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -33,8 +34,7 @@ const RequirePermission: React.FC<{ children: React.ReactNode; permission?: stri
     const location = useLocation();
     if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />;
     
-    // Locked accounts (non-admins) cannot access feature routes
-    if (user?.accountLocked && !isAdmin) {
+    if (isAuthenticated && (!user?.enabled || (user?.accountLocked && !isAdmin))) {
         return <Navigate to="/dashboard" replace />;
     }
 
@@ -117,6 +117,7 @@ const App: React.FC = () => {
                 <Route path="/profile"      element={<RequireAuth><Layout><ProfilePage /></Layout></RequireAuth>} />
                 <Route path="/posts"        element={<RequirePermission permission="POST_VIEW"><Layout><PostsFeedPage /></Layout></RequirePermission>} />
                 <Route path="/events"       element={<RequirePermission permission="EVENT_VIEW"><Layout><AlumniEventsPage /></Layout></RequirePermission>} />
+                <Route path="/membership"   element={<RequirePermission><Layout><MembershipPage /></Layout></RequirePermission>} />
 
                 {/* Alumni directory */}
                 <Route path="/alumni"         element={<RequirePermission permission="USER_VIEW"><Layout><AlumniDirectoryPage /></Layout></RequirePermission>} />

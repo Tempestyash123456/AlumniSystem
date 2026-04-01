@@ -23,6 +23,7 @@ export interface UserInfo {
     roles: string[];
     permissions: string[];
     accountLocked: boolean;
+    enabled: boolean;
 }
 
 export interface AuthResponse {

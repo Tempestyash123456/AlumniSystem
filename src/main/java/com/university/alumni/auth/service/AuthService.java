@@ -225,7 +225,8 @@ public class AuthService {
                 user.getProfilePhotoUrl(),
                 roles,
                 permissions,
-                user.isAccountLocked()
+                user.isAccountLocked(),
+                user.isEnabled()
         );
         return new AuthResponse(accessToken, refreshToken, "Bearer", appProperties.getJwt().getAccessTokenExpiryMs() / 1000, userInfo);
     }
