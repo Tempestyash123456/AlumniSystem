@@ -53,8 +53,6 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_GET_PATHS = {
             "/api/v1/health",
-            "/api/v1/posts",
-            "/api/v1/posts/**",
             "/uploads/**",
             "/api/v1/profile/**",
             "/actuator/health",

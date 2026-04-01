@@ -5,6 +5,7 @@ import com.university.alumni.common.dto.ApiResponse;
 import com.university.alumni.post.dto.PostDtos.*;
 import com.university.alumni.post.service.PostService;
 import com.university.alumni.security.model.CachedUserDetails;
+import com.university.alumni.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,12 +33,17 @@ public class PostController {
     private final ObjectMapper objectMapper;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PostResponse>>> getAll() {
+    public ResponseEntity<ApiResponse<List<PostResponse>>> getAll(
+            @AuthenticationPrincipal CachedUserDetails currentUser) {
+        SecurityUtils.validateAccountActive(currentUser);
         return ResponseEntity.ok(ApiResponse.success(postService.getAllPosts()));
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<ApiResponse<PostResponse>> getOne(@PathVariable UUID postId) {
+    public ResponseEntity<ApiResponse<PostResponse>> getOne(
+            @PathVariable UUID postId,
+            @AuthenticationPrincipal CachedUserDetails currentUser) {
+        SecurityUtils.validateAccountActive(currentUser);
         return ResponseEntity.ok(ApiResponse.success(postService.getPost(postId)));
     }
 

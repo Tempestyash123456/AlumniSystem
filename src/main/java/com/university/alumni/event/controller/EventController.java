@@ -5,6 +5,7 @@ import com.university.alumni.common.dto.ApiResponse;
 import com.university.alumni.event.dto.EventDtos.*;
 import com.university.alumni.event.service.EventService;
 import com.university.alumni.security.model.CachedUserDetails;
+import com.university.alumni.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,11 +36,15 @@ public class EventController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<EventResponse>>> getAll(
             @AuthenticationPrincipal CachedUserDetails currentUser) {
+        SecurityUtils.validateAccountActive(currentUser);
         return ResponseEntity.ok(ApiResponse.success(eventService.getAllEvents(currentUser)));
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<ApiResponse<EventResponse>> getOne(@PathVariable UUID eventId) {
+    public ResponseEntity<ApiResponse<EventResponse>> getOne(
+            @PathVariable UUID eventId,
+            @AuthenticationPrincipal CachedUserDetails currentUser) {
+        SecurityUtils.validateAccountActive(currentUser);
         return ResponseEntity.ok(ApiResponse.success(eventService.getEvent(eventId)));
     }
 

@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -52,13 +51,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path   = request.getServletPath();
-        String method = request.getMethod();
 
         // Skip auth entirely for public paths
         if (PUBLIC_PATHS.stream().anyMatch(path::startsWith)) return true;
 
-        // GET /api/v1/posts and /api/v1/posts/{id} are public reads
-        if (HttpMethod.GET.matches(method) && path.startsWith("/api/v1/posts")) return true;
 
         return false;
     }
