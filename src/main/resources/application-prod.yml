@@ -1,9 +1,12 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    # URL, Username, and Password are now handled by DatabaseConfig.java
+    # based on DATABASE_URL or SPRING_DATASOURCE_URL
+    # url: ${SPRING_DATASOURCE_URL}
+    # username: ${SPRING_DATASOURCE_USERNAME}
+    # password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
     hikari:
       maximum-pool-size: 5
       minimum-idle: 2
