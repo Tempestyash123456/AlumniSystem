@@ -32,16 +32,27 @@ public class DatabaseConfig {
             throw new RuntimeException("No database URL found in DATABASE_URL or SPRING_DATASOURCE_URL environment variables.");
         }
 
-        // If it starts with postgres:// (standard URI format provided by Render/Heroku)
-        if (urlToUse.startsWith("postgres://")) {
-            return createDataSourceFromUri(urlToUse);
+        // If the URL contains credentials (user:pass@), we must parse it manually
+        // regardless of whether it starts with postgres:// or jdbc:postgresql://
+        if (urlToUse.contains("@")) {
+            String uriString = urlToUse;
+            if (uriString.startsWith("jdbc:postgresql://")) {
+                uriString = "postgres://" + uriString.substring(18);
+            } else if (uriString.startsWith("postgresql://")) {
+                uriString = "postgres://" + uriString.substring(13);
+            } else if (!uriString.contains("://")) {
+                uriString = "postgres://" + uriString;
+            }
+            return createDataSourceFromUri(uriString);
         }
 
-        // If it's already a standard jdbc:postgresql:// URL, use it directly
+        // Otherwise, treat as a standard JDBC URL
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(urlToUse.startsWith("jdbc:") ? urlToUse : "jdbc:" + urlToUse);
+        String jdbcUrl = urlToUse.startsWith("jdbc:") ? urlToUse : "jdbc:postgresql://" + urlToUse;
+        config.setJdbcUrl(jdbcUrl);
         return new HikariDataSource(config);
     }
+
 
     private DataSource createDataSourceFromUri(String url) throws URISyntaxException {
         URI dbUri = new URI(url);
