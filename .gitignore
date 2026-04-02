@@ -40,3 +40,4 @@ src/main/resources/application-dev.yml
 ### Uploads ###
 uploads/
 src/main/resources/application.yml
+alumni-backend.env
