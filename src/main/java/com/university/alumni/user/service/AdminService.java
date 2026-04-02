@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -194,6 +195,15 @@ public class AdminService {
 
             // Extract users from the filtered profiles
             targetUsers = profiles.stream().map(AlumniProfile::getUser).distinct().collect(Collectors.toList());
+        }
+
+        if (request.targetUserEmail() == null || request.targetUserEmail().isBlank()) {
+            // EXCLUDE SENDER: Only for bulk broadcasts, remove the currently authenticated user
+            String currentPrincipalName = SecurityContextHolder.getContext().getAuthentication().getName();
+            boolean removed = targetUsers.removeIf(u -> u.getEmail().equalsIgnoreCase(currentPrincipalName));
+            if (removed) {
+                log.info("Excluded sender ({}) from bulk email dispatch.", currentPrincipalName);
+            }
         }
 
         int count = 0;
