@@ -1,0 +1,92 @@
+spring:
+  application:
+    name: alumni-portal
+
+  # Active profile — override with env var SPRING_PROFILES_ACTIVE=prod
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  # JPA shared settings
+  jpa:
+    open-in-view: false          # Prevents lazy-loading anti-pattern across HTTP boundary
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: public
+
+  # Flyway migrations
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+  # Jackson
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # Mail
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: "yashdubey262@gmail.com"
+    password: "ndpoaydvcldelzvg"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 477985656018-s9ptl74mb92a9q8s5d9uu4assbhomf42.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
+
+# App-specific config
+app:
+  jwt:
+    secret: EYV6gLC+GBpIArakC9HSOhmdr0jniw57RruakoPadq7GdauWb3dK0o9Ht73PhedTVE4dBjNm1KF8en1hAbORBw==
+    access-token-expiry-ms: 900000          # 15 minutes
+    refresh-token-expiry-ms: 604800000      # 7 days
+
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+      - http://localhost:3000
+
+  upload:
+    dir: uploads
+    max-file-size-mb: 5
+    allowed-image-types: image/jpeg,image/png,image/webp
+
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
