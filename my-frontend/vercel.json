@@ -1,0 +1,27 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "https://alumni-backend-i978.onrender.com/api/:path*"
+        },
+        {
+            "source": "/oauth2/:path*",
+            "destination": "https://alumni-backend-i978.onrender.com/oauth2/:path*"
+        },
+        {
+            "source": "/login/oauth2/:path*",
+            "destination": "https://alumni-backend-i978.onrender.com/login/oauth2/:path*"
+        },
+        {
+            "source": "/uploads/:path*",
+            "destination": "https://alumni-backend-i978.onrender.com/uploads/:path*"
+        },
+        {
+            "source": "/((?!api|oauth2|login|uploads).*)",
+            "destination": "/index.html"
+        }
+    ],
+    "buildCommand": "npm run build",
+    "outputDirectory": "dist",
+    "framework": "vite"
+}

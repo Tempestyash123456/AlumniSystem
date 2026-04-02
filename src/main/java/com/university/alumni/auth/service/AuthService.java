@@ -86,7 +86,7 @@ public class AuthService {
         verificationTokenRepository.save(verificationToken);
 
         // Send Email
-        String verifyUrl = "http://localhost:5173/verify-email?token=" + token;
+        String verifyUrl = appProperties.getFrontendUrl() + "/verify-email?token=" + token;
         emailService.sendEmail(user.getEmail(), "Verify your Alumni Account",
                 "Click the link to verify your account: " + verifyUrl);
 
@@ -103,7 +103,7 @@ public class AuthService {
         User user = userRepository.findByEmailAndDeletedAtIsNull(request.email().toLowerCase().trim()).orElseThrow();
         userRepository.updateLastLogin(user.getId(), Instant.now());
         auditLogService.record("LOGGED_IN", user.getFirstName(), user.getLastName(), null);
-        String accessToken  = jwtService.generateAccessToken(user);
+        String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         refreshTokenService.create(user, refreshToken, extractDeviceInfo(httpRequest));
         return buildAuthResponse(user, accessToken, refreshToken);
@@ -114,7 +114,7 @@ public class AuthService {
         RefreshToken storedToken = refreshTokenService.validateAndGet(request.refreshToken());
         User user = storedToken.getUser();
         refreshTokenService.revoke(storedToken);
-        String newAccessToken  = jwtService.generateAccessToken(user);
+        String newAccessToken = jwtService.generateAccessToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
         refreshTokenService.create(user, newRefreshToken, extractDeviceInfo(httpRequest));
         return buildAuthResponse(user, newAccessToken, newRefreshToken);
@@ -174,7 +174,7 @@ public class AuthService {
                     .build();
             verificationTokenRepository.save(resetToken);
 
-            String resetUrl = "http://localhost:5173/reset-password?token=" + token;
+            String resetUrl = appProperties.getFrontendUrl() + "/reset-password?token=" + token;
             emailService.sendEmail(user.getEmail(), "Password Reset Request",
                     "Click the link to reset your password: " + resetUrl);
             log.info("Password reset requested for: {}", email);
@@ -226,9 +226,9 @@ public class AuthService {
                 roles,
                 permissions,
                 user.isAccountLocked(),
-                user.isEnabled()
-        );
-        return new AuthResponse(accessToken, refreshToken, "Bearer", appProperties.getJwt().getAccessTokenExpiryMs() / 1000, userInfo);
+                user.isEnabled());
+        return new AuthResponse(accessToken, refreshToken, "Bearer",
+                appProperties.getJwt().getAccessTokenExpiryMs() / 1000, userInfo);
     }
 
     private String extractDeviceInfo(HttpServletRequest request) {

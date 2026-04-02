@@ -6,6 +6,8 @@ import com.university.alumni.user.entity.User;
 import com.university.alumni.user.repository.RoleRepository;
 import com.university.alumni.user.repository.UserRepository;
 import com.university.alumni.audit.service.AuditLogService;
+import com.university.alumni.common.config.AppProperties;
+
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,10 +29,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final AuditLogService auditLogService;
+    private final AppProperties appProperties;
+
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException {
+            Authentication authentication) throws IOException {
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
         String email = oauth2User.getAttribute("email");
         String googlePictureUrl = oauth2User.getAttribute("picture");
@@ -64,12 +68,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String accessToken = jwtService.generateAccessToken(user);
 
-        String baseUrl = request.getScheme() + "://" + request.getServerName();
-        if (request.getServerPort() != 80 && request.getServerPort() != 443) {
-            baseUrl += ":" + request.getServerPort();
-        }
+        String frontendUrl = appProperties.getFrontendUrl();
 
-        String targetUrl = UriComponentsBuilder.fromUriString(baseUrl + "/oauth2/callback")
+        String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/oauth2/callback")
                 .queryParam("token", accessToken)
                 .build().toUriString();
 
