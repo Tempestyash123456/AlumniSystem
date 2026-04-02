@@ -34,8 +34,9 @@ build/
 .vscode/
 
 ### Resouce ###
-src/main/resources/application-dev.yml
 src/main/resources/application.yml
+src/main/resources/application-dev.yml
 
 ### Uploads ###
 uploads/
+src/main/resources/application.yml
