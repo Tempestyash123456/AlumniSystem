@@ -34,7 +34,9 @@ public class DatabaseConfig {
 
         // If the URL contains credentials (user:pass@), we must parse it manually
         // regardless of whether it starts with postgres:// or jdbc:postgresql://
-        if (urlToUse.contains("@")) {
+        // If the URL contains credentials in the user:pass@host format, we must parse it manually.
+        // We check for "@" but ensure it's not just in the query parameters.
+        if (urlToUse.contains("@") && !urlToUse.contains("?password=")) {
             String uriString = urlToUse;
             if (uriString.startsWith("jdbc:postgresql://")) {
                 uriString = "postgres://" + uriString.substring(18);
@@ -56,8 +58,17 @@ public class DatabaseConfig {
 
     private DataSource createDataSourceFromUri(String url) throws URISyntaxException {
         URI dbUri = new URI(url);
-        String username = dbUri.getUserInfo().split(":")[0];
-        String password = dbUri.getUserInfo().split(":")[1];
+        String userInfo = dbUri.getUserInfo();
+        
+        if (userInfo == null) {
+            // Fallback for cases where @ might be in the query string but not user info
+            HikariConfig config = new HikariConfig();
+            config.setJdbcUrl(url.startsWith("postgres://") ? "jdbc:postgresql://" + url.substring(11) : url);
+            return new HikariDataSource(config);
+        }
+
+        String username = userInfo.split(":", 2)[0];
+        String password = userInfo.split(":", 2)[1];
         
         // Convert to JDBC format
         String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ':' + 
