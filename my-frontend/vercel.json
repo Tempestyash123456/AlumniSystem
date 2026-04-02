@@ -2,19 +2,19 @@
     "rewrites": [
         {
             "source": "/api/:path*",
-            "destination": "https://alumni-backend-i978.onrender.com/api/:path*"
+            "destination": "https://backend-production-feca5.up.railway.app/api/:path*"
         },
         {
             "source": "/oauth2/:path*",
-            "destination": "https://alumni-backend-i978.onrender.com/oauth2/:path*"
+            "destination": "https://backend-production-feca5.up.railway.app/oauth2/:path*"
         },
         {
             "source": "/login/oauth2/:path*",
-            "destination": "https://alumni-backend-i978.onrender.com/login/oauth2/:path*"
+            "destination": "https://backend-production-feca5.up.railway.app/login/oauth2/:path*"
         },
         {
             "source": "/uploads/:path*",
-            "destination": "https://alumni-backend-i978.onrender.com/uploads/:path*"
+            "destination": "https://backend-production-feca5.up.railway.app/uploads/:path*"
         },
         {
             "source": "/((?!api|oauth2|login|uploads).*)",
