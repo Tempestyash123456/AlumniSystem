@@ -29,6 +29,15 @@ public class FileStorageService {
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
 
+    @Value("${app.storage.provider:local}")
+    private String storageProvider;
+
+    private final SupabaseStorageService supabaseStorageService;
+
+    public FileStorageService(SupabaseStorageService supabaseStorageService) {
+        this.supabaseStorageService = supabaseStorageService;
+    }
+
     // ── Profile Photos ────────────────────────────────────────────────────────
 
     public String storeProfilePhoto(MultipartFile file, UUID userId) {
@@ -103,6 +112,12 @@ public class FileStorageService {
     // ── Internal ──────────────────────────────────────────────────────────────
 
     private String store(MultipartFile file, Path dir, String filename, String urlPrefix) {
+        if ("supabase".equalsIgnoreCase(storageProvider)) {
+            // RELATIVIZE to get folder structure (e.g. "profiles", "posts", "events/media")
+            String relativeDirPath = uploadDir.isEmpty() ? dir.toString() : Paths.get(uploadDir).relativize(dir).toString();
+            return supabaseStorageService.uploadFile(file, relativeDirPath, filename);
+        }
+
         try {
             Files.createDirectories(dir);
             Path dest = dir.resolve(filename);

@@ -66,6 +66,8 @@ app:
       - image/png
       - image/webp
   frontend-url: ${FRONTEND_URL:https://your-frontend.vercel.app}
+  storage:
+    provider: supabase
 
 logging:
   level:
