@@ -24,10 +24,37 @@ public class SupabaseStorageService {
             @Value("${app.supabase.url}") String supabaseUrl,
             @Value("${app.supabase.key}") String supabaseKey,
             @Value("${app.supabase.bucket}") String bucket) {
-        this.webClient = webClientBuilder.baseUrl(supabaseUrl).build();
-        this.supabaseUrl = supabaseUrl;
-        this.supabaseKey = supabaseKey;
-        this.bucket = bucket;
+        
+        // Remove trailing slash and accidental quotes that might be in env vars
+        this.supabaseUrl = sanitize(supabaseUrl);
+        this.supabaseKey = sanitize(supabaseKey);
+        this.bucket      = sanitize(bucket);
+
+        log.info("Initializing SupabaseStorageService with URL: {} (Bucket: {})", this.supabaseUrl, this.bucket);
+
+        if (this.supabaseUrl == null || this.supabaseUrl.isBlank() || !this.supabaseUrl.startsWith("http")) {
+            log.error("INVALID Supabase URL: '{}'. It must be a non-empty string starting with http.", this.supabaseUrl);
+            throw new IllegalArgumentException("Supabase URL is invalid or missing. Check SUPABASE_URL env var.");
+        }
+
+        try {
+            this.webClient = webClientBuilder.baseUrl(this.supabaseUrl).build();
+        } catch (Exception e) {
+            log.error("Failed to build WebClient for Supabase at URL: {}. Error: {}", this.supabaseUrl, e.getMessage());
+            throw new RuntimeException("Could not initialize Supabase WebClient", e);
+        }
+    }
+
+    private String sanitize(String s) {
+        if (s == null) return null;
+        String result = s.trim();
+        if (result.startsWith("\"") && result.endsWith("\"")) {
+            result = result.substring(1, result.length() - 1);
+        }
+        if (result.startsWith("'") && result.endsWith("'")) {
+            result = result.substring(1, result.length() - 1);
+        }
+        return result.trim();
     }
 
     /**

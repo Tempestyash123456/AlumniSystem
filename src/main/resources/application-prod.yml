@@ -71,7 +71,7 @@ app:
 
 logging:
   level:
-    com.university.alumni: DEBUG
+    com.university.alumni: INFO
     org.springframework: INFO
-    org.springframework.boot: DEBUG
-    org.flywaydb: DEBUG
+    org.springframework.boot: INFO
+    org.flywaydb: INFO
