@@ -102,13 +102,13 @@ public class AuditLogService {
 
     // ── Map entity → DTO ─────────────────────────────────────────────────────
     private Map<String, String> toDto(AuditLog a) {
-        return Map.of(
-                "id",           a.getId().toString(),
-                "actionType",   a.getActionType(),
-                "firstName",    a.getFirstName(),
-                "lastName",     a.getLastName(),
-                "resourceName", a.getResourceName() != null ? a.getResourceName() : "",
-                "createdAt",    a.getCreatedAt().toString()
-        );
+        Map<String, String> dto = new java.util.HashMap<>();
+        dto.put("id", a.getId() != null ? a.getId().toString() : "");
+        dto.put("actionType", a.getActionType() != null ? a.getActionType() : "");
+        dto.put("firstName", a.getFirstName() != null ? a.getFirstName() : "");
+        dto.put("lastName", a.getLastName() != null ? a.getLastName() : "");
+        dto.put("resourceName", a.getResourceName() != null ? a.getResourceName() : "");
+        dto.put("createdAt", a.getCreatedAt() != null ? a.getCreatedAt().toString() : "");
+        return dto;
     }
 }

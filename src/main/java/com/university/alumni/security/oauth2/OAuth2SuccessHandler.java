@@ -38,17 +38,42 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
         String email = oauth2User.getAttribute("email");
         String googlePictureUrl = oauth2User.getAttribute("picture");
+        String givenName = oauth2User.getAttribute("given_name");
+        String familyName = oauth2User.getAttribute("family_name");
+        String fullName = oauth2User.getAttribute("name");
+
+        // Fallback logic for missing names
+        if (givenName == null || givenName.isBlank()) {
+            if (fullName != null && !fullName.isBlank()) {
+                String[] parts = fullName.split("\\s+", 2);
+                givenName = parts[0];
+                if (familyName == null || familyName.isBlank()) {
+                    familyName = parts.length > 1 ? parts[1] : "User";
+                }
+            } else {
+                givenName = email != null ? email.split("@")[0] : "Google";
+                if (familyName == null || familyName.isBlank()) {
+                    familyName = "User";
+                }
+            }
+        }
+        if (familyName == null || familyName.isBlank()) {
+            familyName = "User";
+        }
+
+        final String finalGivenName = givenName;
+        final String finalFamilyName = familyName;
 
         User user = userRepository.findByEmailAndDeletedAtIsNull(email)
                 .orElseGet(() -> {
                     User newUser = User.builder()
                             .email(email)
-                            .firstName(oauth2User.getAttribute("given_name"))
-                            .lastName(oauth2User.getAttribute("family_name"))
+                            .firstName(finalGivenName)
+                            .lastName(finalFamilyName)
                             .profilePhotoUrl(googlePictureUrl)
                             .passwordHash("{noop}" + UUID.randomUUID())
                             .enabled(true)
-                            .accountLocked(true)
+                            .accountLocked(false) // New OAuth2 users should not be locked
                             .build();
 
                     auditLogService.record("REGISTERED", newUser.getFirstName(), newUser.getLastName(), "Google OAuth");

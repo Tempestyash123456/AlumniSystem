@@ -48,7 +48,8 @@ public class SecurityConfig {
             "/api/v1/auth/forgot-password",
             "/api/v1/auth/reset-password",
             "/api/v1/auth/verify-email",
-            "/login/oauth2/**" // Allowed for OAuth flow
+            "/login/oauth2/**",
+            "/error"
     };
 
     private static final String[] PUBLIC_GET_PATHS = {
@@ -61,7 +62,9 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
-            "/oauth2/**" // Allowed for OAuth flow
+            "/oauth2/**",
+            "/login/oauth2/**",
+            "/error"
     };
 
     @Bean
