@@ -3,6 +3,7 @@ package com.university.alumni.security.oauth2;
 import com.university.alumni.security.util.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import org.springframework.util.Assert;
  * Essential for stateless (JWT-based) backends where the 'state' must survive across redirects
  * without using HttpSession.
  */
+@Slf4j
 @Component
 public class HttpCookieOAuth2AuthorizationRequestRepository implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
 
@@ -23,9 +25,22 @@ public class HttpCookieOAuth2AuthorizationRequestRepository implements Authoriza
     @Override
     public OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
         Assert.notNull(request, "request cannot be null");
+        
         return CookieUtils.getCookie(request, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME)
-                .map(cookie -> CookieUtils.deserialize(cookie, OAuth2AuthorizationRequest.class))
-                .orElse(null);
+                .map(cookie -> {
+                    try {
+                        OAuth2AuthorizationRequest authRequest = CookieUtils.deserialize(cookie, OAuth2AuthorizationRequest.class);
+                        log.debug("Successfully loaded OAuth2 Authorization Request from cookie. State: {}", authRequest.getState());
+                        return authRequest;
+                    } catch (Exception e) {
+                        log.error("Failed to deserialize OAuth2 Authorization Request from cookie: {}", e.getMessage());
+                        return null;
+                    }
+                })
+                .orElseGet(() -> {
+                    log.debug("No OAuth2 Authorization Request cookie found: {}", OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
+                    return null;
+                });
     }
 
     @Override
@@ -38,13 +53,14 @@ public class HttpCookieOAuth2AuthorizationRequestRepository implements Authoriza
             return;
         }
 
-        CookieUtils.addCookie(response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
+        CookieUtils.addCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
                 CookieUtils.serialize(authorizationRequest), COOKIE_EXPIRE_SECONDS);
 
         String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
         if (redirectUriAfterLogin != null && !redirectUriAfterLogin.isBlank()) {
-            CookieUtils.addCookie(response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, COOKIE_EXPIRE_SECONDS);
+            CookieUtils.addCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, COOKIE_EXPIRE_SECONDS);
         }
+        log.debug("Saved OAuth2 Authorization Request to cookie. State: {}", authorizationRequest.getState());
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.university.alumni.security.util;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.SerializationUtils;
 
 import java.io.ByteArrayInputStream;
@@ -26,32 +28,35 @@ public class CookieUtils {
     }
 
     /**
-     * Adds a secure, HttpOnly cookie with SameSite=Lax.
-     * Since standard jakarta.servlet.http.Cookie doesn't support setSameSite easily
-     * in all environments, we manually set the header to ensure cross-site reliability.
+     * Adds a cookie using Spring's ResponseCookie for better security and flexible SameSite options.
+     * In production (HTTPS), it sets SameSite=None to allow cross-domain redirects from Google.
      */
-    public static void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        StringBuilder cookieHeader = new StringBuilder();
-        cookieHeader.append(name).append("=").append(value)
-                .append("; Path=/; HttpOnly; Max-Age=").append(maxAge)
-                .append("; SameSite=Lax");
+    public static void addCookie(HttpServletRequest request, HttpServletResponse response, String name, String value, int maxAge) {
+        boolean isSecure = request.isSecure();
         
-        // Add Secure attribute only in production/HTTPS
-        // In a real app, you'd check if the request is secure
-        cookieHeader.append("; Secure");
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .path("/")
+                .httpOnly(true)
+                .maxAge(maxAge)
+                .secure(isSecure)
+                .sameSite(isSecure ? "None" : "Lax")
+                .build();
 
-        response.addHeader("Set-Cookie", cookieHeader.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     public static void deleteCookie(HttpServletRequest request, HttpServletResponse response, String name) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null && cookies.length > 0) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals(name)) {
-                    response.addHeader("Set-Cookie", name + "=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure");
-                }
-            }
-        }
+        boolean isSecure = request.isSecure();
+        
+        ResponseCookie cookie = ResponseCookie.from(name, "")
+                .path("/")
+                .httpOnly(true)
+                .maxAge(0)
+                .secure(isSecure)
+                .sameSite(isSecure ? "None" : "Lax")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     public static String serialize(Object object) {
