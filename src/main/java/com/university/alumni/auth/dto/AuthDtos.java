@@ -44,7 +44,10 @@ public final class AuthDtos {
             )
             String password,
 
-            String phone         // Optional
+            String phone,         // Optional
+
+            @NotBlank(message = "Role is required")
+            String role          // alumni or faculty
     ) {}
 
     public record RefreshTokenRequest(

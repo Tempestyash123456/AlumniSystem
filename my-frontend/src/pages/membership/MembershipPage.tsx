@@ -102,7 +102,7 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
                             margin: 0,
                             fontWeight: 700
                         }}>
-                            ALUMNI NETWORK MEMBER
+                            NETWORK MEMBER
                         </p>
                     </div>
                 </div>

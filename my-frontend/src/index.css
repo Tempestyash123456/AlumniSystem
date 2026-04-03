@@ -300,6 +300,17 @@ h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 600; letter-spacing
 .cp-divider-glow { border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent); box-shadow: 0 0 8px var(--neon-cyan); }
 .theme-light .cp-divider-glow { box-shadow: none; }
 
+/* ── Role Highlights ─────────────────────────────────────────────────────── */
+.admin-highlight {
+    color: var(--neon-cyan);
+    font-weight: 700;
+    text-shadow: 0 0 8px rgba(0, 245, 255, 0.4);
+}
+.theme-light .admin-highlight {
+    color: #ff0000 !important;
+    text-shadow: none !important;
+}
+
 /* ── Progress / Score bar ────────────────────────────────────────────────── */
 .cp-progress { height: 6px; background: var(--bg-hover); border-radius: 3px; overflow: hidden; }
 .cp-progress-fill { height: 100%; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple)); border-radius: 3px; box-shadow: 0 0 8px var(--neon-cyan); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }

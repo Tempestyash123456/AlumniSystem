@@ -191,7 +191,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                                         color: isAdmin ? 'var(--neon-pink)' : 'var(--neon-cyan)',
                                         letterSpacing: '0.08em', marginTop: '2px'
                                     }}>
-                                        {isAdmin ? '◆ ADMIN' : '◉ ALUMNI'}
+                                        {isAdmin ? '◆ AUTHORIZED_ADMIN' : '◉ MEMBER'}
                                     </div>
                                 </div>
                             </div>

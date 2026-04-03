@@ -57,8 +57,10 @@ public class AuthService {
             throw new ConflictException("An account with this email already exists");
         }
 
-        Role alumniRole = roleRepository.findByName(Role.ALUMNI)
-                .orElseThrow(() -> new RuntimeException("Default role ROLE_ALUMNI not found"));
+        String roleName = request.role().equalsIgnoreCase("faculty") ? Role.FACULTY : Role.ALUMNI;
+
+        Role selectedRole = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new RuntimeException("Default role " + roleName + " not found"));
 
         User user = User.builder()
                 .email(request.email().toLowerCase().trim())
@@ -70,7 +72,7 @@ public class AuthService {
                 .accountLocked(true) // Restricted UI features until admin unlocks
                 .build();
 
-        user.addRole(alumniRole);
+        user.addRole(selectedRole);
         User saved = userRepository.save(user);
 
         auditLogService.record("REGISTERED", saved.getFirstName(), saved.getLastName(), null);

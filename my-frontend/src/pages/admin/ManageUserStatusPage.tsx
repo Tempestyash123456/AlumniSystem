@@ -17,7 +17,7 @@ export const ManageUserStatusPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [filterLock, setFilterLock] = useState<'ALL' | 'LOCKED' | 'UNLOCKED'>('ALL');
-    const [filterTab, setFilterTab] = useState<'ALL' | 'ALUMNI' | 'ADMINS'>('ALL');
+    const [filterTab, setFilterTab] = useState<'ALUMNI' | 'FACULTY' | 'ADMINS'>('ALUMNI');
 
     const [actionLoading, setActionLoading] = useState(false);
     const [permissionsTarget, setPermissionsTarget] = useState<AdminUserDto | null>(null);
@@ -49,7 +49,8 @@ export const ManageUserStatusPage: React.FC = () => {
 
         // Role tab filter
         if (filterTab === 'ADMINS') return u.roles.includes('ROLE_ADMIN');
-        if (filterTab === 'ALUMNI') return !u.roles.includes('ROLE_ADMIN');
+        if (filterTab === 'ALUMNI') return u.roles.includes('ROLE_ALUMNI');
+        if (filterTab === 'FACULTY') return u.roles.includes('ROLE_FACULTY');
 
         return true;
     });
@@ -181,7 +182,8 @@ export const ManageUserStatusPage: React.FC = () => {
         enabled: users.filter((u) => u.enabled).length,
         locked: users.filter((u) => u.accountLocked).length,
         admins: users.filter((u) => u.roles.includes('ROLE_ADMIN')).length,
-        alumni: users.filter((u) => !u.roles.includes('ROLE_ADMIN')).length,
+        alumni: users.filter((u) => u.roles.includes('ROLE_ALUMNI')).length,
+        faculty: users.filter((u) => u.roles.includes('ROLE_FACULTY')).length,
     };
 
     return (
@@ -199,7 +201,7 @@ export const ManageUserStatusPage: React.FC = () => {
 
             {/* ── Tabs ── */}
             <div style={{ display: 'flex', gap: 20, borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
-                {(['ALL', 'ALUMNI', 'ADMINS'] as const).map(tab => (
+                {(['ALUMNI', 'FACULTY', 'ADMINS'] as const).map(tab => (
                     <button
                         key={tab}
                         onClick={() => setFilterTab(tab)}
@@ -217,7 +219,7 @@ export const ManageUserStatusPage: React.FC = () => {
                             transition: 'color 0.2s'
                         }}
                     >
-                        {tab} ({tab === 'ALL' ? stats.total : tab === 'ALUMNI' ? stats.alumni : stats.admins})
+                        {tab} ({tab === 'ALUMNI' ? stats.alumni : tab === 'FACULTY' ? stats.faculty : stats.admins})
                         {filterTab === tab && (
                             <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0, height: 2, background: 'var(--neon-cyan)', boxShadow: '0 0 8px var(--neon-cyan)' }} />
                         )}
@@ -319,10 +321,24 @@ export const ManageUserStatusPage: React.FC = () => {
                                                         )}
                                                     </div>
                                                     <div>
-                                                        <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: 'var(--font-size-md)' }}>
+                                                        <div style={{ 
+                                                            fontFamily: 'Rajdhani, sans-serif', 
+                                                            fontWeight: 600, 
+                                                            fontSize: 'var(--font-size-md)',
+                                                            color: isAdmin ? 'var(--neon-pink)' : 'inherit'
+                                                        }}>
                                                             {user.firstName} {user.lastName}
                                                         </div>
-                                                        <div style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)', fontFamily: 'Outfit, sans-serif' }}>{user.email}</div>
+                                                        <div style={{ 
+                                                            fontSize: 'var(--font-size-sm)', 
+                                                            fontFamily: 'Outfit, sans-serif',
+                                                            color: isAdmin ? 'var(--neon-cyan)' : 'var(--text-muted)',
+                                                            fontWeight: isAdmin ? 700 : 400,
+                                                            textShadow: isAdmin ? '0 0 8px var(--neon-cyan)' : 'none',
+                                                            transition: 'all 0.3s ease'
+                                                        }} className={isAdmin ? 'admin-highlight' : ''}>
+                                                            {user.email}
+                                                        </div>
                                                     </div>
                                                 </Link>
                                             </td>

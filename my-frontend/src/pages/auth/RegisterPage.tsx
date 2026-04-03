@@ -6,7 +6,7 @@ import { Input, Button, Alert } from '../../components/ui';
 
 export const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
-    const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', phone: '' });
+    const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', phone: '', role: 'alumni' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -109,6 +109,19 @@ export const RegisterPage: React.FC = () => {
                             </div>
                             <Input label="Email" type="email" value={form.email} onChange={set('email')} placeholder="ada@university.edu" error={fieldErrors.email} required />
                             <Input label="Password" type="password" value={form.password} onChange={set('password')} placeholder="Min 8 chars..." error={fieldErrors.password} required />
+                            
+                            <div className="cp-input-wrap">
+                                <label className="cp-label">I am an:</label>
+                                <select 
+                                    className="cp-input cp-select" 
+                                    value={form.role} 
+                                    onChange={(e) => setForm(f => ({ ...f, role: e.target.value }))}
+                                    style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px' }}
+                                >
+                                    <option value="alumni">ALUMNI</option>
+                                    <option value="faculty">FACULTY</option>
+                                </select>
+                            </div>
                             <Button type="submit" loading={loading} style={{ width: '100%', background: 'linear-gradient(135deg, var(--neon-purple), #7b2fbf)' }}>
                                 {loading ? 'REGISTERING...' : 'CREATE ACCOUNT'}
                             </Button>
