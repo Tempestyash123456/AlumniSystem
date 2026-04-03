@@ -9,7 +9,7 @@
             "destination": "https://backend-production-feca5.up.railway.app/uploads/:path*"
         },
         {
-            "source": "/((?!api|oauth2|login|uploads).*)",
+            "source": "/((?!api|uploads).*)",
             "destination": "/index.html"
         }
     ],
