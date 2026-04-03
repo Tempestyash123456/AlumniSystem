@@ -66,6 +66,10 @@ app:
       - image/png
       - image/webp
   frontend-url: ${FRONTEND_URL:https://your-frontend.vercel.app}
+  supabase:
+    url: ${SUPABASE_URL}
+    key: ${SUPABASE_KEY}
+    bucket: ${SUPABASE_BUCKET:alumni-uploads}
   storage:
     provider: supabase
 
