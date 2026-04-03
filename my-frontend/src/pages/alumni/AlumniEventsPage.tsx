@@ -323,10 +323,6 @@ export const AlumniEventsPage: React.FC = () => {
         return matchSearch && matchStatus;
     });
 
-    const upcomingCount = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'UPCOMING').length;
-    const ongoingCount = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'ONGOING').length;
-    const pastCount = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'PAST').length;
-
     return (
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
 
@@ -340,7 +336,7 @@ export const AlumniEventsPage: React.FC = () => {
                         Alumni Events
                     </h1>
                     <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginTop: 4 }}>
-                        {events.length} event{events.length !== 1 ? 's' : ''} · {upcomingCount} upcoming
+                        {events.length} event{events.length !== 1 ? 's' : ''}
                     </p>
                 </div>
             </div>
