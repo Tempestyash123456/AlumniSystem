@@ -29,8 +29,8 @@ const getEventStatus = (startTime: string, endTime?: string | null): EventStatus
 
 const STATUS_STYLES: Record<EventStatus, { bg: string; text: string; border: string }> = {
     UPCOMING: { bg: 'rgba(57,255,20,0.15)', text: 'var(--neon-green)', border: 'rgba(57,255,20,0.3)' },
-    ONGOING:  { bg: 'rgba(0,245,255,0.15)', text: 'var(--neon-cyan)', border: 'rgba(0,245,255,0.3)' },
-    PAST:     { bg: 'rgba(255,184,0,0.12)', text: 'var(--neon-amber)', border: 'rgba(255,184,0,0.3)' }
+    ONGOING: { bg: 'rgba(0,245,255,0.15)', text: 'var(--neon-cyan)', border: 'rgba(0,245,255,0.3)' },
+    PAST: { bg: 'rgba(255,184,0,0.12)', text: 'var(--neon-amber)', border: 'rgba(255,184,0,0.3)' }
 };
 
 const docIcon = (name: string | undefined) => {
@@ -295,12 +295,12 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export const AlumniEventsPage: React.FC = () => {
-    const [events, setEvents]           = useState<EventDto[]>([]);
-    const [loading, setLoading]         = useState(true);
-    const [error, setError]             = useState('');
-    const [search, setSearch]           = useState('');
+    const [events, setEvents] = useState<EventDto[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState<'all' | 'ongoing' | 'upcoming' | 'past'>('all');
-    const [viewEvent, setViewEvent]     = useState<EventDto | null>(null);
+    const [viewEvent, setViewEvent] = useState<EventDto | null>(null);
 
     const load = async () => {
         setLoading(true);
@@ -324,8 +324,8 @@ export const AlumniEventsPage: React.FC = () => {
     });
 
     const upcomingCount = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'UPCOMING').length;
-    const ongoingCount  = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'ONGOING').length;
-    const pastCount     = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'PAST').length;
+    const ongoingCount = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'ONGOING').length;
+    const pastCount = events.filter(e => getEventStatus(e.startTime, e.endTime) === 'PAST').length;
 
     return (
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
@@ -343,21 +343,6 @@ export const AlumniEventsPage: React.FC = () => {
                         {events.length} event{events.length !== 1 ? 's' : ''} · {upcomingCount} upcoming
                     </p>
                 </div>
-            </div>
-
-            {/* ── Stat cards ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14, flexShrink: 0 }}>
-                {[
-                    { label: 'Total',    value: events.length, color: 'purple' },
-                    { label: 'Ongoing',  value: ongoingCount,  color: 'cyan'   },
-                    { label: 'Upcoming', value: upcomingCount, color: 'green'  },
-                    { label: 'Past',     value: pastCount,     color: 'amber'  },
-                ].map(({ label, value, color }) => (
-                    <div key={label} className={`cp-stat-card ${color}`}>
-                        <div className={`cp-stat-value text-neon-${color}`}>{value}</div>
-                        <div className="cp-stat-label">{label}</div>
-                    </div>
-                ))}
             </div>
 
             {/* ── Alerts ── */}
