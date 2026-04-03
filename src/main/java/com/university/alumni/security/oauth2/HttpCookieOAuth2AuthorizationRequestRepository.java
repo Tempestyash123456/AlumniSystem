@@ -60,7 +60,8 @@ public class HttpCookieOAuth2AuthorizationRequestRepository implements Authoriza
         if (redirectUriAfterLogin != null && !redirectUriAfterLogin.isBlank()) {
             CookieUtils.addCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, COOKIE_EXPIRE_SECONDS);
         }
-        log.debug("Saved OAuth2 Authorization Request to cookie. State: {}", authorizationRequest.getState());
+        log.debug("Saved OAuth2 Authorization Request to cookie. State: {}, RedirectURI: {}", 
+                authorizationRequest.getState(), redirectUriAfterLogin);
     }
 
     @Override

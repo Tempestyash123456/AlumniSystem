@@ -32,21 +32,21 @@ public class CookieUtils {
      * In production (HTTPS), it sets SameSite=None to allow cross-domain redirects from Google.
      */
     public static void addCookie(HttpServletRequest request, HttpServletResponse response, String name, String value, int maxAge) {
-        boolean isSecure = request.isSecure();
+        boolean isSecure = request.isSecure() || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"));
         
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .path("/")
                 .httpOnly(true)
                 .maxAge(maxAge)
                 .secure(isSecure)
-                .sameSite(isSecure ? "None" : "Lax")
+                .sameSite(isSecure ? "None" : "Lax") 
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     public static void deleteCookie(HttpServletRequest request, HttpServletResponse response, String name) {
-        boolean isSecure = request.isSecure();
+        boolean isSecure = request.isSecure() || "https".equalsIgnoreCase(request.getHeader("X-Forwarded-Proto"));
         
         ResponseCookie cookie = ResponseCookie.from(name, "")
                 .path("/")

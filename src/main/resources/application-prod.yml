@@ -48,7 +48,7 @@ spring:
 
 server:
   port: ${PORT:8080}
-  forward-headers-strategy: framework
+  forward-headers-strategy: native
 
 app:
   jwt:
@@ -79,7 +79,7 @@ app:
 
 logging:
   level:
-    com.university.alumni: INFO
+    com.university.alumni: DEBUG
     org.springframework: INFO
     org.springframework.boot: INFO
     org.flywaydb: INFO
