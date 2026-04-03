@@ -67,6 +67,9 @@ app:
   frontend-url: ${FRONTEND_URL:https://your-frontend.vercel.app}
   mail:
     provider: ${APP_MAIL_PROVIDER:resend}
+    resend:
+      api-key: ${RESEND_API_KEY}
+      from: ${RESEND_FROM_EMAIL:Alumni Portal <onboarding@resend.dev>}
   supabase:
     url: ${SUPABASE_URL}
     key: ${SUPABASE_KEY}
