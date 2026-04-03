@@ -243,11 +243,12 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponse completeOAuthRegistration(CompleteOAuthRegistrationRequest request, UUID userId) {
-        User user = userRepository.findByIdWithRoles(userId)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+    public AuthResponse completeOAuthRegistration(CompleteOAuthRegistrationRequest request, String userEmail) {
+        User user = userRepository.findByEmailWithRoles(userEmail)
+                .orElseThrow(() -> new BadRequestException("User profile not found for email: " + userEmail));
+        
         if (user.isRoleSelected()) {
-            throw new BadRequestException("Role already selected");
+            throw new BadRequestException("Role selection protocol already completed");
         }
 
         String roleName;
@@ -256,19 +257,20 @@ public class AuthService {
         } else if (request.role().equalsIgnoreCase("alumni")) {
             roleName = Role.ALUMNI;
         } else {
-            throw new BadRequestException("Invalid role selected. Must be ALUMNI or FACULTY.");
+            throw new BadRequestException("Access protocol invalid. Select either ALUMNI or FACULTY.");
         }
 
         Role selectedRole = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new RuntimeException("Role " + roleName + " not found"));
+                .orElseThrow(() -> new RuntimeException("System role " + roleName + " unmapped in database"));
 
         user.addRole(selectedRole);
         user.setRoleSelected(true);
         userRepository.save(user);
+        userRepository.flush();
 
         auditLogService.record("ROLE_SELECTED", user.getFirstName(), user.getLastName(), roleName);
 
-        // Regen tokens to reflect new authorities
+        // Regenerate tokens to include new permissions
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 

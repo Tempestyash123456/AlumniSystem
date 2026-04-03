@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 
     @Override
+    @Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws IOException {
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
@@ -77,12 +79,16 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     auditLogService.record("REGISTERED", newUser.getFirstName(), newUser.getLastName(), "Google OAuth");
 
                     // We no longer assign ROLE_ALUMNI here for new OAuth users
-                    return userRepository.save(newUser);
+                    User saved = userRepository.save(newUser);
+                    userRepository.flush();
+                    return saved;
                 });
 
         if (user.getProfilePhotoUrl() == null && googlePictureUrl != null) {
             user.setProfilePhotoUrl(googlePictureUrl);
+            user.setProfilePhotoUrl(googlePictureUrl);
             userRepository.save(user);
+            userRepository.flush();
         }
 
         auditLogService.record("LOGGED_IN", user.getFirstName(), user.getLastName(), "Google OAuth");

@@ -37,7 +37,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<AuthResponse>> completeOAuthRegistration(
             @AuthenticationPrincipal CachedUserDetails currentUser,
             @Valid @RequestBody CompleteOAuthRegistrationRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(authService.completeOAuthRegistration(request, currentUser.getId())));
+        return ResponseEntity.ok(ApiResponse.success(authService.completeOAuthRegistration(request, currentUser.getEmail())));
     }
 
     @PostMapping("/refresh")
