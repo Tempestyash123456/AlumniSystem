@@ -63,7 +63,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/oauth2/**",
-            "/login/oauth2/**",
+            "/login/**",
             "/error"
     };
 
@@ -77,12 +77,18 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, PUBLIC_POST_PATHS).permitAll()
                         .requestMatchers(HttpMethod.GET,  PUBLIC_GET_PATHS).permitAll()
+                        .requestMatchers("/login/**").permitAll() // Explicitly permit all login related paths
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2SuccessHandler)
+                        .failureHandler((request, response, exception) -> {
+                            System.err.println("OAuth2 Login Failed: " + exception.getMessage());
+                            exception.printStackTrace();
+                            response.sendRedirect("/login?error=" + exception.getMessage());
+                        })
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint())
