@@ -243,6 +243,7 @@ public class AuthService {
     }
 
     @Transactional
+    @CacheEvict(value = com.university.alumni.common.config.RedisConfig.CacheNames.USER_DETAILS, key = "#userEmail")
     public AuthResponse completeOAuthRegistration(CompleteOAuthRegistrationRequest request, String userEmail) {
         User user = userRepository.findByEmailWithRoles(userEmail)
                 .orElseThrow(() -> new BadRequestException("User profile not found for email: " + userEmail));
