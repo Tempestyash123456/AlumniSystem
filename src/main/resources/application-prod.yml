@@ -65,6 +65,8 @@ app:
       - image/png
       - image/webp
   frontend-url: ${FRONTEND_URL:https://your-frontend.vercel.app}
+  mail:
+    provider: ${APP_MAIL_PROVIDER:resend}
   supabase:
     url: ${SUPABASE_URL}
     key: ${SUPABASE_KEY}
