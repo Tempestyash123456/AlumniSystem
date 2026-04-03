@@ -5,6 +5,9 @@ import type {
 } from '../types';
 
 const BASE_URL = '/api/v1';
+export const OAUTH2_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? ''
+    : 'https://backend-production-feca5.up.railway.app';
 
 export const tokenStorage = {
     getAccess: () => localStorage.getItem('accessToken'),
