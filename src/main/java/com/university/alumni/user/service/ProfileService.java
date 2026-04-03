@@ -77,9 +77,8 @@ public class ProfileService {
     private void applyUpdates(AlumniProfile p, UpdateProfileRequest r) {
         if (r.studentId()       != null) p.setStudentId(r.studentId());
         if (r.graduationYear()  != null) p.setGraduationYear(r.graduationYear());
-        if (r.degree()          != null) p.setDegree(r.degree());
-        if (r.department()      != null) p.setDepartment(r.department());
-        if (r.specialization()  != null) p.setSpecialization(r.specialization());
+        if (r.discipline()      != null) p.setDiscipline(r.discipline());
+        if (r.program()         != null) p.setProgram(r.program());
         if (r.currentJobTitle() != null) p.setCurrentJobTitle(r.currentJobTitle());
         if (r.currentCompany()  != null) p.setCurrentCompany(r.currentCompany());
         if (r.industry()        != null) p.setIndustry(r.industry());
@@ -109,9 +108,8 @@ public class ProfileService {
 
                 p != null ? p.getStudentId()      : null,
                 p != null ? p.getGraduationYear() : null,
-                p != null ? p.getDegree()         : null,
-                p != null ? p.getDepartment()     : null,
-                p != null ? p.getSpecialization() : null,
+                p != null ? p.getDiscipline()     : null,
+                p != null ? p.getProgram()        : null,
 
                 p != null ? p.getCurrentJobTitle()  : null,
                 p != null ? p.getCurrentCompany()   : null,

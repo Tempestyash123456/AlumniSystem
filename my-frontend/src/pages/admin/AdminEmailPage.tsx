@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 // @ts-ignore
 import { adminApi } from '../../lib/api';
 import { Button, Alert, Input, Select, Textarea } from '../../components/ui';
-import { DEPARTMENT_OPTIONS, SPECIALIZATION_OPTIONS } from '../profile/ProfilePage';
+import { PROGRAM_OPTIONS } from '../profile/ProfilePage';
 
 export const AdminEmailPage: React.FC = () => {
     const [error, setError] = useState('');
@@ -11,9 +11,8 @@ export const AdminEmailPage: React.FC = () => {
     const [emailForm, setEmailForm] = useState({
         subject: '',
         body: 'Hello {{firstName}},\n\n',
-        department: '',
-        degree: '',
-        specialization: '',
+        program: '',
+        discipline: '',
         graduationYear: '',
         targetUserEmail: ''
     });
@@ -40,9 +39,8 @@ export const AdminEmailPage: React.FC = () => {
         const payload = {
             subject: emailForm.subject,
             body: emailForm.body,
-            department: emailForm.department || undefined,
-            degree: emailForm.degree || undefined,
-            specialization: emailForm.specialization || undefined,
+            program: emailForm.program || undefined,
+            discipline: emailForm.discipline || undefined,
             graduationYear: emailForm.graduationYear ? Number(emailForm.graduationYear) : undefined,
             targetUserEmail: emailForm.targetUserEmail.trim() || undefined
         };
@@ -58,7 +56,7 @@ export const AdminEmailPage: React.FC = () => {
         setSendingEmail(false);
     };
 
-    const DEGREE_OPTIONS = [
+    const DISCIPLINE_OPTIONS = [
         'B.Tech', 'B.E.', 'B.Sc', 'BCA', 'M.Tech', 'M.E.',
         'M.Sc', 'MCA', 'MBA', 'Ph.D', 'Other',
     ].map((v) => ({ value: v, label: v }));
@@ -111,29 +109,21 @@ export const AdminEmailPage: React.FC = () => {
                             />
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                             <Select
-                                label="Department"
-                                options={DEPARTMENT_OPTIONS}
-                                placeholder="Any Department"
-                                value={emailForm.department}
-                                onChange={(e) => setEmailForm({...emailForm, department: e.target.value})}
+                                label="Program"
+                                options={PROGRAM_OPTIONS}
+                                placeholder="Any Program"
+                                value={emailForm.program}
+                                onChange={(e) => setEmailForm({...emailForm, program: e.target.value})}
                                 disabled={!!emailForm.targetUserEmail}
                             />
                             <Select
-                                label="Degree"
-                                options={DEGREE_OPTIONS}
-                                placeholder="Any Degree"
-                                value={emailForm.degree}
-                                onChange={(e) => setEmailForm({...emailForm, degree: e.target.value})}
-                                disabled={!!emailForm.targetUserEmail}
-                            />
-                            <Select
-                                label="Specialization"
-                                options={SPECIALIZATION_OPTIONS}
-                                placeholder="Any Specialization"
-                                value={emailForm.specialization}
-                                onChange={(e) => setEmailForm({...emailForm, specialization: e.target.value})}
+                                label="Discipline"
+                                options={DISCIPLINE_OPTIONS}
+                                placeholder="Any Discipline"
+                                value={emailForm.discipline}
+                                onChange={(e) => setEmailForm({...emailForm, discipline: e.target.value})}
                                 disabled={!!emailForm.targetUserEmail}
                             />
                         </div>

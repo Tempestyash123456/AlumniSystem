@@ -49,9 +49,8 @@ export interface ProfileResponse {
 
     studentId?: string;
     graduationYear?: number;
-    degree?: string;
-    department?: string;
-    specialization?: string;
+    discipline?: string;
+    program?: string;
 
     currentJobTitle?: string;
     currentCompany?: string;
@@ -80,9 +79,8 @@ export interface UpdateProfileRequest {
     phone?: string | null;
     studentId?: string | null;
     graduationYear?: number | null;
-    degree?: string | null;
-    department?: string | null;
-    specialization?: string | null;
+    discipline?: string | null;
+    program?: string | null;
     currentJobTitle?: string | null;
     currentCompany?: string | null;
     industry?: string | null;

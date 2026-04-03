@@ -111,9 +111,8 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
             {/* Details / QR Section */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', zIndex: 1 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 40px' }}>
-                    <DetailRow label="DEPARTMENT" value={profile?.department || 'N/A'} />
-                    <DetailRow label="DEGREE" value={profile?.degree || 'N/A'} />
-                    <DetailRow label="SPECIALIZATION" value={profile?.specialization || 'N/A'} />
+                    <DetailRow label="PROGRAM" value={profile?.program || 'N/A'} />
+                    <DetailRow label="DISCIPLINE" value={profile?.discipline || 'N/A'} />
                     <DetailRow label="GRAD YEAR" value={profile?.graduationYear?.toString() || 'N/A'} />
                 </div>
 
@@ -239,9 +238,8 @@ export const MembershipPage: React.FC = () => {
     const qrData = JSON.stringify({
         id: profile?.studentId || profile?.userId,
         name: `${profile?.firstName} ${profile?.lastName}`,
-        dept: profile?.department,
-        degree: profile?.degree,
-        specialization: profile?.specialization,
+        program: profile?.program,
+        discipline: profile?.discipline,
         gradYear: profile?.graduationYear,
         type: cardType === 'general' ? 'GENERAL' : 'EXCLUSIVE'
     });

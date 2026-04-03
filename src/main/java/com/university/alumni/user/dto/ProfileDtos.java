@@ -24,9 +24,8 @@ public final class ProfileDtos {
             // Academic
             String  studentId,
             Integer graduationYear,
-            String  degree,
-            String  department,
-            String  specialization,
+            String  discipline,
+            String  program,
 
             // Professional
             String  currentJobTitle,
@@ -63,9 +62,8 @@ public final class ProfileDtos {
             // Academic
             @Size(max = 50)  String studentId,
             @Min(1950) @Max(2100) Integer graduationYear,
-            @Size(max = 100) String degree,
-            @Size(max = 150) String department,
-            @Size(max = 150) String specialization,
+            @Size(max = 100) String discipline,
+            @Size(max = 150) String program,
 
             // Professional
             @Size(max = 150) String currentJobTitle,

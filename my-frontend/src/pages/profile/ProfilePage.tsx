@@ -13,21 +13,15 @@ const INDUSTRY_OPTIONS = [
     'Retail', 'Media', 'Consulting', 'Government', 'Non-profit', 'Other',
 ].map((v) => ({ value: v, label: v }));
 
-const DEGREE_OPTIONS = [
+const DISCIPLINE_OPTIONS = [
     'B.Tech', 'B.E.', 'B.Sc', 'BCA', 'M.Tech', 'M.E.',
     'M.Sc', 'MCA', 'MBA', 'Ph.D', 'Other',
 ].map((v) => ({ value: v, label: v }));
 
-export const DEPARTMENT_OPTIONS = [
+export const PROGRAM_OPTIONS = [
     'Computer Science', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering',
     'Electronics and Communication', 'Information Technology', 'Chemical Engineering',
     'Aerospace Engineering', 'Bio-Technology', 'Business Administration', 'Physics', 'Mathematics', 'Other'
-].map(v => ({ value: v, label: v }));
-
-export const SPECIALIZATION_OPTIONS = [
-    'Artificial Intelligence', 'Data Science', 'Machine Learning', 'Cyber Security',
-    'Cloud Computing', 'Software Engineering', 'Structural Engineering', 'Robotics',
-    'Power Systems', 'Finance', 'Marketing', 'Human Resources', 'Operations', 'Other'
 ].map(v => ({ value: v, label: v }));
 
 type Section = 'personal' | 'academic' | 'professional';
@@ -191,9 +185,8 @@ export const ProfilePage: React.FC = () => {
                 dateOfBirth: res.data.dateOfBirth ?? '',
                 studentId: res.data.studentId ?? '',
                 graduationYear: res.data.graduationYear ?? undefined,
-                degree: res.data.degree ?? '',
-                department: res.data.department ?? '',
-                specialization: res.data.specialization ?? '',
+                discipline: res.data.discipline ?? '',
+                program: res.data.program ?? '',
                 currentJobTitle: res.data.currentJobTitle ?? '',
                 currentCompany: res.data.currentCompany ?? '',
                 industry: res.data.industry ?? '',
@@ -401,10 +394,9 @@ export const ProfilePage: React.FC = () => {
                                     <Input label="Graduation Year" type="number" placeholder="YYYY" value={form.graduationYear ?? ''} onChange={setNum('graduationYear')} />
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                                    <Select label="Degree" value={form.degree ?? ''} onChange={setStr('degree')} options={DEGREE_OPTIONS} placeholder="Select Degree" />
-                                    <Select label="Department" value={form.department ?? ''} onChange={setStr('department')} options={DEPARTMENT_OPTIONS} placeholder="Select Department" />
+                                    <Select label="Discipline" value={form.discipline ?? ''} onChange={setStr('discipline')} options={DISCIPLINE_OPTIONS} placeholder="Select Discipline" />
+                                    <Select label="Program" value={form.program ?? ''} onChange={setStr('program')} options={PROGRAM_OPTIONS} placeholder="Select Program" />
                                 </div>
-                                <Select label="Specialization" value={form.specialization ?? ''} onChange={setStr('specialization')} options={SPECIALIZATION_OPTIONS} placeholder="Select Specialization" />
                             </div>
                         )}
 

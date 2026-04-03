@@ -180,14 +180,11 @@ public class AdminService {
                     .collect(Collectors.toList());
 
             // Apply filters
-            if (request.department() != null && !request.department().isBlank()) {
-                profiles.removeIf(p -> p.getDepartment() == null || !p.getDepartment().equalsIgnoreCase(request.department()));
+            if (request.program() != null && !request.program().isBlank()) {
+                profiles.removeIf(p -> p.getProgram() == null || !p.getProgram().equalsIgnoreCase(request.program()));
             }
-            if (request.degree() != null && !request.degree().isBlank()) {
-                profiles.removeIf(p -> p.getDegree() == null || !p.getDegree().equalsIgnoreCase(request.degree()));
-            }
-            if (request.specialization() != null && !request.specialization().isBlank()) {
-                profiles.removeIf(p -> p.getSpecialization() == null || !p.getSpecialization().equalsIgnoreCase(request.specialization()));
+            if (request.discipline() != null && !request.discipline().isBlank()) {
+                profiles.removeIf(p -> p.getDiscipline() == null || !p.getDiscipline().equalsIgnoreCase(request.discipline()));
             }
             if (request.graduationYear() != null) {
                 profiles.removeIf(p -> p.getGraduationYear() == null || !p.getGraduationYear().equals(request.graduationYear()));

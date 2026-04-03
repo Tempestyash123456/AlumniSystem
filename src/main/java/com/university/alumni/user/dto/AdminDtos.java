@@ -50,9 +50,8 @@ public final class AdminDtos {
             @NotBlank(message = "Body is required") String body,
 
             // Optional filters to target specific alumni
-            String department,
-            String degree,
-            String specialization,
+            String program,
+            String discipline,
             Integer graduationYear,
             String targetUserEmail // Send to one specific user by email if provided
     ) {}
