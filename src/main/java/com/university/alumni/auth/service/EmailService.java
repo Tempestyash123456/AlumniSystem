@@ -28,7 +28,7 @@ public class EmailService {
     @Value("${app.mail.resend.api-key:}")
     private String resendApiKey;
 
-    @Value("${app.mail.resend.from:onboarding@resend.dev}")
+    @Value("${app.mail.resend.from:admin@tempestonline.in}")
     private String resendFrom;
 
     @Value("${spring.mail.username:}")
