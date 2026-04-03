@@ -89,9 +89,13 @@ public class SecurityConfig {
                                 .authorizationRequestRepository(cookieRepository))
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler((request, response, exception) -> {
-                            String errorMessage = java.net.URLEncoder.encode(exception.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
                             System.err.println("OAuth2 Login Failed: " + exception.getMessage());
-                            response.sendRedirect("/login?error=" + errorMessage);
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write(String.format(
+                                    "{\"success\":false,\"error\":{\"status\":401,\"code\":\"OAUTH2_ERROR\",\"message\":\"%s\"}}",
+                                    exception.getMessage().replace("\"", "\\\"")
+                            ));
                         })
                 )
                 .exceptionHandling(ex -> ex
