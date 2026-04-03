@@ -1,9 +1,7 @@
 package com.university.alumni.security.oauth2;
 
 import com.university.alumni.security.service.JwtService;
-import com.university.alumni.user.entity.Role;
 import com.university.alumni.user.entity.User;
-import com.university.alumni.user.repository.RoleRepository;
 import com.university.alumni.user.repository.UserRepository;
 import com.university.alumni.audit.service.AuditLogService;
 import com.university.alumni.common.config.AppProperties;
@@ -27,7 +25,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final AuditLogService auditLogService;
     private final AppProperties appProperties;
 
@@ -73,14 +70,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                             .profilePhotoUrl(googlePictureUrl)
                             .passwordHash("{noop}" + UUID.randomUUID())
                             .enabled(true)
-                            .accountLocked(false) // New OAuth2 users should not be locked
+                            .accountLocked(false)
+                            .roleSelected(false)    // User must pick Alumni or Faculty
                             .build();
 
                     auditLogService.record("REGISTERED", newUser.getFirstName(), newUser.getLastName(), "Google OAuth");
 
-                    Role alumniRole = roleRepository.findByName(Role.ALUMNI)
-                            .orElseThrow(() -> new RuntimeException("ROLE_ALUMNI not found"));
-                    newUser.addRole(alumniRole);
+                    // We no longer assign ROLE_ALUMNI here for new OAuth users
                     return userRepository.save(newUser);
                 });
 

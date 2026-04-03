@@ -16,7 +16,7 @@ class SecurityUtilsTest {
     void validateAccountActive_shouldThrowException_whenUserDisabled() {
         CachedUserDetails user = new CachedUserDetails(
                 UUID.randomUUID(), "test@test.com", "hash", "First", "Last", null,
-                false, false, List.of("ROLE_USER"), List.of()
+                false, false, true, List.of("ROLE_USER"), List.of()
         );
 
         assertThrows(AccessDeniedException.class, () -> SecurityUtils.validateAccountActive(user));
@@ -26,7 +26,7 @@ class SecurityUtilsTest {
     void validateAccountActive_shouldThrowException_whenUserLocked() {
         CachedUserDetails user = new CachedUserDetails(
                 UUID.randomUUID(), "test@test.com", "hash", "First", "Last", null,
-                true, true, List.of("ROLE_USER"), List.of()
+                true, true, true, List.of("ROLE_USER"), List.of()
         );
 
         assertThrows(AccessDeniedException.class, () -> SecurityUtils.validateAccountActive(user));
@@ -36,7 +36,7 @@ class SecurityUtilsTest {
     void validateAccountActive_shouldNotThrow_whenUserActive() {
         CachedUserDetails user = new CachedUserDetails(
                 UUID.randomUUID(), "test@test.com", "hash", "First", "Last", null,
-                true, false, List.of("ROLE_USER"), List.of()
+                true, false, true, List.of("ROLE_USER"), List.of()
         );
 
         assertDoesNotThrow(() -> SecurityUtils.validateAccountActive(user));

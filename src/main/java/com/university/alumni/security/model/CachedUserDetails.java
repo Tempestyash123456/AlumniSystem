@@ -23,6 +23,7 @@ public class CachedUserDetails implements UserDetails {
     private final String profilePhotoUrl;
     private final boolean enabled;
     private final boolean accountLocked;
+    private final boolean roleSelected;
 
     private final List<String> roles;
     private final List<String> permissions;
@@ -36,7 +37,8 @@ public class CachedUserDetails implements UserDetails {
             @JsonProperty("lastName")        String  lastName,
             @JsonProperty("profilePhotoUrl") String  profilePhotoUrl,
             @JsonProperty("enabled")         boolean enabled,
-             @JsonProperty("accountLocked")   boolean accountLocked,
+            @JsonProperty("accountLocked")   boolean accountLocked,
+            @JsonProperty("roleSelected")    boolean roleSelected,
             @JsonProperty("roles")           List<String> roles,
             @JsonProperty("permissions")     List<String> permissions
     ) {
@@ -48,6 +50,7 @@ public class CachedUserDetails implements UserDetails {
         this.profilePhotoUrl = profilePhotoUrl;
         this.enabled         = enabled;
         this.accountLocked   = accountLocked;
+        this.roleSelected    = roleSelected;
         this.roles           = roles != null ? List.copyOf(roles) : List.of();
         this.permissions     = permissions != null ? List.copyOf(permissions) : List.of();
     }
@@ -68,6 +71,7 @@ public class CachedUserDetails implements UserDetails {
                 user.getProfilePhotoUrl(),
                 user.isEnabled(),
                 user.isAccountLocked(),
+                user.isRoleSelected(),
                 roles,
                 user.getPermissions().stream().map(p -> p.getName()).toList()
         );
@@ -126,4 +130,5 @@ public class CachedUserDetails implements UserDetails {
     // FIX: These two getters tell Jackson to save the password and locked status into Redis
     public String getPasswordHash()    { return passwordHash; }
     public boolean getAccountLocked()  { return accountLocked; }
+    public boolean isRoleSelected()    { return roleSelected; }
 }

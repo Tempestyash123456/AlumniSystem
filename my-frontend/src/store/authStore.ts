@@ -10,6 +10,9 @@ interface AuthState {
     isAuthenticated: boolean;
     isAdmin: boolean;
     permissions: string[];
+    accountLocked: boolean;
+    enabled: boolean;
+    roleSelected: boolean;
     setUser: (user: UserInfo, accessToken: string, refreshToken: string) => void;
     clearAuth: () => void;
     updateUser: (partial: Partial<UserInfo>) => void;
@@ -23,6 +26,9 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isAdmin: false,
             permissions: [],
+            accountLocked: false,
+            enabled: false,
+            roleSelected: false,
 
             setUser: (user, accessToken, refreshToken) => {
                 tokenStorage.set(accessToken, refreshToken);
@@ -31,6 +37,9 @@ export const useAuthStore = create<AuthState>()(
                     isAuthenticated: true,
                     isAdmin: user.roles?.includes('ROLE_ADMIN') || false,
                     permissions: user.permissions || [],
+                    accountLocked: user.accountLocked || false,
+                    enabled: user.enabled || false,
+                    roleSelected: user.roleSelected || false,
                 });
             },
 

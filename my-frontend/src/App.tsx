@@ -20,12 +20,18 @@ import { AlumniEventsPage } from './pages/alumni/AlumniEventsPage.tsx';
 import { OAuth2Callback } from './pages/auth/OAuth2Callback.tsx';
 import { LandingPage } from './pages/landing/LandingPage.tsx';
 import { MembershipPage } from './pages/membership/MembershipPage.tsx';
+import { CompleteRegistrationPage } from './pages/auth/CompleteRegistrationPage.tsx';
 
 // ── Guards ──────────────────────────────────────────────────────────────────
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isAuthenticated } = useAuthStore();
+    const { isAuthenticated, user } = useAuthStore();
     const location = useLocation();
     if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />;
+    
+    if (isAuthenticated && !user?.roleSelected && location.pathname !== '/complete-registration') {
+        return <Navigate to="/complete-registration" replace />;
+    }
+    
     return <>{children}</>;
 };
 
@@ -34,6 +40,10 @@ const RequirePermission: React.FC<{ children: React.ReactNode; permission?: stri
     const location = useLocation();
     if (!isAuthenticated) return <Navigate to="/login" state={{ from: location }} replace />;
     
+    if (isAuthenticated && !user?.roleSelected && location.pathname !== '/complete-registration') {
+        return <Navigate to="/complete-registration" replace />;
+    }
+
     if (isAuthenticated && (!user?.enabled || (user?.accountLocked && !isAdmin))) {
         return <Navigate to="/dashboard" replace />;
     }
@@ -51,8 +61,11 @@ const RequirePermission: React.FC<{ children: React.ReactNode; permission?: stri
 };
 
 const RedirectIfAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { isAuthenticated } = useAuthStore();
-    if (isAuthenticated) return <Navigate to="/dashboard" replace />;
+    const { isAuthenticated, user } = useAuthStore();
+    if (isAuthenticated) {
+        if (!user?.roleSelected) return <Navigate to="/complete-registration" replace />;
+        return <Navigate to="/dashboard" replace />;
+    }
     return <>{children}</>;
 };
 
@@ -111,6 +124,7 @@ const App: React.FC = () => {
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/reset-password"  element={<ResetPasswordPage />} />
                 <Route path="/verify-email"    element={<VerifyEmailPage />} />
+                <Route path="/complete-registration" element={<RequireAuth><CompleteRegistrationPage /></RequireAuth>} />
 
                 {/* Protected – all authenticated users */}
                 <Route path="/dashboard"    element={<RequireAuth><Layout><DashboardPage /></Layout></RequireAuth>} />

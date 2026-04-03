@@ -24,6 +24,7 @@ export interface UserInfo {
     permissions: string[];
     accountLocked: boolean;
     enabled: boolean;
+    roleSelected: boolean;
 }
 
 export interface AuthResponse {

@@ -33,6 +33,13 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(authService.login(request, httpRequest)));
     }
 
+    @PostMapping("/complete-oauth-registration")
+    public ResponseEntity<ApiResponse<AuthResponse>> completeOAuthRegistration(
+            @AuthenticationPrincipal CachedUserDetails currentUser,
+            @Valid @RequestBody CompleteOAuthRegistrationRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(authService.completeOAuthRegistration(request, currentUser.getId())));
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AuthResponse>> refresh(
             @Valid @RequestBody RefreshTokenRequest request,
@@ -85,7 +92,8 @@ public class AuthController {
                 currentUser.getRoles(),
                 currentUser.getPermissions(),
                 currentUser.getAccountLocked(),
-                currentUser.isEnabled()
+                currentUser.isEnabled(),
+                currentUser.isRoleSelected()
         );
         return ResponseEntity.ok(ApiResponse.success(info));
     }

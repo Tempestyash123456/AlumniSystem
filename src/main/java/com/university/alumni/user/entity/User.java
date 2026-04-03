@@ -60,6 +60,10 @@ public class User extends BaseEntity implements UserDetails {
     @Builder.Default
     private int failedLoginCount = 0;
 
+    @Column(name = "role_selected", nullable = false)
+    @Builder.Default
+    private boolean roleSelected = false;
+
     // ── Roles (many-to-many) ─────────────────────────────────────────────────
     @ManyToMany(fetch = FetchType.EAGER)   // EAGER here — roles always needed for auth
     @JoinTable(

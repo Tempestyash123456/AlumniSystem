@@ -47,7 +47,8 @@ public final class AuthDtos {
             String phone,         // Optional
 
             @NotBlank(message = "Role is required")
-            String role          // alumni or faculty
+            @Pattern(regexp = "^(?i)(alumni|faculty)$", message = "Role must be either ALUMNI or FACULTY")
+            String role
     ) {}
 
     public record RefreshTokenRequest(
@@ -97,7 +98,14 @@ public final class AuthDtos {
             java.util.List<String> roles,
             java.util.List<String> permissions,
             boolean accountLocked,
-            boolean enabled
+            boolean enabled,
+            boolean roleSelected
+    ) {}
+
+    public record CompleteOAuthRegistrationRequest(
+            @NotBlank(message = "Role is required")
+            @Pattern(regexp = "^(?i)(alumni|faculty)$", message = "Role must be either ALUMNI or FACULTY")
+            String role
     ) {}
 
     public record MessageResponse(String message) {}

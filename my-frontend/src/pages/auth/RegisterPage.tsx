@@ -6,7 +6,7 @@ import { Input, Button, Alert } from '../../components/ui';
 
 export const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
-    const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', phone: '', role: 'alumni' });
+    const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', phone: '', role: '' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -117,7 +117,9 @@ export const RegisterPage: React.FC = () => {
                                     value={form.role} 
                                     onChange={(e) => setForm(f => ({ ...f, role: e.target.value }))}
                                     style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px' }}
+                                    required
                                 >
+                                    <option value="" disabled>-- SELECT YOUR ROLE --</option>
                                     <option value="alumni">ALUMNI</option>
                                     <option value="faculty">FACULTY</option>
                                 </select>

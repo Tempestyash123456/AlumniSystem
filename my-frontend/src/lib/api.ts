@@ -101,6 +101,7 @@ export const authApi = {
     forgotPassword: (email: string) => apiFetch<{ message: string }>('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) }),
     resetPassword: (token: string, newPassword: string) => apiFetch<{ message: string }>('/auth/reset-password', { method: 'POST', body: JSON.stringify({ token, newPassword }) }),
     verifyEmail: (token: string) => apiFetch<{ message: string }>('/auth/verify-email', { method: 'POST', body: JSON.stringify({ token }) }),
+    completeOAuthRegistration: (role: string) => apiFetch<AuthResponse>('/auth/complete-oauth-registration', { method: 'POST', body: JSON.stringify({ role }) }),
 };
 
 export const profileApi = {

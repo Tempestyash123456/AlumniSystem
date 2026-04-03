@@ -25,7 +25,11 @@ export const OAuth2Callback = () => {
             .then((res) => {
                 if (res.data) {
                     setUser(res.data, token, '');
-                    navigate('/dashboard', { replace: true });
+                    if (!res.data.roleSelected) {
+                        navigate('/complete-registration', { replace: true });
+                    } else {
+                        navigate('/dashboard', { replace: true });
+                    }
                 } else {
                     clearAuth();
                     navigate('/login?error=oauth2_failed', { replace: true });

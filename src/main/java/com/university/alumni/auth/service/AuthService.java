@@ -57,7 +57,14 @@ public class AuthService {
             throw new ConflictException("An account with this email already exists");
         }
 
-        String roleName = request.role().equalsIgnoreCase("faculty") ? Role.FACULTY : Role.ALUMNI;
+        String roleName;
+        if (request.role().equalsIgnoreCase("faculty")) {
+            roleName = Role.FACULTY;
+        } else if (request.role().equalsIgnoreCase("alumni")) {
+            roleName = Role.ALUMNI;
+        } else {
+            throw new BadRequestException("Invalid role selected. Must be ALUMNI or FACULTY.");
+        }
 
         Role selectedRole = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new RuntimeException("Default role " + roleName + " not found"));
@@ -70,6 +77,7 @@ public class AuthService {
                 .phone(request.phone())
                 .enabled(false) // Locked until verified
                 .accountLocked(true) // Restricted UI features until admin unlocks
+                .roleSelected(true) // Role already picked in form
                 .build();
 
         user.addRole(selectedRole);
@@ -228,9 +236,43 @@ public class AuthService {
                 roles,
                 permissions,
                 user.isAccountLocked(),
-                user.isEnabled());
+                user.isEnabled(),
+                user.isRoleSelected());
         return new AuthResponse(accessToken, refreshToken, "Bearer",
                 appProperties.getJwt().getAccessTokenExpiryMs() / 1000, userInfo);
+    }
+
+    @Transactional
+    public AuthResponse completeOAuthRegistration(CompleteOAuthRegistrationRequest request, UUID userId) {
+        User user = userRepository.findByIdWithRoles(userId)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+        if (user.isRoleSelected()) {
+            throw new BadRequestException("Role already selected");
+        }
+
+        String roleName;
+        if (request.role().equalsIgnoreCase("faculty")) {
+            roleName = Role.FACULTY;
+        } else if (request.role().equalsIgnoreCase("alumni")) {
+            roleName = Role.ALUMNI;
+        } else {
+            throw new BadRequestException("Invalid role selected. Must be ALUMNI or FACULTY.");
+        }
+
+        Role selectedRole = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new RuntimeException("Role " + roleName + " not found"));
+
+        user.addRole(selectedRole);
+        user.setRoleSelected(true);
+        userRepository.save(user);
+
+        auditLogService.record("ROLE_SELECTED", user.getFirstName(), user.getLastName(), roleName);
+
+        // Regen tokens to reflect new authorities
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        return buildAuthResponse(user, accessToken, refreshToken);
     }
 
     private String extractDeviceInfo(HttpServletRequest request) {
