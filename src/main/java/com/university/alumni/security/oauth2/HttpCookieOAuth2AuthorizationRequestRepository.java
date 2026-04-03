@@ -26,6 +26,17 @@ public class HttpCookieOAuth2AuthorizationRequestRepository implements Authoriza
     public OAuth2AuthorizationRequest loadAuthorizationRequest(HttpServletRequest request) {
         Assert.notNull(request, "request cannot be null");
         
+        // Debug: Log all incoming cookies
+        if (request.getCookies() != null) {
+            StringBuilder cookieList = new StringBuilder();
+            for (jakarta.servlet.http.Cookie c : request.getCookies()) {
+                cookieList.append(c.getName()).append(", ");
+            }
+            log.debug("Incoming cookies on callback: [{}]", cookieList.isEmpty() ? "none" : cookieList.substring(0, cookieList.length() - 2));
+        } else {
+            log.debug("No cookies at all received on callback.");
+        }
+
         return CookieUtils.getCookie(request, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME)
                 .map(cookie -> {
                     try {
