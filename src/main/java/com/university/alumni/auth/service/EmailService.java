@@ -4,11 +4,15 @@ import com.university.alumni.auth.dto.ResendEmailRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
@@ -40,6 +44,11 @@ public class EmailService {
     }
 
     private void sendViaResend(String to, String subject, String body) {
+        if (resendApiKey == null || resendApiKey.isBlank()) {
+            log.error("RESEND_API_KEY is missing or empty. Cannot send email via Resend API.");
+            return;
+        }
+
         try {
             ResendEmailRequest emailRequest = ResendEmailRequest.builder()
                     .from(resendFrom)
@@ -51,9 +60,16 @@ public class EmailService {
             webClientBuilder.build()
                     .post()
                     .uri("https://api.resend.com/emails")
-                    .header("Authorization", "Bearer " + resendApiKey)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + resendApiKey.trim())
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .bodyValue(emailRequest)
                     .retrieve()
+                    .onStatus(HttpStatusCode::isError, response -> 
+                        response.bodyToMono(String.class).flatMap(errorBody -> {
+                            log.error("Resend API returned error: {} - {}", response.statusCode(), errorBody);
+                            return Mono.error(new RuntimeException("Resend API Failure: " + errorBody));
+                        })
+                    )
                     .toBodilessEntity()
                     .block();
 
