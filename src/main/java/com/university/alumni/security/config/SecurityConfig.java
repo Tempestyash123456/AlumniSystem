@@ -3,6 +3,7 @@ package com.university.alumni.security.config;
 import com.university.alumni.common.config.AppProperties;
 import com.university.alumni.security.filter.JwtAuthenticationFilter;
 import com.university.alumni.security.oauth2.OAuth2SuccessHandler;
+import com.university.alumni.security.oauth2.HttpCookieOAuth2AuthorizationRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,7 +40,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
     private final AppProperties appProperties;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler; // Injected handler
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final HttpCookieOAuth2AuthorizationRequestRepository cookieRepository;
 
     private static final String[] PUBLIC_POST_PATHS = {
             "/api/v1/auth/login",
@@ -83,11 +85,13 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(auth -> auth
+                                .authorizationRequestRepository(cookieRepository))
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler((request, response, exception) -> {
+                            String errorMessage = java.net.URLEncoder.encode(exception.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
                             System.err.println("OAuth2 Login Failed: " + exception.getMessage());
-                            exception.printStackTrace();
-                            response.sendRedirect("/login?error=" + exception.getMessage());
+                            response.sendRedirect("/login?error=" + errorMessage);
                         })
                 )
                 .exceptionHandling(ex -> ex
