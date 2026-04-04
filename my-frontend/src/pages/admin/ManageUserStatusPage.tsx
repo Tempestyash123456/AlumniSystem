@@ -10,6 +10,7 @@ import { toast } from '../../store/toastStore';
 import { confirm } from '../../store/confirmStore';
 
 import { useAuthStore } from '../../store/authStore';
+import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
 export const ManageUserStatusPage: React.FC = () => {
     const { hasPermission, user: currentUser } = useAuthStore();
@@ -269,7 +270,9 @@ export const ManageUserStatusPage: React.FC = () => {
                     <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                         {filtered.length} of {users.length}
                     </span>
-                    <Button variant="outline" size="sm" onClick={load}>🔄 Refresh</Button>
+                    <PermissionGuard permission="VIEW_DIRECTORY">
+                        <Button variant="outline" size="sm" onClick={load}>🔄 Refresh</Button>
+                    </PermissionGuard>
                 </div>
 
                 <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'auto' }}>

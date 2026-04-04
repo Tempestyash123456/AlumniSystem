@@ -4,7 +4,6 @@ import { useAuthStore } from '../../store/authStore';
 import { useThemeStore } from '../../store/themeStore';
 import { authApi, tokenStorage } from '../../lib/api';
 import { ToastContainer, GlobalConfirmContainer } from '../ui';
-import { PermissionGuard } from '../auth/PermissionGuard';
 
 const BASE_URL = '';
 
@@ -13,7 +12,7 @@ interface LayoutProps {
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const { user, isAdmin, clearAuth } = useAuthStore();
+    const { user, isAdmin, hasPermission, clearAuth } = useAuthStore();
     const { theme, toggleTheme } = useThemeStore();
     const location = useLocation();
     const navigate = useNavigate();
@@ -114,33 +113,29 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                             </>
                         )}
 
-                        <PermissionGuard 
-                            permission="VIEW_DIRECTORY" 
-                            fallback={
-                                <PermissionGuard permission="SEND_EMAIL">
-                                    <SectionLabel text="ADMINISTRATION" />
-                                    <NavItem path="/admin/email" icon="✉" label="Broadcast Email" exact />
-                                </PermissionGuard>
-                            }
-                        >
-                            <SectionLabel text="ADMINISTRATION" />
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                <NavItem path="/alumni" icon="👥" label="Users directory" exact />
-                                <NavItem path="/admin/users/status" icon="🛡️" label="Manage Permissions" exact />
-                                
-                                <PermissionGuard permission="SEND_EMAIL">
-                                    <NavItem path="/admin/email" icon="✉" label="Broadcast Email" exact />
-                                </PermissionGuard>
-
-                                <PermissionGuard permission="CREATE_POST">
-                                    <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />
-                                </PermissionGuard>
-
-                                <PermissionGuard permission="CREATE_EVENT">
-                                    <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />
-                                </PermissionGuard>
-                            </div>
-                        </PermissionGuard>
+                        {/* Administration Section */}
+                        {(hasPermission('VIEW_DIRECTORY') || hasPermission('MANAGE_PERMISSION') || hasPermission('SEND_EMAIL') || hasPermission('CREATE_POST') || hasPermission('CREATE_EVENT')) && (
+                            <>
+                                <SectionLabel text="ADMINISTRATION" />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    {hasPermission('VIEW_DIRECTORY') && (
+                                        <NavItem path="/alumni" icon="👥" label="Users directory" exact />
+                                    )}
+                                    {hasPermission('MANAGE_PERMISSION') && (
+                                        <NavItem path="/admin/users/status" icon="🛡️" label="Manage Permissions" exact />
+                                    )}
+                                    {hasPermission('SEND_EMAIL') && (
+                                        <NavItem path="/admin/email" icon="✉" label="Broadcast Email" exact />
+                                    )}
+                                    {hasPermission('CREATE_POST') && (
+                                        <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />
+                                    )}
+                                    {hasPermission('CREATE_EVENT') && (
+                                        <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />
+                                    )}
+                                </div>
+                            </>
+                        )}
                     </nav>
                 </div>
             </aside>
