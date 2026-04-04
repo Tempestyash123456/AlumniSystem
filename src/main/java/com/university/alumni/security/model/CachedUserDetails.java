@@ -62,6 +62,13 @@ public class CachedUserDetails implements UserDetails {
                 .map(role -> role.getName())
                 .toList();
 
+        // Extract all permissions (flattened from roles + direct)
+        List<String> allPermissions = user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(a -> !a.startsWith("ROLE_"))
+                .distinct()
+                .toList();
+
         return new CachedUserDetails(
                 user.getId(),
                 user.getEmail(),
@@ -73,7 +80,7 @@ public class CachedUserDetails implements UserDetails {
                 user.isAccountLocked(),
                 user.isRoleSelected(),
                 roles,
-                user.getPermissions().stream().map(p -> p.getName()).toList()
+                allPermissions
         );
     }
 
@@ -82,15 +89,15 @@ public class CachedUserDetails implements UserDetails {
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        var authorities = roles.stream()
+        var roleAuthorities = roles.stream()
                 .map(SimpleGrantedAuthority::new)
                 .toList();
 
-        var directPermissions = permissions.stream()
+        var permissionAuthorities = permissions.stream()
                 .map(SimpleGrantedAuthority::new)
                 .toList();
 
-        return java.util.stream.Stream.concat(authorities.stream(), directPermissions.stream())
+        return java.util.stream.Stream.concat(roleAuthorities.stream(), permissionAuthorities.stream())
                 .toList();
     }
 
