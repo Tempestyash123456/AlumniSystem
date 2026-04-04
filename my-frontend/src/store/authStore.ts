@@ -56,15 +56,22 @@ export const useAuthStore = create<AuthState>()(
 
             hasPermission: (permission: string) => {
                 const state = get();
+                
+                // Super-admin fallback: Always true for admins
+                if (state.isAdmin) return true;
+
                 // Default permissions for all authenticated users (VIEW rights)
                 const defaultPermissions = ['VIEW_POST', 'VIEW_EVENT'];
                 if (defaultPermissions.includes(permission)) return true;
 
-                // Super-admin check: Anyone with MANAGE_PERMISSION can do anything
-                if (state.permissions.includes('MANAGE_PERMISSION')) return true;
+                if (!state.permissions) return false;
 
-                // Direct permission check
-                return state.permissions.includes(permission);
+                // Support both string and object formats (defensive)
+                return state.permissions.some(p => {
+                    if (typeof p === 'string') return p === permission;
+                    if (p && typeof p === 'object' && 'name' in p) return (p as any).name === permission;
+                    return false;
+                });
             },
         }),
         {
