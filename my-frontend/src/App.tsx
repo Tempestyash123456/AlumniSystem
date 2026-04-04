@@ -48,8 +48,8 @@ const RequirePermission: React.FC<{ children: React.ReactNode; permission?: stri
         return <Navigate to="/dashboard" replace />;
     }
 
-    // Admin routes strictly require isAdmin role
-    if (location.pathname.startsWith('/admin') && !isAdmin) {
+    // Admin routes require EITHER isAdmin role OR the specific granular permission
+    if (location.pathname.startsWith('/admin') && !isAdmin && (!permission || !hasPermission(permission))) {
         return <Navigate to="/dashboard" replace />;
     }
 

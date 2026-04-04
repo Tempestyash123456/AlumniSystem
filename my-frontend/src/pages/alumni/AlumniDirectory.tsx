@@ -577,7 +577,7 @@ export const AlumniProfileViewPage: React.FC = () => {
                 )}
 
                 {(profile.linkedinUrl || profile.githubUrl || profile.portfolioUrl) && (
-                    <div>
+                    <div style={{ marginBottom: 24 }}>
                         <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>
                             LINKS
                         </div>
@@ -585,6 +585,22 @@ export const AlumniProfileViewPage: React.FC = () => {
                             {profile.linkedinUrl  && <a href={profile.linkedinUrl}  target="_blank" rel="noreferrer" className="cp-btn cp-btn-outline cp-btn-sm">LinkedIn ↗</a>}
                             {profile.githubUrl    && <a href={profile.githubUrl}    target="_blank" rel="noreferrer" className="cp-btn cp-btn-ghost cp-btn-sm">GitHub ↗</a>}
                             {profile.portfolioUrl && <a href={profile.portfolioUrl} target="_blank" rel="noreferrer" className="cp-btn cp-btn-ghost cp-btn-sm">Portfolio ↗</a>}
+                        </div>
+                    </div>
+                )}
+
+                {/* Admin Actions */}
+                {(hasPermission('MANAGE_PERMISSION') || hasPermission('MANAGE_USER')) && (
+                    <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--border-subtle)' }}>
+                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.2em', marginBottom: 16 }}>
+                            ADMIN_ACTIONS
+                        </div>
+                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                            {hasPermission('MANAGE_PERMISSION') && (
+                                <Link to="/admin/users/status" state={{ highlightUser: userId }} className="cp-btn cp-btn-primary cp-btn-sm">
+                                    🛡️ MANAGE PERMISSIONS
+                                </Link>
+                            )}
                         </div>
                     </div>
                 )}

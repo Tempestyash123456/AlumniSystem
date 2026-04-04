@@ -374,19 +374,28 @@ export const ManageUserStatusPage: React.FC = () => {
                                                         </Button>
                                                     )}
                                                     
-                                                    {(hasPermission('MANAGE_USER') || hasPermission('DELETE_ADMIN')) && (
-                                                        <>
-                                                            <Button variant="ghost" size="sm" onClick={() => handleEnable(user)} disabled={actionLoading}>
-                                                                {user.enabled ? 'Disable' : 'Enable'}
-                                                            </Button>
-                                                            <Button variant={user.accountLocked ? 'outline' : 'ghost'} size="sm" onClick={() => handleLock(user)} disabled={actionLoading}>
-                                                                {user.accountLocked ? 'Unlock' : 'Lock'}
-                                                            </Button>
-                                                            <Button variant="danger" size="sm" onClick={() => handleDelete(user)} disabled={actionLoading || isSelf}>
-                                                                Delete
-                                                            </Button>
-                                                        </>
-                                                    )}
+                                                     {hasPermission('MANAGE_USER') && (
+                                                         <>
+                                                             <Button variant="ghost" size="sm" onClick={() => handleEnable(user)} disabled={actionLoading}>
+                                                                 {user.enabled ? 'Disable' : 'Enable'}
+                                                             </Button>
+                                                             <Button variant={user.accountLocked ? 'outline' : 'ghost'} size="sm" onClick={() => handleLock(user)} disabled={actionLoading}>
+                                                                 {user.accountLocked ? 'Unlock' : 'Lock'}
+                                                             </Button>
+                                                         </>
+                                                     )}
+
+                                                     {(() => {
+                                                         const isTargetAdmin = user.roles.includes('ROLE_ADMIN');
+                                                         const canDelete = isTargetAdmin ? hasPermission('DELETE_ADMIN') : hasPermission('MANAGE_USER');
+                                                         if (!canDelete) return null;
+                                                         
+                                                         return (
+                                                             <Button variant="danger" size="sm" onClick={() => handleDelete(user)} disabled={actionLoading || isSelf}>
+                                                                 Delete
+                                                             </Button>
+                                                         );
+                                                     })()}
                                                 </div>
                                             </td>
                                         </tr>
@@ -419,13 +428,14 @@ export const ManageUserStatusPage: React.FC = () => {
                 <div style={{ maxHeight: '420px', overflowY: 'auto', paddingRight: 8 }} className="custom-scrollbar">
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                         {[
-                            { id: 'POST', label: 'Feed & Content', perms: ['CREATE_POST', 'EDIT_POST', 'DELETE_POST'] },
-                            { id: 'EVENT', label: 'Events & Programs', perms: ['CREATE_EVENT', 'EDIT_EVENT', 'DELETE_EVENT'] },
-                            { id: 'USER', label: 'User Directory', perms: ['MANAGE_USER'] },
-                            { id: 'ADMIN', label: 'Administrative Controls', perms: ['MANAGE_PERMISSION', 'ASSIGN_ADMIN_ROLE', 'REVOKE_ADMIN_ROLE', 'DELETE_ADMIN'] },
+                            { id: 'POST', label: 'Feed & Content', perms: ['VIEW_POST', 'CREATE_POST', 'EDIT_POST', 'DELETE_POST'] },
+                            { id: 'EVENT', label: 'Events & Programs', perms: ['VIEW_EVENT', 'CREATE_EVENT', 'EDIT_EVENT', 'DELETE_EVENT'] },
+                            { id: 'USER', label: 'User Management', perms: ['VIEW_DIRECTORY', 'MANAGE_USER', 'MANAGE_PERMISSION'] },
+                            { id: 'ADMIN', label: 'Administrative Controls', perms: ['ASSIGN_ADMIN_ROLE', 'REVOKE_ADMIN_ROLE', 'DELETE_ADMIN'] },
                             { id: 'COMM', label: 'Communications', perms: ['SEND_EMAIL'] },
                             { id: 'SYS', label: 'System Settings', perms: ['MANAGE_SETTINGS'] }
                         ].map(group => {
+                            // Filter availablePermissions to only those in the current group
                             const groupPerms = availablePermissions.filter(p => group.perms.includes(p.name));
                             if (groupPerms.length === 0) return null;
 
