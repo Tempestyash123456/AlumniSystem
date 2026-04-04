@@ -86,75 +86,86 @@ export const AdminEmailPage: React.FC = () => {
                     </p>
                 </div>
 
-                <form onSubmit={handleSendBulkEmail} style={{ display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
+                <form onSubmit={handleSendBulkEmail} style={{ display: 'grid', gridTemplateColumns: 'minmax(320px, 1fr) 1.5fr', gap: '32px', flex: 1, minHeight: 0 }}>
+                    
+                    {/* ── Left Column: Target Filters ── */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                        <div style={{ background: 'var(--bg-dark)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-subtle)', boxShadow: 'var(--shadow-lg)' }}>
+                            <h3 style={{ color: 'var(--text-primary)', fontSize: 'var(--font-size-sm)', fontFamily: 'Orbitron, sans-serif', marginBottom: '20px', fontWeight: 600, letterSpacing: '0.05em' }}>
+                                TARGET_SELECTION
+                            </h3>
 
-                    <div style={{ background: 'var(--bg-dark)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
-                        <h3 style={{ color: 'var(--text-primary)', fontSize: 'var(--font-size-sm)', fontFamily: 'Orbitron, sans-serif', marginBottom: '16px', fontWeight: 600, letterSpacing: '0.05em' }}>Target Selection</h3>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
-                            <Input
-                                label="Direct To User Email (Overrides other filters)"
-                                type="email"
-                                placeholder="E.g. user@example.com"
-                                value={emailForm.targetUserEmail}
-                                onChange={(e) => setEmailForm({...emailForm, targetUserEmail: e.target.value})}
-                            />
-                            <Input
-                                label="Graduation Year"
-                                type="number"
-                                placeholder="E.g. 2026"
-                                value={emailForm.graduationYear}
-                                onChange={(e) => setEmailForm({...emailForm, graduationYear: e.target.value})}
-                                disabled={!!emailForm.targetUserEmail}
-                            />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                                <Input
+                                    label="Direct Email (Override)"
+                                    type="email"
+                                    placeholder="E.g. user@example.com"
+                                    value={emailForm.targetUserEmail}
+                                    onChange={(e) => setEmailForm({...emailForm, targetUserEmail: e.target.value})}
+                                />
+                                <Input
+                                    label="Graduation Year"
+                                    type="number"
+                                    placeholder="E.g. 2026"
+                                    value={emailForm.graduationYear}
+                                    onChange={(e) => setEmailForm({...emailForm, graduationYear: e.target.value})}
+                                    disabled={!!emailForm.targetUserEmail}
+                                />
+                                <Select
+                                    label="Program"
+                                    options={PROGRAM_OPTIONS}
+                                    placeholder="Any Program"
+                                    value={emailForm.program}
+                                    onChange={(e) => setEmailForm({...emailForm, program: e.target.value})}
+                                    disabled={!!emailForm.targetUserEmail}
+                                />
+                                <Select
+                                    label="Discipline"
+                                    options={DISCIPLINE_OPTIONS}
+                                    placeholder="Any Discipline"
+                                    value={emailForm.discipline}
+                                    onChange={(e) => setEmailForm({...emailForm, discipline: e.target.value})}
+                                    disabled={!!emailForm.targetUserEmail}
+                                />
+                            </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                            <Select
-                                label="Program"
-                                options={PROGRAM_OPTIONS}
-                                placeholder="Any Program"
-                                value={emailForm.program}
-                                onChange={(e) => setEmailForm({...emailForm, program: e.target.value})}
-                                disabled={!!emailForm.targetUserEmail}
-                            />
-                            <Select
-                                label="Discipline"
-                                options={DISCIPLINE_OPTIONS}
-                                placeholder="Any Discipline"
-                                value={emailForm.discipline}
-                                onChange={(e) => setEmailForm({...emailForm, discipline: e.target.value})}
-                                disabled={!!emailForm.targetUserEmail}
-                            />
+                        <div style={{ padding: '0 8px' }}>
+                            <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-xs)', fontFamily: 'Outfit, sans-serif', lineHeight: 1.5 }}>
+                                * Filters are additive. Email override takes precedence.
+                            </p>
                         </div>
                     </div>
 
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {/* ── Right Column: Message Content ── */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minHeight: 0 }}>
                         <Input
-                            label="Subject Line"
+                            label="SUBJECT_LINE"
                             placeholder="E.g. Invitation to the Annual Department Meetup"
                             value={emailForm.subject}
                             onChange={(e) => setEmailForm({...emailForm, subject: e.target.value})}
                         />
 
-                        <div className="cp-input-wrap" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                        <div className="cp-input-wrap" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <label className="cp-label">Email Body (Plain Text)</label>
-                                <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontFamily: 'Outfit, sans-serif', fontWeight: 500 }}>Use {'{{firstName}}'} for personalization</span>
+                                <label className="cp-label">MESSAGE_COMPOSE</label>
+                                <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', fontFamily: 'Outfit, sans-serif', fontWeight: 500 }}>
+                                    Use <code style={{ color: 'var(--neon-pink)', background: 'rgba(255, 0, 150, 0.1)', padding: '2px 4px', borderRadius: '4px' }}>{`{{firstName}}`}</code> for personalization
+                                </span>
                             </div>
                             <Textarea
-                                style={{ flex: 1, minHeight: '200px' }}
+                                style={{ flex: 1, minHeight: '350px', resize: 'none' }}
                                 placeholder={`Hello {{firstName}},\n\nWrite your message here...`}
                                 value={emailForm.body}
                                 onChange={(e) => setEmailForm({...emailForm, body: e.target.value})}
                             />
                         </div>
-                    </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', flexShrink: 0 }}>
-                        <Button type="submit" size="lg" loading={sendingEmail} style={{ minWidth: '200px' }}>
-                            DISPATCH MAILS 🚀
-                        </Button>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '10px', flexShrink: 0 }}>
+                            <Button type="submit" size="lg" loading={sendingEmail} style={{ minWidth: '240px' }}>
+                                DISPATCH_COMMUNICATION ››
+                            </Button>
+                        </div>
                     </div>
                 </form>
             </div>
