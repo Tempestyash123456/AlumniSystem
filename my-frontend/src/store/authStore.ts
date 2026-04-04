@@ -56,29 +56,14 @@ export const useAuthStore = create<AuthState>()(
 
             hasPermission: (permission: string) => {
                 const state = get();
-                // Default permissions for all authenticated users
-                const defaultPermissions = ['POST_VIEW', 'EVENT_VIEW'];
+                // Default permissions for all authenticated users (VIEW rights)
+                const defaultPermissions = ['VIEW_POST', 'VIEW_EVENT'];
                 if (defaultPermissions.includes(permission)) return true;
 
-                // Implicit viewing rights for admins
-                if (permission === 'USER_VIEW' && (state.permissions.includes('USER_MANAGE') || state.permissions.includes('PERMISSION_MANAGE'))) {
-                    return true;
-                }
+                // Super-admin check: Anyone with MANAGE_PERMISSION can do anything
+                if (state.permissions.includes('MANAGE_PERMISSION')) return true;
 
-                // Super-admin check
-                if (state.permissions.includes('PERMISSION_MANAGE')) return true;
-
-                // Abstract management permissions
-                if (permission === 'POST_MANAGE') {
-                    return ['POST_CREATE', 'POST_EDIT', 'POST_DELETE'].some(p => state.permissions.includes(p));
-                }
-                if (permission === 'EVENT_MANAGE') {
-                    return ['EVENT_CREATE', 'EVENT_EDIT', 'EVENT_DELETE'].some(p => state.permissions.includes(p));
-                }
-                if (permission === 'USER_ADMIN_ACCESS') {
-                    return ['USER_VIEW', 'USER_MANAGE', 'PERMISSION_MANAGE'].some(p => state.permissions.includes(p));
-                }
-
+                // Direct permission check
                 return state.permissions.includes(permission);
             },
         }),
