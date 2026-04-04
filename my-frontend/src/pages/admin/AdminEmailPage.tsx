@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { adminApi } from '../../lib/api';
 import { Button, Alert, Input, Select, Textarea } from '../../components/ui';
 import { PROGRAM_OPTIONS } from '../profile/ProfilePage';
-import { useAuthStore } from '../../store/authStore';
+import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
 export const AdminEmailPage: React.FC = () => {
     const [error, setError] = useState('');
@@ -56,7 +56,7 @@ export const AdminEmailPage: React.FC = () => {
         setSendingEmail(false);
     };
 
-    const hasSendPermission = useAuthStore().hasPermission('SEND_EMAIL');
+    // Dispatch handled by PermissionGuard in render
 
     const DISCIPLINE_OPTIONS = [
         'B.Tech', 'B.E.', 'B.Sc', 'BCA', 'M.Tech', 'M.E.',
@@ -165,20 +165,26 @@ export const AdminEmailPage: React.FC = () => {
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10, marginTop: '10px' }}>
-                                <Button 
-                                    type="submit" 
-                                    size="lg" 
-                                    loading={sendingEmail} 
-                                    disabled={!hasSendPermission}
-                                    style={{ minWidth: '240px' }}
+                                <PermissionGuard 
+                                    permission="SEND_EMAIL"
+                                    fallback={
+                                        <>
+                                            <Button size="lg" disabled style={{ minWidth: '240px' }}>UNAUTHORIZED</Button>
+                                            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)' }}>
+                                                Requires SEND_EMAIL permission
+                                            </span>
+                                        </>
+                                    }
                                 >
-                                    {hasSendPermission ? 'DISPATCH_COMMUNICATION ››' : 'UNAUTHORIZED'}
-                                </Button>
-                                {!hasSendPermission && (
-                                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)' }}>
-                                        Requires SEND_EMAIL permission
-                                    </span>
-                                )}
+                                    <Button 
+                                        type="submit" 
+                                        size="lg" 
+                                        loading={sendingEmail} 
+                                        style={{ minWidth: '240px' }}
+                                    >
+                                        DISPATCH_COMMUNICATION ››
+                                    </Button>
+                                </PermissionGuard>
                             </div>
                         </div>
                     </form>

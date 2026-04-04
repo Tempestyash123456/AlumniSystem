@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore.ts';
 import type { AlumniDto, ProfileResponse } from '../../types';
 import { Spinner, Input, Badge, ProgressBar } from '../../components/ui';
 import { getImageUrl } from '../../lib/api';
+import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const avatarColor = (id: string) => {
@@ -447,8 +448,8 @@ export const AlumniDirectoryPage: React.FC = () => {
 // ── Profile View Page ─────────────────────────────────────────────────────────
 export const AlumniProfileViewPage: React.FC = () => {
     const { userId } = useParams<{ userId: string }>();
-    const { hasPermission } = useAuthStore();
-    const canViewDirectory = hasPermission('VIEW_DIRECTORY');
+    const { hasPermission: hp } = useAuthStore();
+    const canViewDirectory = hp('VIEW_DIRECTORY');
     const [profile, setProfile] = useState<ProfileResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError]     = useState('');
@@ -590,20 +591,18 @@ export const AlumniProfileViewPage: React.FC = () => {
                 )}
 
                 {/* Admin Actions */}
-                {(hasPermission('MANAGE_PERMISSION') || hasPermission('MANAGE_USER')) && (
+                <PermissionGuard permission="MANAGE_PERMISSION">
                     <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--border-subtle)' }}>
                         <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.2em', marginBottom: 16 }}>
                             ADMIN_ACTIONS
                         </div>
                         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                            {hasPermission('MANAGE_PERMISSION') && (
-                                <Link to="/admin/users/status" state={{ highlightUser: userId }} className="cp-btn cp-btn-primary cp-btn-sm">
-                                    🛡️ MANAGE PERMISSIONS
-                                </Link>
-                            )}
+                            <Link to="/admin/users/status" state={{ highlightUser: userId }} className="cp-btn cp-btn-primary cp-btn-sm">
+                                🛡️ MANAGE PERMISSIONS
+                            </Link>
                         </div>
                     </div>
-                )}
+                </PermissionGuard>
             </div>
         </div>
     );

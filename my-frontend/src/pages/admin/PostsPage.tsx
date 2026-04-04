@@ -3,6 +3,7 @@ import { postsApi } from '../../lib/api';
 import type { PostDto } from '../../types';
 import { Button, Alert, Input, Spinner, Confirm, Modal } from '../../components/ui';
 import { useAuthStore } from '../../store/authStore';
+import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
 const BASE_URL = '';
 
@@ -32,7 +33,7 @@ const PostCard: React.FC<{
     onDelete: () => void;
     onView: () => void;
 }> = ({ post, onEdit, onDelete, onView }) => {
-    const { hasPermission } = useAuthStore();
+    const {} = useAuthStore();
     const preview = post.description.replace(/[#*`>\-\[\]]/g, '').slice(0, 180);
     return (
         <div className="cp-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
@@ -65,8 +66,12 @@ const PostCard: React.FC<{
                 </p>
                 <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                     <Button variant="ghost" size="sm" onClick={onView} style={{ flex: 1 }}>Read</Button>
-                    {hasPermission('EDIT_POST') && <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>}
-                    {hasPermission('DELETE_POST') && <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>}
+                    <PermissionGuard permission="EDIT_POST">
+                        <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>
+                    </PermissionGuard>
+                    <PermissionGuard permission="DELETE_POST">
+                        <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>
+                    </PermissionGuard>
                 </div>
             </div>
         </div>
@@ -237,7 +242,7 @@ const PostViewModal: React.FC<{ post: PostDto | null; onClose: () => void }> = (
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export const PostsPage: React.FC = () => {
-    const { hasPermission } = useAuthStore();
+    const {} = useAuthStore();
     const [posts, setPosts]               = useState<PostDto[]>([]);
     const [loading, setLoading]           = useState(true);
     const [saving, setSaving]             = useState(false);
@@ -332,7 +337,9 @@ export const PostsPage: React.FC = () => {
                         {posts.length} post{posts.length !== 1 ? 's' : ''} published
                     </p>
                 </div>
-                {hasPermission('CREATE_POST') && <Button onClick={openCreate} variant="primary">+ NEW POST</Button>}
+                <PermissionGuard permission="CREATE_POST">
+                    <Button onClick={openCreate} variant="primary">+ NEW POST</Button>
+                </PermissionGuard>
             </div>
 
             {/* ── Alerts ── */}
@@ -361,7 +368,11 @@ export const PostsPage: React.FC = () => {
                         <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)', marginBottom: 20 }}>
                             {search ? 'No posts match your search' : 'No posts yet — create the first one'}
                         </p>
-                        {!search && hasPermission('CREATE_POST') && <Button onClick={openCreate}>Create Post</Button>}
+                        {!search && (
+                            <PermissionGuard permission="CREATE_POST">
+                                <Button onClick={openCreate}>Create Post</Button>
+                            </PermissionGuard>
+                        )}
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>

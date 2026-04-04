@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { eventsApi, getImageUrl } from '../../lib/api';
 import type { EventDto } from '../../types';
 import { Button, Alert, Input, Spinner, Confirm, Modal } from '../../components/ui';
+import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
 const BASE_URL = '';
 
@@ -267,7 +268,7 @@ const EventCard: React.FC<{
     onView: () => void;
     index: number;
 }> = ({ event, onEdit, onDelete, onView, index }) => {
-    const { hasPermission } = useAuthStore();
+    const {} = useAuthStore();
     const status = getEventStatus(event.startTime, event.endTime);
     const styleConf = STATUS_STYLES[status];
 
@@ -369,8 +370,12 @@ const EventCard: React.FC<{
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: 6, marginTop: 'auto', paddingTop: 8 }}>
                     <Button variant="ghost" size="sm" onClick={onView} style={{ flex: 1 }}>View</Button>
-                    {hasPermission('EDIT_EVENT') && <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>}
-                    {hasPermission('DELETE_EVENT') && <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>}
+                    <PermissionGuard permission="EDIT_EVENT">
+                        <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>
+                    </PermissionGuard>
+                    <PermissionGuard permission="DELETE_EVENT">
+                        <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>
+                    </PermissionGuard>
                 </div>
             </div>
         </div>
@@ -648,7 +653,6 @@ const EventEditorModal: React.FC<{
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export const EventsPage: React.FC = () => {
-    const { hasPermission } = useAuthStore();
     const [events, setEvents] = useState<EventDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -761,7 +765,9 @@ export const EventsPage: React.FC = () => {
                         {events.length} event{events.length !== 1 ? 's' : ''} · {upcomingCount} upcoming
                     </p>
                 </div>
-                {hasPermission('CREATE_EVENT') && <Button onClick={openCreate} variant="primary">+ NEW EVENT</Button>}
+                <PermissionGuard permission="CREATE_EVENT">
+                    <Button onClick={openCreate} variant="primary">+ NEW EVENT</Button>
+                </PermissionGuard>
             </div>
 
             {/* ── Stat cards ── */}
@@ -828,8 +834,10 @@ export const EventsPage: React.FC = () => {
                         <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)', marginBottom: 20 }}>
                             {search || filterStatus !== 'all' ? 'No events match your filters' : 'No events yet — create the first one'}
                         </p>
-                        {!search && filterStatus === 'all' && hasPermission('CREATE_EVENT') && (
-                            <Button onClick={openCreate}>Create Event</Button>
+                        {!search && filterStatus === 'all' && (
+                            <PermissionGuard permission="CREATE_EVENT">
+                                <Button onClick={openCreate}>Create Event</Button>
+                            </PermissionGuard>
                         )}
                     </div>
                 ) : (
