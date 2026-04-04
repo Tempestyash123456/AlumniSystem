@@ -28,20 +28,20 @@ public class AdminController {
     // ── Users ─────────────────────────────────────────────────────────────────
 
     @GetMapping("/users")
-    @PreAuthorize("hasAuthority('USER_VIEW')")
+    @PreAuthorize("hasAuthority('VIEW_DIRECTORY')")
     public ResponseEntity<ApiResponse<AdminUserListResponse>> getAllUsers() {
         return ResponseEntity.ok(ApiResponse.success(adminService.getAllUsers()));
     }
 
     @GetMapping("/users/{userId}")
-    @PreAuthorize("hasAuthority('USER_VIEW')")
+    @PreAuthorize("hasAuthority('VIEW_DIRECTORY')")
     public ResponseEntity<ApiResponse<AdminUserDto>> getUserById(
             @PathVariable UUID userId) {
         return ResponseEntity.ok(ApiResponse.success(adminService.getUserById(userId)));
     }
 
     @DeleteMapping("/users/{userId}")
-    @PreAuthorize("hasAuthority('USER_MANAGE')")
+    @PreAuthorize("hasAuthority('MANAGE_USER') or hasAuthority('DELETE_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable UUID userId) {
         adminService.deleteUser(userId);
         return ResponseEntity.ok(ApiResponse.success());
@@ -50,7 +50,7 @@ public class AdminController {
     // ── Role Management ───────────────────────────────────────────────────────
 
     @PostMapping("/users/{userId}/roles")
-    @PreAuthorize("hasAuthority('PERMISSION_MANAGE')")
+    @PreAuthorize("hasAuthority('MANAGE_PERMISSION') or (hasAuthority('ASSIGN_ADMIN_ROLE') and #request.roleName == 'ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<AdminUserDto>> assignRole(
             @PathVariable UUID userId,
             @Valid @RequestBody AssignRoleRequest request) {
@@ -58,7 +58,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{userId}/roles/{roleName}")
-    @PreAuthorize("hasAuthority('PERMISSION_MANAGE') or (hasAuthority('REVOKE_ADMIN_ACCESS') and #roleName == 'ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('MANAGE_PERMISSION') or (hasAuthority('REVOKE_ADMIN_ROLE') and #roleName == 'ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<AdminUserDto>> removeRole(
             @PathVariable UUID userId,
             @PathVariable String roleName) {
@@ -68,13 +68,13 @@ public class AdminController {
     // ── Permission Management ─────────────────────────────────────────────────
 
     @GetMapping("/permissions")
-    @PreAuthorize("hasAuthority('PERMISSION_MANAGE')")
+    @PreAuthorize("hasAuthority('MANAGE_PERMISSION')")
     public ResponseEntity<ApiResponse<List<PermissionDto>>> getAllPermissions() {
         return ResponseEntity.ok(ApiResponse.success(adminService.getAllPermissions()));
     }
 
     @PatchMapping("/users/{userId}/permissions")
-    @PreAuthorize("hasAuthority('PERMISSION_MANAGE')")
+    @PreAuthorize("hasAuthority('MANAGE_PERMISSION')")
     public ResponseEntity<ApiResponse<AdminUserDto>> updatePermissions(
             @PathVariable UUID userId,
             @Valid @RequestBody UpdatePermissionsRequest request) {
@@ -84,7 +84,7 @@ public class AdminController {
     // ── Account Status ────────────────────────────────────────────────────────
 
     @PatchMapping("/users/{userId}/lock")
-    @PreAuthorize("hasAuthority('USER_MANAGE')")
+    @PreAuthorize("hasAuthority('MANAGE_USER')")
     public ResponseEntity<ApiResponse<AdminUserDto>> setLock(
             @PathVariable UUID userId,
             @Valid @RequestBody LockAccountRequest request) {
@@ -92,7 +92,7 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{userId}/enable")
-    @PreAuthorize("hasAuthority('USER_MANAGE')")
+    @PreAuthorize("hasAuthority('MANAGE_USER')")
     public ResponseEntity<ApiResponse<AdminUserDto>> setEnabled(
             @PathVariable UUID userId,
             @RequestParam boolean enabled) {
@@ -102,7 +102,7 @@ public class AdminController {
     // ── Bulk Email Tool ───────────────────────────────────────────────────────
 
     @PostMapping("/email/send")
-    @PreAuthorize("hasAuthority('PERMISSION_MANAGE')")
+    @PreAuthorize("hasAuthority('SEND_EMAIL')")
     public ResponseEntity<ApiResponse<String>> sendTargetedEmail(
             @Valid @RequestBody BulkEmailRequest request) {
         int emailsSent = adminService.sendTargetedEmails(request);

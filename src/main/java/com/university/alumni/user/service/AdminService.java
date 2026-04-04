@@ -115,6 +115,23 @@ public class AdminService {
     @Transactional
     public void deleteUser(UUID userId) {
         User user = findUserOrThrow(userId);
+
+        // Security check: cannot delete self
+        String currentPrincipal = SecurityContextHolder.getContext().getAuthentication().getName();
+        if (user.getEmail().equalsIgnoreCase(currentPrincipal)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot delete your own account.");
+        }
+
+        // Security check: if target is admin, requires DELETE_ADMIN
+        boolean isTargetAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_ADMIN"));
+        if (isTargetAdmin) {
+            boolean hasPermission = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("DELETE_ADMIN"));
+            if (!hasPermission) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Insufficient permissions to delete an administrator.");
+            }
+        }
+
         userRepository.delete(user);
         evictUserCache(user.getEmail());
     }
@@ -148,6 +165,15 @@ public class AdminService {
                 Role adminRole = roleRepository.findByName("ROLE_ADMIN")
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "ROLE_ADMIN not found in database"));
                 user.addRole(adminRole);
+            }
+        }
+
+        // Ensure VIEW_DIRECTORY is always granted if permissions are managed through this endpoint
+        // (as it's the base permission for admin directory access)
+        if (!newPermissions.isEmpty()) {
+            boolean hasDirectoryView = newPermissions.stream().anyMatch(p -> p.getName().equals("VIEW_DIRECTORY"));
+            if (!hasDirectoryView) {
+                permissionRepository.findByName("VIEW_DIRECTORY").ifPresent(newPermissions::add);
             }
         }
 

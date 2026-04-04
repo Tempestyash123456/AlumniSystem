@@ -448,7 +448,7 @@ export const AlumniDirectoryPage: React.FC = () => {
 export const AlumniProfileViewPage: React.FC = () => {
     const { userId } = useParams<{ userId: string }>();
     const { hasPermission } = useAuthStore();
-    const canViewDirectory = hasPermission('USER_VIEW');
+    const canViewDirectory = hasPermission('VIEW_DIRECTORY');
     const [profile, setProfile] = useState<ProfileResponse | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError]     = useState('');

@@ -20,9 +20,9 @@ import java.util.UUID;
 
 /**
  * POST /api/v1/posts         — list all (authenticated users)
- * POST /api/v1/posts/create  — create (POST_CREATE)
- * PUT  /api/v1/posts/{id}    — update (POST_EDIT)
- * DELETE /api/v1/posts/{id}  — soft-delete (POST_DELETE)
+ * POST /api/v1/posts/create  — create (CREATE_POST)
+ * PUT  /api/v1/posts/{id}    — update (EDIT_POST)
+ * DELETE /api/v1/posts/{id}  — soft-delete (DELETE_POST)
  */
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -33,6 +33,7 @@ public class PostController {
     private final ObjectMapper objectMapper;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('VIEW_POST')")
     public ResponseEntity<ApiResponse<List<PostResponse>>> getAll(
             @AuthenticationPrincipal CachedUserDetails currentUser) {
         SecurityUtils.validateAccountActive(currentUser);
@@ -40,6 +41,7 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
+    @PreAuthorize("hasAuthority('VIEW_POST')")
     public ResponseEntity<ApiResponse<PostResponse>> getOne(
             @PathVariable UUID postId,
             @AuthenticationPrincipal CachedUserDetails currentUser) {
@@ -53,7 +55,7 @@ public class PostController {
      *  - image: (optional) image file
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('POST_CREATE')")
+    @PreAuthorize("hasAuthority('CREATE_POST')")
     public ResponseEntity<ApiResponse<PostResponse>> create(
             @RequestPart("data") String dataJson,
             @RequestPart(value = "image", required = false) MultipartFile image,
@@ -65,7 +67,7 @@ public class PostController {
     }
 
     @PutMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('POST_EDIT')")
+    @PreAuthorize("hasAuthority('EDIT_POST')")
     public ResponseEntity<ApiResponse<PostResponse>> update(
             @PathVariable UUID postId,
             @RequestPart("data") String dataJson,
@@ -76,7 +78,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    @PreAuthorize("hasAuthority('POST_DELETE')")
+    @PreAuthorize("hasAuthority('DELETE_POST')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID postId) {
         postService.deletePost(postId);
         return ResponseEntity.ok(ApiResponse.success());

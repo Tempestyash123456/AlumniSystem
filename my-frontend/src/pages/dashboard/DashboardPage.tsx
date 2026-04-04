@@ -67,7 +67,7 @@ export const DashboardPage: React.FC = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const canViewStats = hasPermission('USER_VIEW');
+                const canViewStats = hasPermission('VIEW_DIRECTORY');
                 if (canViewStats) {
                     const userRes = await adminApi.getAllUsers();
                     if (userRes.data) setUsers(userRes.data.users);
@@ -99,7 +99,7 @@ export const DashboardPage: React.FC = () => {
 
     // ── SSE for live audit logs (admin only) ──────────────────────────────────
     useEffect(() => {
-        if (!hasPermission('USER_VIEW')) return;
+        if (!hasPermission('VIEW_DIRECTORY')) return;
         const token = tokenStorage.getAccess();
         if (!token) return;
 
@@ -152,7 +152,7 @@ export const DashboardPage: React.FC = () => {
                 </h1>
 
                 <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
-                    {(isAdmin && hasPermission('USER_VIEW')) ? (
+                    {(isAdmin && hasPermission('VIEW_DIRECTORY')) ? (
                         <>
                             <div className="cp-stat-card pink" style={{ flex: 1 }}>
                                 <div className="cp-stat-value text-neon-pink">{users.length}</div>
@@ -172,7 +172,7 @@ export const DashboardPage: React.FC = () => {
             {/* SCROLLABLE GRID SECTION */}
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: (isAdmin && hasPermission('USER_VIEW')) ? '400px 1fr' : '1fr 340px',
+                gridTemplateColumns: (isAdmin && hasPermission('VIEW_DIRECTORY')) ? '400px 1fr' : '1fr 340px',
                 gap: 24,
                 flexGrow: 1,
                 minHeight: 0 // Crucial for independent scrolling in flex containers
@@ -180,7 +180,7 @@ export const DashboardPage: React.FC = () => {
 
                 {/* LEFT COLUMN - Independent Scroll */}
                 <div className="custom-scrollbar" style={{ overflowY: 'auto', paddingRight: 8 }}>
-                    {!(isAdmin && hasPermission('USER_VIEW')) ? (
+                    {!(isAdmin && hasPermission('VIEW_DIRECTORY')) ? (
                         /* Alumni Dashboard Header Component (Quick Actions + Highlights) */
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                             {/* Alumni Quick Actions */}
@@ -197,19 +197,19 @@ export const DashboardPage: React.FC = () => {
                                         <span style={{ fontSize: 20 }}>💳</span>
                                         <span>MEMBERSHIP</span>
                                     </Button>
-                                    {hasPermission('USER_VIEW') && (
+                                    {hasPermission('VIEW_DIRECTORY') && (
                                         <Button variant="outline" onClick={() => navigate('/alumni')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
                                             <span style={{ fontSize: 20 }}>🔍</span>
                                             <span>DIRECTORY</span>
                                         </Button>
                                     )}
-                                    {hasPermission('POST_VIEW') && (
+                                    {hasPermission('VIEW_POST') && (
                                         <Button variant="outline" onClick={() => navigate('/posts')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
                                             <span style={{ fontSize: 20 }}>📑</span>
                                             <span>STORIES</span>
                                         </Button>
                                     )}
-                                    {hasPermission('EVENT_VIEW') && (
+                                    {hasPermission('VIEW_EVENT') && (
                                         <Button variant="outline" onClick={() => navigate('/events')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
                                             <span style={{ fontSize: 20 }}>🗓</span>
                                             <span>EVENTS</span>
@@ -249,18 +249,18 @@ export const DashboardPage: React.FC = () => {
                                 ◈ QUICK_ACTIONS_NODE
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                {hasPermission('USER_ADMIN_ACCESS') && <Button variant="primary" onClick={() => navigate('/admin/users/status')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>👥 Manage Users</Button>}
-                                {hasPermission('PERMISSION_MANAGE') && <Button variant="primary" onClick={() => navigate('/admin/email')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>✉ Send Broadcast</Button>}
-                                {hasPermission('EVENT_MANAGE') && <Button variant="outline" onClick={() => navigate('/admin/events')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>📅 Manage Events</Button>}
-                                {hasPermission('POST_MANAGE') && <Button variant="outline" onClick={() => navigate('/admin/posts')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>✦ Manage Posts</Button>}
+                                {hasPermission('VIEW_DIRECTORY') && <Button variant="primary" onClick={() => navigate('/admin/users/status')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>👥 Manage Users</Button>}
+                                {hasPermission('SEND_EMAIL') && <Button variant="primary" onClick={() => navigate('/admin/email')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>✉ Send Broadcast</Button>}
+                                {hasPermission('CREATE_EVENT') && <Button variant="outline" onClick={() => navigate('/admin/events')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>📅 Manage Events</Button>}
+                                {hasPermission('CREATE_POST') && <Button variant="outline" onClick={() => navigate('/admin/posts')} style={{ minHeight: 48, justifyContent: 'flex-start', paddingLeft: 20 }}>✦ Manage Posts</Button>}
                             </div>
                         </div>
                     )}
                 </div>
 
                 {/* RIGHT COLUMN - Independent Scroll (Live Logs for Admin, Stats for Alumni) */}
-                <div className={(isAdmin && hasPermission('USER_VIEW')) ? "custom-scrollbar" : "custom-scrollbar-purple"} style={{ overflowY: 'auto', paddingRight: 8 }}>
-                    {(isAdmin && hasPermission('USER_VIEW')) ? (
+                <div className={(isAdmin && hasPermission('VIEW_DIRECTORY')) ? "custom-scrollbar" : "custom-scrollbar-purple"} style={{ overflowY: 'auto', paddingRight: 8 }}>
+                    {(isAdmin && hasPermission('VIEW_DIRECTORY')) ? (
                         <div className="cp-panel" style={{ padding: '24px', minHeight: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                                 <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em' }}>

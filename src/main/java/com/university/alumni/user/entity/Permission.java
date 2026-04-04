@@ -23,7 +23,7 @@ public class Permission {
     private UUID id;
 
     @Column(nullable = false, unique = true)
-    private String name;        // e.g. "POST_CREATE"
+    private String name;        // e.g. "CREATE_POST"
 
     private String description;
 }

@@ -105,7 +105,8 @@ export const ManageUserStatusPage: React.FC = () => {
             const res = await adminApi.getPermissions();
             if (res.data) {
                 // Filter out default permissions
-                const filtered = res.data.filter(p => !['POST_VIEW', 'EVENT_VIEW', 'USER_VIEW'].includes(p.name));
+                const excluded = ['VIEW_POST', 'VIEW_EVENT', 'VIEW_DIRECTORY'];
+                const filtered = res.data.filter(p => !excluded.includes(p.name));
                 setAvailablePermissions(filtered);
             }
         }
@@ -156,10 +157,10 @@ export const ManageUserStatusPage: React.FC = () => {
                 await adminApi.assignRole(permissionsTarget.id, 'ROLE_ADMIN');
             }
 
-            // Always ensure USER_VIEW is physically granted if they are an admin
+            // Always ensure VIEW_DIRECTORY is physically granted if they are an admin
             const finalPermissions = [...targetPermissions];
-            if (finalPermissions.length > 0 && !finalPermissions.includes('USER_VIEW')) {
-                finalPermissions.push('USER_VIEW');
+            if (finalPermissions.length > 0 && !finalPermissions.includes('VIEW_DIRECTORY')) {
+                finalPermissions.push('VIEW_DIRECTORY');
             }
 
             const res = await adminApi.updatePermissions(permissionsTarget.id, finalPermissions);
@@ -361,19 +362,19 @@ export const ManageUserStatusPage: React.FC = () => {
                                             </td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                                                    {isAdmin && hasPermission('REVOKE_ADMIN_ACCESS') && !isSelf && (
+                                                    {isAdmin && hasPermission('REVOKE_ADMIN_ROLE') && !isSelf && (
                                                         <Button variant="outline" size="sm" onClick={() => handleRevokeAdmin(user)} disabled={actionLoading} style={{ color: 'var(--neon-pink)', borderColor: 'rgba(255, 45, 120, 0.3)' }}>
                                                             Revoke Admin
                                                         </Button>
                                                     )}
                                                     
-                                                    {hasPermission('PERMISSION_MANAGE') && (
+                                                    {hasPermission('MANAGE_PERMISSION') && (
                                                         <Button variant="ghost" size="sm" onClick={() => handlePermissions(user)} disabled={actionLoading}>
                                                             Permissions
                                                         </Button>
                                                     )}
                                                     
-                                                    {hasPermission('USER_MANAGE') && (
+                                                    {(hasPermission('MANAGE_USER') || hasPermission('DELETE_ADMIN')) && (
                                                         <>
                                                             <Button variant="ghost" size="sm" onClick={() => handleEnable(user)} disabled={actionLoading}>
                                                                 {user.enabled ? 'Disable' : 'Enable'}
@@ -415,32 +416,64 @@ export const ManageUserStatusPage: React.FC = () => {
                 </div>
 
                 <div style={{ maxHeight: '400px', overflowY: 'auto', paddingRight: 8 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        {availablePermissions.map((perm) => {
-                            const isInherited = !!(permissionsTarget?.allPermissions.includes(perm.name) && !permissionsTarget?.permissions.includes(perm.name));
+                <div style={{ maxHeight: '420px', overflowY: 'auto', paddingRight: 8 }} className="custom-scrollbar">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                        {[
+                            { id: 'POST', label: 'Feed & Content', perms: ['CREATE_POST', 'EDIT_POST', 'DELETE_POST'] },
+                            { id: 'EVENT', label: 'Events & Programs', perms: ['CREATE_EVENT', 'EDIT_EVENT', 'DELETE_EVENT'] },
+                            { id: 'USER', label: 'User Directory', perms: ['MANAGE_USER'] },
+                            { id: 'ADMIN', label: 'Administrative Controls', perms: ['MANAGE_PERMISSION', 'ASSIGN_ADMIN_ROLE', 'REVOKE_ADMIN_ROLE', 'DELETE_ADMIN'] },
+                            { id: 'COMM', label: 'Communications', perms: ['SEND_EMAIL'] },
+                            { id: 'SYS', label: 'System Settings', perms: ['MANAGE_SETTINGS'] }
+                        ].map(group => {
+                            const groupPerms = availablePermissions.filter(p => group.perms.includes(p.name));
+                            if (groupPerms.length === 0) return null;
+
                             return (
-                                <div key={perm.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: 10, background: 'var(--bg-input)', borderRadius: 4, border: '1px solid var(--border-subtle)', opacity: isInherited ? 0.7 : 1 }}>
-                                    <div style={{ marginTop: 2 }}>
-                                        <Checkbox
-                                            checked={targetPermissions.includes(perm.name) || isInherited}
-                                            disabled={isInherited}
-                                            onChange={(checked: boolean) => {
-                                                if (checked) setTargetPermissions([...targetPermissions, perm.name]);
-                                                else setTargetPermissions(targetPermissions.filter(p => p !== perm.name));
-                                            }}
-                                        />
+                                <div key={group.id} style={{ border: '1px solid var(--border-subtle)', borderRadius: 8, overflow: 'hidden', background: 'rgba(255,255,255,0.02)' }}>
+                                    <div style={{ 
+                                        padding: '8px 12px', 
+                                        background: 'var(--bg-hover)', 
+                                        fontFamily: 'Orbitron, sans-serif', 
+                                        fontSize: '11px', 
+                                        letterSpacing: '0.1em', 
+                                        color: 'var(--neon-pink)',
+                                        borderBottom: '1px solid var(--border-subtle)',
+                                        fontWeight: 700
+                                    }}>
+                                        {group.label}
                                     </div>
-                                    <div style={{ flex: 1 }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-base)', fontWeight: 600 }}>{perm.name}</span>
-                                            {isInherited && <Badge variant="cyan">INHERITED</Badge>}
-                                        </div>
-                                        <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginTop: 2, fontFamily: 'Outfit, sans-serif' }}>{perm.description}</div>
+                                    <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                        {groupPerms.map((perm) => {
+                                            const isInherited = !!(permissionsTarget?.allPermissions.includes(perm.name) && !permissionsTarget?.permissions.includes(perm.name));
+                                            return (
+                                                <div key={perm.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, opacity: isInherited ? 0.6 : 1 }}>
+                                                    <div style={{ marginTop: 2 }}>
+                                                        <Checkbox
+                                                            checked={targetPermissions.includes(perm.name) || isInherited}
+                                                            disabled={isInherited}
+                                                            onChange={(checked: boolean) => {
+                                                                if (checked) setTargetPermissions([...targetPermissions, perm.name]);
+                                                                else setTargetPermissions(targetPermissions.filter(p => p !== perm.name));
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div style={{ flex: 1 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                            <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '13px', fontWeight: 600 }}>{perm.name.replace(/_/g, ' ')}</span>
+                                                            {isInherited && <Badge variant="cyan">INHERITED</Badge>}
+                                                        </div>
+                                                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: 2, fontFamily: 'Outfit, sans-serif' }}>{perm.description}</div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
+                </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border-subtle)' }}>

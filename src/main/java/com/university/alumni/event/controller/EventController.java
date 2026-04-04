@@ -21,9 +21,9 @@ import java.util.UUID;
 /**
  * GET    /api/v1/events          — list all (any authenticated user)
  * GET    /api/v1/events/{id}     — single event
- * POST   /api/v1/events          — create  (EVENT_CREATE)
- * PUT    /api/v1/events/{id}     — update  (EVENT_EDIT)
- * DELETE /api/v1/events/{id}     — delete  (EVENT_DELETE)
+ * POST   /api/v1/events          — create  (CREATE_EVENT)
+ * PUT    /api/v1/events/{id}     — update  (EDIT_EVENT)
+ * DELETE /api/v1/events/{id}     — delete  (DELETE_EVENT)
  */
 @RestController
 @RequestMapping("/api/v1/events")
@@ -34,6 +34,7 @@ public class EventController {
     private final ObjectMapper  objectMapper;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('VIEW_EVENT')")
     public ResponseEntity<ApiResponse<List<EventResponse>>> getAll(
             @AuthenticationPrincipal CachedUserDetails currentUser) {
         SecurityUtils.validateAccountActive(currentUser);
@@ -41,6 +42,7 @@ public class EventController {
     }
 
     @GetMapping("/{eventId}")
+    @PreAuthorize("hasAuthority('VIEW_EVENT')")
     public ResponseEntity<ApiResponse<EventResponse>> getOne(
             @PathVariable UUID eventId,
             @AuthenticationPrincipal CachedUserDetails currentUser) {
@@ -49,7 +51,7 @@ public class EventController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('EVENT_CREATE')")
+    @PreAuthorize("hasAuthority('CREATE_EVENT')")
     public ResponseEntity<ApiResponse<EventResponse>> create(
             @RequestPart("data")                              String dataJson,
             @RequestPart(value = "media",    required = false) MultipartFile media,
@@ -63,7 +65,7 @@ public class EventController {
     }
 
     @PutMapping(value = "/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority('EVENT_EDIT')")
+    @PreAuthorize("hasAuthority('EDIT_EVENT')")
     public ResponseEntity<ApiResponse<EventResponse>> update(
             @PathVariable UUID eventId,
             @RequestPart("data")                              String dataJson,
@@ -76,7 +78,7 @@ public class EventController {
     }
 
     @DeleteMapping("/{eventId}")
-    @PreAuthorize("hasAuthority('EVENT_DELETE')")
+    @PreAuthorize("hasAuthority('DELETE_EVENT')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID eventId) {
         eventService.deleteEvent(eventId);
         return ResponseEntity.ok(ApiResponse.success());

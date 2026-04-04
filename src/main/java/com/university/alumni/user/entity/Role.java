@@ -10,7 +10,7 @@ import java.util.UUID;
 
 /**
  * Role entity.
- * Values are seeded in V1 migration: ROLE_ADMIN, ROLE_ALUMNI, ROLE_STUDENT, ROLE_FACULTY
+ * Values are seeded in V1 migration: ROLE_ADMIN, ROLE_ALUMNI, ROLE_FACULTY
  *
  * Spring Security convention: role names must be prefixed with ROLE_
  * so that hasRole("ADMIN") matches ROLE_ADMIN automatically.
@@ -51,6 +51,5 @@ public class Role {
     // ── Constants for use in @PreAuthorize ───────────────────────────────────
     public static final String ADMIN   = "ROLE_ADMIN";
     public static final String ALUMNI  = "ROLE_ALUMNI";
-    public static final String STUDENT = "ROLE_STUDENT";
     public static final String FACULTY = "ROLE_FACULTY";
 }

@@ -129,19 +129,19 @@ const App: React.FC = () => {
                 {/* Protected – all authenticated users */}
                 <Route path="/dashboard"    element={<RequireAuth><Layout><DashboardPage /></Layout></RequireAuth>} />
                 <Route path="/profile"      element={<RequireAuth><Layout><ProfilePage /></Layout></RequireAuth>} />
-                <Route path="/posts"        element={<RequirePermission permission="POST_VIEW"><Layout><PostsFeedPage /></Layout></RequirePermission>} />
-                <Route path="/events"       element={<RequirePermission permission="EVENT_VIEW"><Layout><AlumniEventsPage /></Layout></RequirePermission>} />
+                <Route path="/posts"        element={<RequirePermission permission="VIEW_POST"><Layout><PostsFeedPage /></Layout></RequirePermission>} />
+                <Route path="/events"       element={<RequirePermission permission="VIEW_EVENT"><Layout><AlumniEventsPage /></Layout></RequirePermission>} />
                 <Route path="/membership"   element={<RequirePermission><Layout><MembershipPage /></Layout></RequirePermission>} />
 
                 {/* Alumni directory */}
-                <Route path="/alumni"         element={<RequirePermission permission="USER_VIEW"><Layout><AlumniDirectoryPage /></Layout></RequirePermission>} />
-                <Route path="/alumni/:userId" element={<RequirePermission permission="USER_VIEW"><Layout><AlumniProfileViewPage /></Layout></RequirePermission>} />
+                <Route path="/alumni"         element={<RequirePermission permission="VIEW_DIRECTORY"><Layout><AlumniDirectoryPage /></Layout></RequirePermission>} />
+                <Route path="/alumni/:userId" element={<RequirePermission permission="VIEW_DIRECTORY"><Layout><AlumniProfileViewPage /></Layout></RequirePermission>} />
 
                 {/* Admin-only */}
-                <Route path="/admin/users/status"      element={<RequirePermission permission="USER_ADMIN_ACCESS"><Layout><ManageUserStatusPage /></Layout></RequirePermission>} />
-                <Route path="/admin/email"             element={<RequirePermission permission="PERMISSION_MANAGE"><Layout><AdminEmailPage /></Layout></RequirePermission>} />
-                <Route path="/admin/posts"             element={<RequirePermission permission="POST_MANAGE"><Layout><PostsPage /></Layout></RequirePermission>} />
-                <Route path="/admin/events"            element={<RequirePermission permission="EVENT_MANAGE"><Layout><EventsPage /></Layout></RequirePermission>} />
+                <Route path="/admin/users/status"      element={<RequirePermission permission="VIEW_DIRECTORY"><Layout><ManageUserStatusPage /></Layout></RequirePermission>} />
+                <Route path="/admin/email"             element={<RequirePermission permission="SEND_EMAIL"><Layout><AdminEmailPage /></Layout></RequirePermission>} />
+                <Route path="/admin/posts"             element={<RequirePermission permission="CREATE_POST"><Layout><PostsPage /></Layout></RequirePermission>} />
+                <Route path="/admin/events"            element={<RequirePermission permission="CREATE_EVENT"><Layout><EventsPage /></Layout></RequirePermission>} />
 
                 {/* Landing / Fallbacks */}
                 <Route path="/"  element={<LandingPage />} />

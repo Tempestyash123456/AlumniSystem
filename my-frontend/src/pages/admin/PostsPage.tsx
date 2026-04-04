@@ -65,8 +65,8 @@ const PostCard: React.FC<{
                 </p>
                 <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
                     <Button variant="ghost" size="sm" onClick={onView} style={{ flex: 1 }}>Read</Button>
-                    {hasPermission('POST_EDIT') && <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>}
-                    {hasPermission('POST_DELETE') && <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>}
+                    {hasPermission('EDIT_POST') && <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>}
+                    {hasPermission('DELETE_POST') && <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>}
                 </div>
             </div>
         </div>
@@ -332,7 +332,7 @@ export const PostsPage: React.FC = () => {
                         {posts.length} post{posts.length !== 1 ? 's' : ''} published
                     </p>
                 </div>
-                {hasPermission('POST_CREATE') && <Button onClick={openCreate} variant="primary">+ NEW POST</Button>}
+                {hasPermission('CREATE_POST') && <Button onClick={openCreate} variant="primary">+ NEW POST</Button>}
             </div>
 
             {/* ── Alerts ── */}
@@ -361,7 +361,7 @@ export const PostsPage: React.FC = () => {
                         <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)', marginBottom: 20 }}>
                             {search ? 'No posts match your search' : 'No posts yet — create the first one'}
                         </p>
-                        {!search && hasPermission('POST_CREATE') && <Button onClick={openCreate}>Create Post</Button>}
+                        {!search && hasPermission('CREATE_POST') && <Button onClick={openCreate}>Create Post</Button>}
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>

@@ -369,8 +369,8 @@ const EventCard: React.FC<{
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: 6, marginTop: 'auto', paddingTop: 8 }}>
                     <Button variant="ghost" size="sm" onClick={onView} style={{ flex: 1 }}>View</Button>
-                    {hasPermission('EVENT_EDIT') && <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>}
-                    {hasPermission('EVENT_DELETE') && <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>}
+                    {hasPermission('EDIT_EVENT') && <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>}
+                    {hasPermission('DELETE_EVENT') && <Button variant="danger" size="sm" onClick={onDelete}>✕</Button>}
                 </div>
             </div>
         </div>
@@ -761,7 +761,7 @@ export const EventsPage: React.FC = () => {
                         {events.length} event{events.length !== 1 ? 's' : ''} · {upcomingCount} upcoming
                     </p>
                 </div>
-                {hasPermission('EVENT_CREATE') && <Button onClick={openCreate} variant="primary">+ NEW EVENT</Button>}
+                {hasPermission('CREATE_EVENT') && <Button onClick={openCreate} variant="primary">+ NEW EVENT</Button>}
             </div>
 
             {/* ── Stat cards ── */}
@@ -828,7 +828,7 @@ export const EventsPage: React.FC = () => {
                         <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--text-muted)', marginBottom: 20 }}>
                             {search || filterStatus !== 'all' ? 'No events match your filters' : 'No events yet — create the first one'}
                         </p>
-                        {!search && filterStatus === 'all' && hasPermission('EVENT_CREATE') && (
+                        {!search && filterStatus === 'all' && hasPermission('CREATE_EVENT') && (
                             <Button onClick={openCreate}>Create Event</Button>
                         )}
                     </div>
