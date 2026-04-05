@@ -7,7 +7,7 @@ const BASE_URL = '';
 
 // ── Markdown renderer ─────────────────────────────────────────────────────────
 const renderMarkdown = (md: string): string => {
-    let html = md
+    const html = md
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/^### (.+)$/gm, '<h3 style="font-family:Orbitron,monospace;font-size:14px;color:var(--neon-purple);letter-spacing:.08em;margin:18px 0 8px">$1</h3>')
         .replace(/^## (.+)$/gm,  '<h2 style="font-family:Orbitron,monospace;font-size:16px;color:var(--neon-cyan);letter-spacing:.08em;margin:20px 0 10px">$1</h2>')
@@ -84,7 +84,7 @@ const PostExpanded: React.FC<{ post: PostDto; onClose: () => void }> = ({ post, 
 
 // ── Post Card (feed) ──────────────────────────────────────────────────────────
 const FeedCard: React.FC<{ post: PostDto; index: number; onClick: () => void }> = ({ post, index, onClick }) => {
-    const preview = post.description.replace(/[#*`>\-\[\]()!]/g, '').replace(/\n/g, ' ').trim().slice(0, 200);
+    const preview = post.description.replace(/[#*`>\-[]()!]/g, '').replace(/\n/g, ' ').trim().slice(0, 200);
     const readTime = Math.max(1, Math.round(post.description.split(/\s+/).length / 200));
 
     return (
@@ -244,7 +244,7 @@ export const PostsFeedPage: React.FC = () => {
                                         {filtered[0].title}
                                     </h2>
                                     <p style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '15px', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                                        {filtered[0].description.replace(/[#*`>\-\[\]()!]/g, '').replace(/\n/g, ' ').trim().slice(0, 280)}...
+                                        {filtered[0].description.replace(/[#*`>\-[]()!]/g, '').replace(/\n/g, ' ').trim().slice(0, 280)}...
                                     </p>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4 }}>
                                         <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>

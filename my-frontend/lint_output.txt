@@ -1,0 +1,514 @@
+
+> my-frontend@0.0.0 lint
+> eslint .
+
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/App.tsx
+  99:8  warning  React Hook useEffect has missing dependencies: 'clearAuth', 'onDone', and 'setUser'. Either include them or remove the dependency array. If 'onDone' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx
+   25:63  error  Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              no-empty
+  105:26  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:105:26
+  103 |                 <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+  104 |                     <nav style={{ flex: 1, padding: '0:12px', paddingBottom: '24px' }}>
+> 105 |                         <SectionLabel text="MAIN" />
+      |                          ^^^^^^^^^^^^ This component is created during render
+  106 |                         <NavItem path="/dashboard" icon="⬡" label="Dashboard" exact />
+  107 |                         <NavItem path="/profile"   icon="◉" label="My Profile" exact />
+  108 |                         {user?.enabled && (!user?.accountLocked || isAdmin) && (
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:45:26
+  43 |     };
+  44 |
+> 45 |     const SectionLabel = ({ text }: { text: string }) => (
+     |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 |         <div style={{
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 47 |             padding: '24px 16px 8px',
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 54 |         </div>
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 55 |     );
+     | ^^^^^^ The component is created during render here
+  56 |
+  57 |     // Avatar initials / photo
+  58 |     const photoUrl = user?.profilePhotoUrl                                                                                                                                                                      react-hooks/static-components
+  106:26  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:106:26
+  104 |                     <nav style={{ flex: 1, padding: '0:12px', paddingBottom: '24px' }}>
+  105 |                         <SectionLabel text="MAIN" />
+> 106 |                         <NavItem path="/dashboard" icon="⬡" label="Dashboard" exact />
+      |                          ^^^^^^^ This component is created during render
+  107 |                         <NavItem path="/profile"   icon="◉" label="My Profile" exact />
+  108 |                         {user?.enabled && (!user?.accountLocked || isAdmin) && (
+  109 |                             <>
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:31:21
+  29 |     };
+  30 |
+> 31 |     const NavItem = ({
+     |                     ^^
+> 32 |                          path, icon, label, exact = false,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |                      }: { path: string; icon: string; label: string; exact?: boolean }) => {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     };
+     | ^^^^^^ The component is created during render here
+  44 |
+  45 |     const SectionLabel = ({ text }: { text: string }) => (
+  46 |         <div style={{                                                                                                             react-hooks/static-components
+  107:26  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:107:26
+  105 |                         <SectionLabel text="MAIN" />
+  106 |                         <NavItem path="/dashboard" icon="⬡" label="Dashboard" exact />
+> 107 |                         <NavItem path="/profile"   icon="◉" label="My Profile" exact />
+      |                          ^^^^^^^ This component is created during render
+  108 |                         {user?.enabled && (!user?.accountLocked || isAdmin) && (
+  109 |                             <>
+  110 |                                 <NavItem path="/posts"      icon="◇" label="Posts" exact />
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:31:21
+  29 |     };
+  30 |
+> 31 |     const NavItem = ({
+     |                     ^^
+> 32 |                          path, icon, label, exact = false,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |                      }: { path: string; icon: string; label: string; exact?: boolean }) => {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     };
+     | ^^^^^^ The component is created during render here
+  44 |
+  45 |     const SectionLabel = ({ text }: { text: string }) => (
+  46 |         <div style={{                                                                                                         react-hooks/static-components
+  110:34  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:110:34
+  108 |                         {user?.enabled && (!user?.accountLocked || isAdmin) && (
+  109 |                             <>
+> 110 |                                 <NavItem path="/posts"      icon="◇" label="Posts" exact />
+      |                                  ^^^^^^^ This component is created during render
+  111 |                                 <NavItem path="/events"     icon="◎" label="Events" exact />
+  112 |                                 <NavItem path="/membership" icon="🪪" label="Membership" exact />
+  113 |                             </>
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:31:21
+  29 |     };
+  30 |
+> 31 |     const NavItem = ({
+     |                     ^^
+> 32 |                          path, icon, label, exact = false,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |                      }: { path: string; icon: string; label: string; exact?: boolean }) => {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     };
+     | ^^^^^^ The component is created during render here
+  44 |
+  45 |     const SectionLabel = ({ text }: { text: string }) => (
+  46 |         <div style={{                                                                                                      react-hooks/static-components
+  111:34  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:111:34
+  109 |                             <>
+  110 |                                 <NavItem path="/posts"      icon="◇" label="Posts" exact />
+> 111 |                                 <NavItem path="/events"     icon="◎" label="Events" exact />
+      |                                  ^^^^^^^ This component is created during render
+  112 |                                 <NavItem path="/membership" icon="🪪" label="Membership" exact />
+  113 |                             </>
+  114 |                         )}
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:31:21
+  29 |     };
+  30 |
+> 31 |     const NavItem = ({
+     |                     ^^
+> 32 |                          path, icon, label, exact = false,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |                      }: { path: string; icon: string; label: string; exact?: boolean }) => {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     };
+     | ^^^^^^ The component is created during render here
+  44 |
+  45 |     const SectionLabel = ({ text }: { text: string }) => (
+  46 |         <div style={{                                                                                                                                                            react-hooks/static-components
+  112:34  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:112:34
+  110 |                                 <NavItem path="/posts"      icon="◇" label="Posts" exact />
+  111 |                                 <NavItem path="/events"     icon="◎" label="Events" exact />
+> 112 |                                 <NavItem path="/membership" icon="🪪" label="Membership" exact />
+      |                                  ^^^^^^^ This component is created during render
+  113 |                             </>
+  114 |                         )}
+  115 |
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:31:21
+  29 |     };
+  30 |
+> 31 |     const NavItem = ({
+     |                     ^^
+> 32 |                          path, icon, label, exact = false,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |                      }: { path: string; icon: string; label: string; exact?: boolean }) => {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     };
+     | ^^^^^^ The component is created during render here
+  44 |
+  45 |     const SectionLabel = ({ text }: { text: string }) => (
+  46 |         <div style={{                                                                                                                                                                                           react-hooks/static-components
+  119:34  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:119:34
+  117 |                         {(hasPermission('VIEW_DIRECTORY') || hasPermission('MANAGE_PERMISSION') || hasPermission('SEND_EMAIL') || hasPermission('CREATE_POST') || hasPermission('CREATE_EVENT')) && (
+  118 |                             <>
+> 119 |                                 <SectionLabel text="ADMINISTRATION" />
+      |                                  ^^^^^^^^^^^^ This component is created during render
+  120 |                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+  121 |                                     {hasPermission('VIEW_DIRECTORY') && (
+  122 |                                         <NavItem path="/alumni" icon="👥" label="Users directory" exact />
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:45:26
+  43 |     };
+  44 |
+> 45 |     const SectionLabel = ({ text }: { text: string }) => (
+     |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 |         <div style={{
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 47 |             padding: '24px 16px 8px',
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 54 |         </div>
+     | ^^^^^^^^^^^^^^^^^^^^^
+> 55 |     );
+     | ^^^^^^ The component is created during render here
+  56 |
+  57 |     // Avatar initials / photo
+  58 |     const photoUrl = user?.profilePhotoUrl                                                                              react-hooks/static-components
+  122:42  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:122:42
+  120 |                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+  121 |                                     {hasPermission('VIEW_DIRECTORY') && (
+> 122 |                                         <NavItem path="/alumni" icon="👥" label="Users directory" exact />
+      |                                          ^^^^^^^ This component is created during render
+  123 |                                     )}
+  124 |                                     {hasPermission('MANAGE_PERMISSION') && (
+  125 |                                         <NavItem path="/admin/users/status" icon="🛡️" label="Manage Permissions" exact />
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:31:21
+  29 |     };
+  30 |
+> 31 |     const NavItem = ({
+     |                     ^^
+> 32 |                          path, icon, label, exact = false,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |                      }: { path: string; icon: string; label: string; exact?: boolean }) => {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     };
+     | ^^^^^^ The component is created during render here
+  44 |
+  45 |     const SectionLabel = ({ text }: { text: string }) => (
+  46 |         <div style={{  react-hooks/static-components
+  125:42  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:125:42
+  123 |                                     )}
+  124 |                                     {hasPermission('MANAGE_PERMISSION') && (
+> 125 |                                         <NavItem path="/admin/users/status" icon="🛡️" label="Manage Permissions" exact />
+      |                                          ^^^^^^^ This component is created during render
+  126 |                                     )}
+  127 |                                     {hasPermission('SEND_EMAIL') && (
+  128 |                                         <NavItem path="/admin/email" icon="✉" label="Broadcast Email" exact />
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:31:21
+  29 |     };
+  30 |
+> 31 |     const NavItem = ({
+     |                     ^^
+> 32 |                          path, icon, label, exact = false,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |                      }: { path: string; icon: string; label: string; exact?: boolean }) => {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     };
+     | ^^^^^^ The component is created during render here
+  44 |
+  45 |     const SectionLabel = ({ text }: { text: string }) => (
+  46 |         <div style={{                                                              react-hooks/static-components
+  128:42  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:128:42
+  126 |                                     )}
+  127 |                                     {hasPermission('SEND_EMAIL') && (
+> 128 |                                         <NavItem path="/admin/email" icon="✉" label="Broadcast Email" exact />
+      |                                          ^^^^^^^ This component is created during render
+  129 |                                     )}
+  130 |                                     {hasPermission('CREATE_POST') && (
+  131 |                                         <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:31:21
+  29 |     };
+  30 |
+> 31 |     const NavItem = ({
+     |                     ^^
+> 32 |                          path, icon, label, exact = false,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |                      }: { path: string; icon: string; label: string; exact?: boolean }) => {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     };
+     | ^^^^^^ The component is created during render here
+  44 |
+  45 |     const SectionLabel = ({ text }: { text: string }) => (
+  46 |         <div style={{                                                                                   react-hooks/static-components
+  131:42  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:131:42
+  129 |                                     )}
+  130 |                                     {hasPermission('CREATE_POST') && (
+> 131 |                                         <NavItem path="/admin/posts" icon="✦" label="Manage Posts" exact />
+      |                                          ^^^^^^^ This component is created during render
+  132 |                                     )}
+  133 |                                     {hasPermission('CREATE_EVENT') && (
+  134 |                                         <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:31:21
+  29 |     };
+  30 |
+> 31 |     const NavItem = ({
+     |                     ^^
+> 32 |                          path, icon, label, exact = false,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |                      }: { path: string; icon: string; label: string; exact?: boolean }) => {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     };
+     | ^^^^^^ The component is created during render here
+  44 |
+  45 |     const SectionLabel = ({ text }: { text: string }) => (
+  46 |         <div style={{                                                                                  react-hooks/static-components
+  134:42  error  Error: Cannot create components during render
+
+Components created during render will reset their state each time they are created. Declare components outside of render.
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:134:42
+  132 |                                     )}
+  133 |                                     {hasPermission('CREATE_EVENT') && (
+> 134 |                                         <NavItem path="/admin/events" icon="◎" label="Manage Events" exact />
+      |                                          ^^^^^^^ This component is created during render
+  135 |                                     )}
+  136 |                                 </div>
+  137 |                             </>
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/components/layout/Layout.tsx:31:21
+  29 |     };
+  30 |
+> 31 |     const NavItem = ({
+     |                     ^^
+> 32 |                          path, icon, label, exact = false,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 33 |                      }: { path: string; icon: string; label: string; exact?: boolean }) => {
+     …
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |         );
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |     };
+     | ^^^^^^ The component is created during render here
+  44 |
+  45 |     const SectionLabel = ({ text }: { text: string }) => (
+  46 |         <div style={{                                                                                                                                                                                              react-hooks/static-components
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/lib/api.ts
+  87:14  error  'err' is defined but never used           @typescript-eslint/no-unused-vars
+  98:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/admin/AdminEmailPage.tsx
+  48:9  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/admin/EventsPage.tsx
+    2:1   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/ban-ts-comment
+    3:21  error  'getImageUrl' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  228:66  error  Expected an assignment or function call and instead saw an expression                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-expressions
+  271:11  error  Unexpected empty object pattern                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             no-empty-pattern
+  543:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/admin/EventsPage.tsx:543:13
+  541 |     useEffect(() => {
+  542 |         if (editTarget) {
+> 543 |             setForm({
+      |             ^^^^^^^ Avoid calling setState() directly within an effect
+  544 |                 name: editTarget.name,
+  545 |                 startTime: toLocalInput(editTarget.startTime),
+  546 |                 endTime: toLocalInput(editTarget.endTime ?? ''),  react-hooks/set-state-in-effect
+  677:23  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/admin/EventsPage.tsx:677:23
+  675 |     };
+  676 |
+> 677 |     useEffect(() => { load(); }, []);
+      |                       ^^^^ Avoid calling setState() directly within an effect
+  678 |
+  679 |     const openCreate = () => { setEditTarget(null); setEditorOpen(true); };
+  680 |     const openEdit = (ev: EventDto) => { setEditTarget(ev); setEditorOpen(true); };                           react-hooks/set-state-in-effect
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/admin/ManageUserStatusPage.tsx
+    3:1   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+    7:1   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+  141:18  error  'err' is defined but never used                                                                                      @typescript-eslint/no-unused-vars
+  175:18  error  'err' is defined but never used                                                                                      @typescript-eslint/no-unused-vars
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/admin/PostsPage.tsx
+   12:9   error  'html' is never reassigned. Use 'const' instead                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     prefer-const
+   36:11  error  Unexpected empty object pattern                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-empty-pattern
+   37:54  error  Unnecessary escape character: \[                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    no-useless-escape
+  137:68  error  Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+  245:11  error  Unexpected empty object pattern                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     no-empty-pattern
+  269:23  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/admin/PostsPage.tsx:269:23
+  267 |     };
+  268 |
+> 269 |     useEffect(() => { load(); }, []);
+      |                       ^^^^ Avoid calling setState() directly within an effect
+  270 |
+  271 |     const openCreate = () => {
+  272 |         setEditTarget(null); setTitle(''); setBody(''); setImageFile(null); setRemoveImage(false);  react-hooks/set-state-in-effect
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/alumni/AlumniEventsPage.tsx
+  313:23  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/alumni/AlumniEventsPage.tsx:313:23
+  311 |     };
+  312 |
+> 313 |     useEffect(() => { load(); }, []);
+      |                       ^^^^ Avoid calling setState() directly within an effect
+  314 |
+  315 |     // Filtering logic combining search text and status
+  316 |     const filtered = events.filter(ev => {  react-hooks/set-state-in-effect
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/auth/AuthPages.tsx
+  148:23  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/auth/AuthPages.tsx:148:23
+  146 |
+  147 |     useEffect(() => {
+> 148 |         if (!token) { setStatus('error'); setMessage('No verification token found.'); return; }
+      |                       ^^^^^^^^^ Avoid calling setState() directly within an effect
+  149 |         authApi.verifyEmail(token).then((res) => {
+  150 |             if (res.success && res.data) { setStatus('success'); setMessage(res.data.message); }
+  151 |             else { setStatus('error'); setMessage(res.error?.message || 'Verification failed.'); }  react-hooks/set-state-in-effect
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/auth/CompleteRegistrationPage.tsx
+  30:18  error  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/auth/OAuth2Callback.tsx
+  42:8  warning  React Hook useEffect has missing dependencies: 'clearAuth', 'navigate', 'searchParams', and 'setUser'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/dashboard/DashboardPage.tsx
+    2:1   error    Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+    3:10  error    'Link' is defined but never used                                                                                     @typescript-eslint/no-unused-vars
+  108:8   warning  React Hook useEffect has a missing dependency: 'hasPermission'. Either include it or remove the dependency array     react-hooks/exhaustive-deps
+  132:8   warning  React Hook useEffect has a missing dependency: 'hasPermission'. Either include it or remove the dependency array     react-hooks/exhaustive-deps
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/profile/ProfilePage.tsx
+  193:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/mnt/HDD/Downloads/Projects/alumni-portal/my-frontend/src/pages/profile/ProfilePage.tsx:193:9
+  191 |
+  192 |     useEffect(() => { 
+> 193 |         loadProfile(); 
+      |         ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  194 |     }, [loadProfile]);
+  195 |
+  196 |     const setStr = (field: keyof UpdateProfileRequest) =>  react-hooks/set-state-in-effect
+
+✖ 42 problems (38 errors, 4 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
+

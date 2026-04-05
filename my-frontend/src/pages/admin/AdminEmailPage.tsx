@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { adminApi } from '../../lib/api';
 import { Button, Alert, Input, Select, Textarea } from '../../components/ui';
-import { PROGRAM_OPTIONS } from '../profile/ProfilePage';
+import { PROGRAM_OPTIONS, DISCIPLINE_OPTIONS } from '../../lib/constants';
 import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
 export const AdminEmailPage: React.FC = () => {
@@ -56,12 +56,6 @@ export const AdminEmailPage: React.FC = () => {
         setSendingEmail(false);
     };
 
-    // Dispatch handled by PermissionGuard in render
-
-    const DISCIPLINE_OPTIONS = [
-        'B.Tech', 'B.E.', 'B.Sc', 'BCA', 'M.Tech', 'M.E.',
-        'M.Sc', 'MCA', 'MBA', 'Ph.D', 'Other',
-    ].map((v) => ({ value: v, label: v }));
 
     return (
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>

@@ -70,7 +70,10 @@ export const useAuthStore = create<AuthState>()(
                 // Supports both raw strings and permission objects (name: string)
                 return state.permissions.some(p => {
                     if (typeof p === 'string') return p === permission;
-                    if (p && typeof p === 'object' && 'name' in p) return (p as any).name === permission;
+                    // Properly check for permission object if it exists (legacy support)
+                    if (p && typeof p === 'object' && 'name' in p) {
+                        return (p as { name: string }).name === permission;
+                    }
                     return false;
                 });
             },

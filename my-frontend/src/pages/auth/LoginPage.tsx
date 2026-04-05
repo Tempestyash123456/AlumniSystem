@@ -1,7 +1,7 @@
 // my-frontend/src/pages/auth/LoginPage.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authApi, OAUTH2_BASE_URL } from '../../lib/api.ts';
+import { authApi, OAUTH2_BASE_URL } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore.ts';
 import { Input, Button, Alert } from '../../components/ui';
 

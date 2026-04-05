@@ -193,7 +193,7 @@ export const MembershipPage: React.FC = () => {
                 } else {
                     setError(res.error?.message || 'Failed to load profile');
                 }
-            } catch (_err) {
+            } catch {
                 setError('A network error occurred while fetching profile.');
             } finally {
                 setLoading(false);

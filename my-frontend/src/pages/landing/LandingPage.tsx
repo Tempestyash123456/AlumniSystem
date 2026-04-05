@@ -115,7 +115,7 @@ const ParticleCanvas: React.FC = () => {
             cancelAnimationFrame(animId);
             window.removeEventListener('resize', onResize);
         };
-    }, []);
+    }, [theme]);
 
     return <canvas ref={canvasRef} className="lp-canvas" />;
 };

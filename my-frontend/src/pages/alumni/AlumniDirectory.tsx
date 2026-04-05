@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { alumniApi, profileApi } from '../../lib/api.ts';
 import { useAuthStore } from '../../store/authStore.ts';
 import type { AlumniDto, ProfileResponse } from '../../types';
-import { Spinner, Input, Badge, ProgressBar } from '../../components/ui';
+import { Spinner, Input, Badge, ProgressBar, Alert } from '../../components/ui';
 import { getImageUrl } from '../../lib/api';
 import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
@@ -249,30 +248,51 @@ export const AlumniDirectoryPage: React.FC = () => {
     const [filterAdmissionYear, setFilterAdmissionYear] = useState('');
 
     useEffect(() => {
-        // Uses public /alumni endpoint — accessible to all authenticated users
-        alumniApi.getAll().then((res) => {
-            if (res.data) {
-                setUsers(res.data);
-            } else {
-                setError(res.error?.message || 'Failed to load users');
+        const loadUsers = async () => {
+            try {
+                const res = await alumniApi.getAll();
+                if (res.data) {
+                    setUsers(res.data);
+                } else {
+                    setError(res.error?.message || 'Failed to load users');
+                }
+            } catch (err) {
+                setError('A network error occurred while loading users');
+                console.error(err);
+            } finally {
+                setLoading(false);
             }
-        }).finally(() => setLoading(false));
+        };
+        loadUsers();
     }, []);
 
     useEffect(() => {
         if (users.length === 0) return;
-        setProfilesLoading(true);
-        Promise.all(
-            users.map(u =>
-                profileApi.getProfileById(u.id)
-                    .then(res => ({ id: u.id, profile: res.data ?? null }))
-                    .catch(() => ({ id: u.id, profile: null }))
-            )
-        ).then(results => {
-            const cache: ProfileCache = {};
-            results.forEach(({ id, profile }) => { cache[id] = profile; });
-            setProfileCache(cache);
-        }).finally(() => setProfilesLoading(false));
+        
+        const loadProfiles = async () => {
+            setProfilesLoading(true);
+            try {
+                const results = await Promise.all(
+                    users.map(async (u) => {
+                        try {
+                            const res = await profileApi.getProfileById(u.id);
+                            return { id: u.id, profile: res.data ?? null };
+                        } catch {
+                            return { id: u.id, profile: null };
+                        }
+                    })
+                );
+                const cache: ProfileCache = {};
+                results.forEach(({ id, profile }) => { cache[id] = profile; });
+                setProfileCache(cache);
+            } catch (err) {
+                console.error('Error batch loading profiles:', err);
+            } finally {
+                setProfilesLoading(false);
+            }
+        };
+        
+        loadProfiles();
     }, [users]);
 
     const filterOptions = useMemo(() => {
@@ -409,8 +429,10 @@ export const AlumniDirectoryPage: React.FC = () => {
                         <Spinner size={32} />
                     </div>
                 ) : error ? (
-                    <div style={{ color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace', padding: 40, textAlign: 'center' }}>
-                        ⚠ {error}
+                    <div style={{ padding: '20px 0' }}>
+                        <Alert type="error" onClose={() => setError('')}>
+                            {error}
+                        </Alert>
                     </div>
                 ) : filteredUsers.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: 80 }}>
@@ -471,6 +493,42 @@ export const AlumniDirectoryPage: React.FC = () => {
     );
 };
 
+// ── Scroll Reveal Hook ────────────────────────────────────────────────────────
+const useScrollReveal = () => {
+    const [isVisible, setIsVisible] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true);
+                    observer.unobserve(entry.target);
+                }
+            },
+            { threshold: 0.1 }
+        );
+
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, []);
+
+    return { ref, isVisible };
+};
+
+const Reveal: React.FC<{ children: React.ReactNode; delay?: number; className?: string; style?: React.CSSProperties }> = ({ children, delay = 0, className = '', style = {} }) => {
+    const { ref, isVisible } = useScrollReveal();
+    return (
+        <div
+            ref={ref}
+            className={`reveal-hidden ${isVisible ? 'reveal-visible' : ''} ${className}`}
+            style={{ ...style, transitionDelay: `${delay}s` }}
+        >
+            {children}
+        </div>
+    );
+};
+
 // ── Profile View Page ─────────────────────────────────────────────────────────
 export const AlumniProfileViewPage: React.FC = () => {
     const { userId } = useParams<{ userId: string }>();
@@ -480,14 +538,29 @@ export const AlumniProfileViewPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError]     = useState('');
 
+    // For progress bar reveal
+    const { ref: progressRef, isVisible: progressVisible } = useScrollReveal();
+
     useEffect(() => {
         if (!userId) return;
-        profileApi.getProfileById(userId)
-            .then((res) => {
-                if (res.data) setProfile(res.data);
-                else setError(res.error?.message || 'Profile not found');
-            })
-            .finally(() => setLoading(false));
+        
+        const loadProfile = async () => {
+            try {
+                const res = await profileApi.getProfileById(userId);
+                if (res.data) {
+                    setProfile(res.data);
+                } else {
+                    setError(res.error?.message || 'Profile not found');
+                }
+            } catch (err) {
+                setError('Failed to reach server. Please check your connection.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        loadProfile();
     }, [userId]);
 
     if (loading) return (
@@ -497,8 +570,18 @@ export const AlumniProfileViewPage: React.FC = () => {
     );
 
     if (error || !profile) return (
-        <div style={{ color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace', padding: 40, textAlign: 'center' }}>
-            ⚠ {error || 'Profile not found'}
+        <div style={{ maxWidth: 820 }}>
+            <div style={{ marginBottom: 24 }}>
+                <Link
+                    to={canViewDirectory ? '/alumni' : '/dashboard'}
+                    style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--neon-cyan)', textDecoration: 'none' }}
+                >
+                    ← {canViewDirectory ? 'Back to Directory' : 'Back to Dashboard'}
+                </Link>
+            </div>
+            <Alert type="error" onClose={() => setError('')}>
+                {error || 'Profile not found'}
+            </Alert>
         </div>
     );
 
@@ -513,28 +596,34 @@ export const AlumniProfileViewPage: React.FC = () => {
                 </Link>
             </div>
 
-            <div className="cp-panel cp-corners" style={{ padding: '32px' }}>
+            <Reveal className="cp-panel cp-corners" style={{ padding: '32px' }}>
                 {/* Header row */}
                 <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap' }}>
 
-                    {profile.profilePhotoUrl ? (
-                        <img
-                            src={getImageUrl(profile.profilePhotoUrl)!}
-                            alt="Profile"
-                            referrerPolicy="no-referrer"
-                            style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover' }}
-                        />
-                    ) : (
-                        <div style={{
-                            width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
-                            background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontFamily: 'Orbitron, monospace', fontSize: '28px', fontWeight: 700,
-                            color: 'var(--bg-void)', boxShadow: '0 0 20px rgba(0,245,255,0.3)',
-                        }}>
-                            {profile.firstName?.[0]}{profile.lastName?.[0]}
-                        </div>
-                    )}
+                    <div style={{ 
+                        position: 'relative', 
+                        animation: 'pulse-glow 4s infinite alternate ease-in-out',
+                        borderRadius: '50%'
+                    }}>
+                        {profile.profilePhotoUrl ? (
+                            <img
+                                src={getImageUrl(profile.profilePhotoUrl)!}
+                                alt="Profile"
+                                referrerPolicy="no-referrer"
+                                style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--neon-cyan)' }}
+                            />
+                        ) : (
+                            <div style={{
+                                width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+                                background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontFamily: 'Orbitron, monospace', fontSize: '28px', fontWeight: 700,
+                                color: 'var(--bg-void)', boxShadow: '0 0 20px rgba(0,245,255,0.3)',
+                            }}>
+                                {profile.firstName?.[0]}{profile.lastName?.[0]}
+                            </div>
+                        )}
+                    </div>
 
                     <div style={{ flex: 1, minWidth: 200 }}>
                         <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
@@ -554,8 +643,8 @@ export const AlumniProfileViewPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <div style={{ minWidth: 120 }}>
-                        <ProgressBar value={profile.profileScore} />
+                    <div ref={progressRef} style={{ minWidth: 120 }}>
+                        <ProgressBar value={progressVisible ? profile.profileScore : 0} />
                         <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 4, letterSpacing: '0.1em', textAlign: 'center' }}>
                             PROFILE_SCORE
                         </div>
@@ -565,13 +654,13 @@ export const AlumniProfileViewPage: React.FC = () => {
                 <hr className="cp-divider" style={{ marginBottom: 24 }} />
 
                 {profile.bio && (
-                    <div style={{ marginBottom: 24 }}>
+                    <Reveal delay={0.1} style={{ marginBottom: 24 }}>
                         <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 8 }}>BIO</div>
                         <p style={{ fontFamily: 'Outfit, sans-serif', color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: 'var(--font-size-base)' }}>{profile.bio}</p>
-                    </div>
+                    </Reveal>
                 )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
+                <Reveal delay={0.2} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
                     {[
                         { label: 'Email',          value: profile.email },
                         { label: 'Phone',          value: profile.phone },
@@ -583,8 +672,8 @@ export const AlumniProfileViewPage: React.FC = () => {
                         { label: 'Industry',       value: profile.industry },
                         { label: 'Experience',     value: profile.experienceYears != null ? `${profile.experienceYears} yrs` : null },
                         { label: 'Student / Employee ID', value: profile.studentId },
-                    ].filter(f => f.value).map(({ label, value }) => (
-                        <div key={label}>
+                    ].filter(f => f.value).map(({ label, value }, idx) => (
+                        <div key={label} className={`reveal-hidden ${progressVisible ? 'reveal-visible' : ''}`} style={{ transitionDelay: `${0.3 + idx * 0.05}s` }}>
                             <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>
                                 {label.toUpperCase()}
                             </div>
@@ -593,21 +682,29 @@ export const AlumniProfileViewPage: React.FC = () => {
                             </div>
                         </div>
                     ))}
-                </div>
+                </Reveal>
 
                 {profile.skills && profile.skills.length > 0 && (
-                    <div style={{ marginBottom: 24 }}>
+                    <Reveal delay={0.4} style={{ marginBottom: 24 }}>
                         <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>
                             SKILLS
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            {profile.skills.map((s) => <span key={s} className="cp-skill-tag">{s}</span>)}
+                            {profile.skills.map((s, i) => (
+                                <span 
+                                    key={s} 
+                                    className={`cp-skill-tag reveal-hidden ${progressVisible ? 'reveal-visible' : ''}`}
+                                    style={{ transitionDelay: `${0.5 + i * 0.03}s` }}
+                                >
+                                    {s}
+                                </span>
+                            ))}
                         </div>
-                    </div>
+                    </Reveal>
                 )}
 
                 {(profile.linkedinUrl || profile.githubUrl || profile.portfolioUrl) && (
-                    <div style={{ marginBottom: 24 }}>
+                    <Reveal delay={0.6} style={{ marginBottom: 24 }}>
                         <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>
                             LINKS
                         </div>
@@ -616,12 +713,12 @@ export const AlumniProfileViewPage: React.FC = () => {
                             {profile.githubUrl    && <a href={profile.githubUrl}    target="_blank" rel="noreferrer" className="cp-btn cp-btn-ghost cp-btn-sm">GitHub ↗</a>}
                             {profile.portfolioUrl && <a href={profile.portfolioUrl} target="_blank" rel="noreferrer" className="cp-btn cp-btn-ghost cp-btn-sm">Portfolio ↗</a>}
                         </div>
-                    </div>
+                    </Reveal>
                 )}
 
                 {/* Admin Actions */}
                 <PermissionGuard permission="MANAGE_PERMISSION">
-                    <div style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--border-subtle)' }}>
+                    <Reveal delay={0.7} style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--border-subtle)' }}>
                         <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.2em', marginBottom: 16 }}>
                             ADMIN_ACTIONS
                         </div>
@@ -630,9 +727,9 @@ export const AlumniProfileViewPage: React.FC = () => {
                                 🛡️ MANAGE PERMISSIONS
                             </Link>
                         </div>
-                    </div>
+                    </Reveal>
                 </PermissionGuard>
-            </div>
+            </Reveal>
         </div>
     );
 };

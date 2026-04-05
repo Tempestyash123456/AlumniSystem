@@ -334,6 +334,30 @@ h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 600; letter-spacing
 .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
 .animate-spin      { animation: spin 1s linear infinite; }
 
+/* ── Scroll Reveal Utilities ─────────────────────────────────────────────── */
+.reveal-hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.reveal-stagger > * {
+    --reveal-delay: 0.1s;
+}
+
+.reveal-stagger-1 { transition-delay: 0.1s; }
+.reveal-stagger-2 { transition-delay: 0.2s; }
+.reveal-stagger-3 { transition-delay: 0.3s; }
+.reveal-stagger-4 { transition-delay: 0.4s; }
+.reveal-stagger-5 { transition-delay: 0.5s; }
+
 /* ── Loading spinner ─────────────────────────────────────────────────────── */
 .cp-spinner { width: 24px; height: 24px; border: 3px solid rgba(0, 245, 255, 0.2); border-top-color: var(--neon-cyan); border-radius: 50%; animation: spin 0.8s linear infinite; }
 .theme-light .cp-spinner { border-color: rgba(211, 47, 47, 0.2); }

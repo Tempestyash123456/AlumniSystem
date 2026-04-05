@@ -2,27 +2,10 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { profileApi } from '../../lib/api.ts';
 import { useAuthStore } from '../../store/authStore.ts';
 import type { ProfileResponse, UpdateProfileRequest } from '../../types';
-// @ts-ignore
-import { Input, Textarea, Select, Button, Alert, ProgressBar, Toggle, SkillsInput, Spinner } from '../../components/ui';
+import { Input, Textarea, Select, Button, Alert, ProgressBar, SkillsInput, Spinner } from '../../components/ui';
+import { PROGRAM_OPTIONS, DISCIPLINE_OPTIONS, INDUSTRY_OPTIONS } from '../../lib/constants';
 
 const BASE_URL = '';
-
-// --- Static options ---
-const INDUSTRY_OPTIONS = [
-    'Technology', 'Finance', 'Healthcare', 'Education', 'Manufacturing',
-    'Retail', 'Media', 'Consulting', 'Government', 'Non-profit', 'Other',
-].map((v) => ({ value: v, label: v }));
-
-const DISCIPLINE_OPTIONS = [
-    'B.Tech', 'B.E.', 'B.Sc', 'BCA', 'M.Tech', 'M.E.',
-    'M.Sc', 'MCA', 'MBA', 'Ph.D', 'Other',
-].map((v) => ({ value: v, label: v }));
-
-export const PROGRAM_OPTIONS = [
-    'Computer Science', 'Mechanical Engineering', 'Civil Engineering', 'Electrical Engineering',
-    'Electronics and Communication', 'Information Technology', 'Chemical Engineering',
-    'Aerospace Engineering', 'Bio-Technology', 'Business Administration', 'Physics', 'Mathematics', 'Other'
-].map(v => ({ value: v, label: v }));
 
 type Section = 'personal' | 'academic' | 'professional';
 
@@ -136,8 +119,8 @@ const PhotoUpload: React.FC<{
                         )}
                     </div>
                     {error && (
-                        <div style={{ marginTop: 8, fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-pink)' }}>
-                            ⚠ {error}
+                        <div style={{ marginTop: 8 }}>
+                            <Alert type="error" onClose={() => setError('')}>{error}</Alert>
                         </div>
                     )}
                 </div>
@@ -170,7 +153,9 @@ export const ProfilePage: React.FC = () => {
     const [form, setForm] = useState<UpdateProfileRequest>({});
 
     const loadProfile = useCallback(async () => {
-        setLoading(true);
+        // Initial state is already true, only set if we are specifically reloading
+        // Using functional update to avoid dependency on 'loading' state
+        setLoading(prev => prev || true);
         const res = await profileApi.getMyProfile();
         if (res.data) {
             setProfile(res.data);
@@ -204,7 +189,9 @@ export const ProfilePage: React.FC = () => {
         setLoading(false);
     }, []);
 
-    useEffect(() => { loadProfile(); }, [loadProfile]);
+    useEffect(() => { 
+        loadProfile(); 
+    }, [loadProfile]);
 
     const setStr = (field: keyof UpdateProfileRequest) =>
         (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -214,9 +201,6 @@ export const ProfilePage: React.FC = () => {
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
             setForm(prev => ({ ...prev, [field]: e.target.value ? Number(e.target.value) : undefined }));
 
-    // @ts-ignore
-    const setBool = (field: keyof UpdateProfileRequest) => (val: boolean) =>
-        setForm(prev => ({ ...prev, [field]: val }));
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
