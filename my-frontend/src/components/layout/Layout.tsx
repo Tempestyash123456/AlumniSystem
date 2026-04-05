@@ -273,7 +273,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </header>
 
                 {/* Scrollable content */}
-                <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', padding: '32px 36px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', padding: '32px 36px', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ maxWidth: 1400, margin: '0 auto', flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', width: '100%' }}>
                         {children}
                     </div>

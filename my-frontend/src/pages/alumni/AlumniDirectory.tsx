@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { alumniApi, profileApi } from '../../lib/api.ts';
 import { useAuthStore } from '../../store/authStore.ts';
 import type { AlumniDto, ProfileResponse } from '../../types';
-import { Spinner, Input, Badge, ProgressBar, Alert } from '../../components/ui';
+import { Spinner, Input, Badge, Alert } from '../../components/ui';
 import { getImageUrl } from '../../lib/api';
 import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
@@ -330,7 +330,7 @@ export const AlumniDirectoryPage: React.FC = () => {
     return (
         <div
             className="animate-fade-in"
-            style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}
+            style={{ display: 'flex', flexDirection: 'column', gap: 24, minHeight: '100%' }}
         >
 
             {/* ── Header ── */}
@@ -422,8 +422,8 @@ export const AlumniDirectoryPage: React.FC = () => {
                 </div>
             )}
 
-            {/* ── Scrollable content area ── */}
-            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 2 }}>
+            {/* ── Results Container ── */}
+            <div style={{ flex: 1, paddingBottom: 60 }}>
                 {loading ? (
                     <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
                         <Spinner size={32} />
@@ -538,8 +538,8 @@ export const AlumniProfileViewPage: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError]     = useState('');
 
-    // For progress bar reveal
-    const { ref: progressRef, isVisible: progressVisible } = useScrollReveal();
+    // For progress bar reveal (unused since removal)
+    // const { ref: progressRef, isVisible: progressVisible } = useScrollReveal();
 
     useEffect(() => {
         if (!userId) return;
@@ -644,12 +644,8 @@ export const AlumniProfileViewPage: React.FC = () => {
                             </div>
                         </div>
 
-                        <div ref={progressRef} style={{ minWidth: 120 }}>
-                            <ProgressBar value={progressVisible ? profile.profileScore : 0} />
-                            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 4, letterSpacing: '0.1em', textAlign: 'center' }}>
-                                PROFILE_SCORE
-                            </div>
-                        </div>
+                        {/* Profile score removed */}
+
                     </div>
 
                     <hr className="cp-divider" style={{ marginBottom: 24 }} />
@@ -674,7 +670,7 @@ export const AlumniProfileViewPage: React.FC = () => {
                             { label: 'Experience',     value: profile.experienceYears != null ? `${profile.experienceYears} yrs` : null },
                             { label: 'Student / Employee ID', value: profile.studentId },
                         ].filter(f => f.value).map(({ label, value }, idx) => (
-                            <div key={label} className={`reveal-hidden ${progressVisible ? 'reveal-visible' : ''}`} style={{ transitionDelay: `${0.3 + idx * 0.05}s` }}>
+                            <div key={label} className={`reveal-hidden reveal-visible`} style={{ transitionDelay: `${0.3 + idx * 0.05}s` }}>
                                 <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>
                                     {label.toUpperCase()}
                                 </div>
@@ -694,7 +690,7 @@ export const AlumniProfileViewPage: React.FC = () => {
                                 {profile.skills.map((s, i) => (
                                     <span 
                                         key={s} 
-                                        className={`cp-skill-tag reveal-hidden ${progressVisible ? 'reveal-visible' : ''}`}
+                                        className="cp-skill-tag reveal-hidden reveal-visible"
                                         style={{ transitionDelay: `${0.5 + i * 0.03}s` }}
                                     >
                                         {s}
