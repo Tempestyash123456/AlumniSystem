@@ -23,6 +23,7 @@ public final class ProfileDtos {
 
             // Academic
             String  studentId,
+            Integer admissionYear,
             Integer graduationYear,
             String  discipline,
             String  program,
@@ -61,6 +62,7 @@ public final class ProfileDtos {
 
             // Academic
             @Size(max = 50)  String studentId,
+            @Min(1950) @Max(2100) Integer admissionYear,
             @Min(1950) @Max(2100) Integer graduationYear,
             @Size(max = 100) String discipline,
             @Size(max = 150) String program,

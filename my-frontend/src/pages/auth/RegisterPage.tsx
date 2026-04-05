@@ -6,7 +6,7 @@ import { Input, Button, Alert } from '../../components/ui';
 
 export const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
-    const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', phone: '', role: '' });
+    const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', studentId: '', phone: '', role: '' });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -109,6 +109,8 @@ export const RegisterPage: React.FC = () => {
                             </div>
                             <Input label="Email" type="email" value={form.email} onChange={set('email')} placeholder="ada@university.edu" error={fieldErrors.email} required />
                             <Input label="Password" type="password" value={form.password} onChange={set('password')} placeholder="Min 8 chars..." error={fieldErrors.password} required />
+                            
+                            <Input label="Student ID / Employee ID" value={form.studentId} onChange={set('studentId')} placeholder="e.g. 2024CS001" error={fieldErrors.studentId} required />
                             
                             <div className="cp-input-wrap">
                                 <label className="cp-label">I am an:</label>

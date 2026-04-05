@@ -49,6 +49,7 @@ export interface ProfileResponse {
     profilePhotoUrl?: string;
 
     studentId?: string;
+    admissionYear?: number;
     graduationYear?: number;
     discipline?: string;
     program?: string;
@@ -79,6 +80,7 @@ export interface UpdateProfileRequest {
     lastName?: string | null;
     phone?: string | null;
     studentId?: string | null;
+    admissionYear?: number | null;
     graduationYear?: number | null;
     discipline?: string | null;
     program?: string | null;

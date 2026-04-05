@@ -33,6 +33,9 @@ public class AlumniProfile extends BaseEntity {
     @Column(name = "graduation_year")
     private Integer graduationYear;
 
+    @Column(name = "admission_year")
+    private Integer admissionYear;
+
     @Column(name = "discipline")
     private String discipline;
 
@@ -109,7 +112,8 @@ public class AlumniProfile extends BaseEntity {
         if (bio              != null && !bio.isBlank())              score += 15;
         if (currentJobTitle  != null && !currentJobTitle.isBlank())  score += 10;
         if (currentCompany   != null && !currentCompany.isBlank())   score += 10;
-        if (graduationYear   != null)                                 score += 10;
+        if (graduationYear   != null)                                 score += 5;
+        if (admissionYear    != null)                                 score += 5;
         if (discipline       != null && !discipline.isBlank())       score += 10;
         if (program          != null && !program.isBlank())          score += 10;
         if (skills           != null && !skills.isEmpty())           score += 15;

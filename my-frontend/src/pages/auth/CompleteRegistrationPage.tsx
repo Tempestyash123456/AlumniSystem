@@ -8,6 +8,7 @@ export const CompleteRegistrationPage: React.FC = () => {
     const navigate = useNavigate();
     const { user, setUser } = useAuthStore();
     const [selectedRole, setSelectedRole] = useState<'alumni' | 'faculty' | null>(null);
+    const [studentId, setStudentId] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +19,7 @@ export const CompleteRegistrationPage: React.FC = () => {
         setError(null);
 
         try {
-            const res = await authApi.completeOAuthRegistration(selectedRole);
+            const res = await authApi.completeOAuthRegistration(selectedRole, studentId);
             if (res.success && res.data) {
                 // Update local store with new user info (roles + roleSelected flag)
                 setUser(res.data.user, res.data.accessToken, res.data.refreshToken);
@@ -146,10 +147,34 @@ export const CompleteRegistrationPage: React.FC = () => {
                     </button>
                 </div>
 
+                <div style={{ marginBottom: '32px', width: '100%', maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto' }}>
+                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: '8px' }}>
+                        REQUIRED_IDENTIFICATION
+                    </div>
+                    <input 
+                        type="text" 
+                        value={studentId} 
+                        onChange={(e) => setStudentId(e.target.value)}
+                        placeholder="ENTER STUDENT / FACULTY ID"
+                        className="cp-input"
+                        style={{ 
+                            width: '100%', 
+                            textAlign: 'center', 
+                            fontSize: '14px', 
+                            letterSpacing: '0.1em',
+                            padding: '16px',
+                            borderStyle: 'solid',
+                            borderWidth: '1px',
+                            borderColor: studentId ? 'var(--neon-cyan)' : 'var(--border-subtle)',
+                            background: 'rgba(0, 0, 0, 0.2)'
+                        }}
+                    />
+                </div>
+
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
                     <button
                         onClick={handleSubmit}
-                        disabled={!selectedRole || loading}
+                        disabled={!selectedRole || !studentId || loading}
                         className={`cp-btn cp-btn-primary cp-btn-lg ${selectedRole ? 'animate-pulse-glow' : ''}`}
                         style={{ width: '100%', maxWidth: '400px' }}
                     >

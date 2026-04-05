@@ -76,6 +76,7 @@ public class ProfileService {
 
     private void applyUpdates(AlumniProfile p, UpdateProfileRequest r) {
         if (r.studentId()       != null) p.setStudentId(r.studentId());
+        if (r.admissionYear()   != null) p.setAdmissionYear(r.admissionYear());
         if (r.graduationYear()  != null) p.setGraduationYear(r.graduationYear());
         if (r.discipline()      != null) p.setDiscipline(r.discipline());
         if (r.program()         != null) p.setProgram(r.program());
@@ -107,6 +108,7 @@ public class ProfileService {
                 user.getProfilePhotoUrl(),
 
                 p != null ? p.getStudentId()      : null,
+                p != null ? p.getAdmissionYear()   : null,
                 p != null ? p.getGraduationYear() : null,
                 p != null ? p.getDiscipline()     : null,
                 p != null ? p.getProgram()        : null,

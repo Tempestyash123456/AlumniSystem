@@ -44,6 +44,9 @@ public final class AuthDtos {
             )
             String password,
 
+            @NotBlank(message = "ID is required")
+            String studentId,
+
             String phone,         // Optional
 
             @NotBlank(message = "Role is required")
@@ -105,7 +108,10 @@ public final class AuthDtos {
     public record CompleteOAuthRegistrationRequest(
             @NotBlank(message = "Role is required")
             @Pattern(regexp = "^(?i)(alumni|faculty)$", message = "Role must be either ALUMNI or FACULTY")
-            String role
+            String role,
+
+            @NotBlank(message = "ID is required")
+            String studentId
     ) {}
 
     public record MessageResponse(String message) {}

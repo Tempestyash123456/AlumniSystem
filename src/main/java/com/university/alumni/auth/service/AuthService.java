@@ -11,6 +11,8 @@ import com.university.alumni.common.exception.ConflictException;
 import com.university.alumni.security.service.JwtService;
 import com.university.alumni.user.entity.Role;
 import com.university.alumni.user.entity.User;
+import com.university.alumni.user.entity.AlumniProfile;
+import com.university.alumni.user.repository.AlumniProfileRepository;
 import com.university.alumni.user.repository.RoleRepository;
 import com.university.alumni.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +41,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final AlumniProfileRepository alumniProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -82,6 +85,13 @@ public class AuthService {
 
         user.addRole(selectedRole);
         User saved = userRepository.save(user);
+
+        // Pre-create AlumniProfile with Student ID
+        AlumniProfile profile = AlumniProfile.builder()
+                .user(saved)
+                .studentId(request.studentId())
+                .build();
+        alumniProfileRepository.save(profile);
 
         auditLogService.record("REGISTERED", saved.getFirstName(), saved.getLastName(), null);
 
@@ -266,8 +276,14 @@ public class AuthService {
 
         user.addRole(selectedRole);
         user.setRoleSelected(true);
-        userRepository.save(user);
+        User saved = userRepository.save(user);
         userRepository.flush();
+
+        // Update or create AlumniProfile with Student ID
+        AlumniProfile profile = alumniProfileRepository.findByUserId(saved.getId())
+                .orElseGet(() -> AlumniProfile.builder().user(saved).build());
+        profile.setStudentId(request.studentId());
+        alumniProfileRepository.save(profile);
 
         auditLogService.record("ROLE_SELECTED", user.getFirstName(), user.getLastName(), roleName);
 

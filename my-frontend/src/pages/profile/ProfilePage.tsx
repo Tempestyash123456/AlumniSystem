@@ -184,6 +184,7 @@ export const ProfilePage: React.FC = () => {
                 country: res.data.country ?? '',
                 dateOfBirth: res.data.dateOfBirth ?? '',
                 studentId: res.data.studentId ?? '',
+                admissionYear: res.data.admissionYear ?? undefined,
                 graduationYear: res.data.graduationYear ?? undefined,
                 discipline: res.data.discipline ?? '',
                 program: res.data.program ?? '',
@@ -389,8 +390,9 @@ export const ProfilePage: React.FC = () => {
 
                         {activeSection === 'academic' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                                    <Input label="Student ID/ Employee ID" value={form.studentId ?? ''} onChange={setStr('studentId')} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
+                                    <Input label="Student / Employee ID" value={form.studentId ?? ''} onChange={setStr('studentId')} />
+                                    <Input label="Admission Year" type="number" placeholder="YYYY" value={form.admissionYear ?? ''} onChange={setNum('admissionYear')} />
                                     <Input label="Graduation Year" type="number" placeholder="YYYY" value={form.graduationYear ?? ''} onChange={setNum('graduationYear')} />
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
