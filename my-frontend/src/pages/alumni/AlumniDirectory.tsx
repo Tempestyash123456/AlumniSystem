@@ -522,7 +522,8 @@ export const AlumniProfileViewPage: React.FC = () => {
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                             {profile.openToMentor   && <Badge variant="cyan">Open to Mentor</Badge>}
                             {profile.openToHire     && <Badge variant="green">Open to Hire</Badge>}
-                            {profile.graduationYear && <Badge variant="purple">Class of {profile.graduationYear}</Badge>}
+                            {profile.admissionYear  && <Badge variant="cyan">Class of {profile.admissionYear} (Admission)</Badge>}
+                            {profile.graduationYear && <Badge variant="purple">Class of {profile.graduationYear} (Graduation)</Badge>}
                             {profile.discipline     && <Badge variant="amber">{profile.discipline}</Badge>}
                         </div>
                     </div>
@@ -549,11 +550,13 @@ export const AlumniProfileViewPage: React.FC = () => {
                         { label: 'Email',          value: profile.email },
                         { label: 'Phone',          value: profile.phone },
                         { label: 'Location',       value: [profile.city, profile.state, profile.country].filter(Boolean).join(', ') },
+                        { label: 'Admission Year',  value: profile.admissionYear },
+                        { label: 'Graduation Year', value: profile.graduationYear },
                         { label: 'Program',        value: profile.program },
                         { label: 'Discipline',     value: profile.discipline },
                         { label: 'Industry',       value: profile.industry },
                         { label: 'Experience',     value: profile.experienceYears != null ? `${profile.experienceYears} yrs` : null },
-                        { label: 'Student ID',     value: profile.studentId },
+                        { label: 'Student / Employee ID', value: profile.studentId },
                     ].filter(f => f.value).map(({ label, value }) => (
                         <div key={label}>
                             <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>
