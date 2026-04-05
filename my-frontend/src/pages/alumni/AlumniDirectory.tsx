@@ -586,8 +586,8 @@ export const AlumniProfileViewPage: React.FC = () => {
     );
 
     return (
-        <div className="animate-fade-in" style={{ maxWidth: 820 }}>
-            <div style={{ marginBottom: 24 }}>
+        <div className="animate-fade-in" style={{ maxWidth: 820, height: '100%', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <div style={{ flexShrink: 0, marginBottom: 24 }}>
                 <Link
                     to={canViewDirectory ? '/alumni' : '/dashboard'}
                     style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--neon-cyan)', textDecoration: 'none' }}
@@ -596,140 +596,142 @@ export const AlumniProfileViewPage: React.FC = () => {
                 </Link>
             </div>
 
-            <Reveal className="cp-panel cp-corners" style={{ padding: '32px' }}>
-                {/* Header row */}
-                <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 10 }}>
+                <Reveal className="cp-panel cp-corners" style={{ padding: '32px' }}>
+                    {/* Header row */}
+                    <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap' }}>
 
-                    <div style={{ 
-                        position: 'relative', 
-                        animation: 'pulse-glow 4s infinite alternate ease-in-out',
-                        borderRadius: '50%'
-                    }}>
-                        {profile.profilePhotoUrl ? (
-                            <img
-                                src={getImageUrl(profile.profilePhotoUrl)!}
-                                alt="Profile"
-                                referrerPolicy="no-referrer"
-                                style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--neon-cyan)' }}
-                            />
-                        ) : (
-                            <div style={{
-                                width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
-                                background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontFamily: 'Orbitron, monospace', fontSize: '28px', fontWeight: 700,
-                                color: 'var(--bg-void)', boxShadow: '0 0 20px rgba(0,245,255,0.3)',
-                            }}>
-                                {profile.firstName?.[0]}{profile.lastName?.[0]}
-                            </div>
-                        )}
-                    </div>
+                        <div style={{ 
+                            position: 'relative', 
+                            animation: 'pulse-glow 4s infinite alternate ease-in-out',
+                            borderRadius: '50%'
+                        }}>
+                            {profile.profilePhotoUrl ? (
+                                <img
+                                    src={getImageUrl(profile.profilePhotoUrl)!}
+                                    alt="Profile"
+                                    referrerPolicy="no-referrer"
+                                    style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--neon-cyan)' }}
+                                />
+                            ) : (
+                                <div style={{
+                                    width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+                                    background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontFamily: 'Orbitron, monospace', fontSize: '28px', fontWeight: 700,
+                                    color: 'var(--bg-void)', boxShadow: '0 0 20px rgba(0,245,255,0.3)',
+                                }}>
+                                    {profile.firstName?.[0]}{profile.lastName?.[0]}
+                                </div>
+                            )}
+                        </div>
 
-                    <div style={{ flex: 1, minWidth: 200 }}>
-                        <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
-                            {profile.firstName} {profile.lastName}
-                        </h1>
-                        {profile.currentJobTitle && (
-                            <div style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '16px', color: 'var(--text-secondary)', marginBottom: 10 }}>
-                                {profile.currentJobTitle}{profile.currentCompany && ` @ ${profile.currentCompany}`}
+                        <div style={{ flex: 1, minWidth: 200 }}>
+                            <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
+                                {profile.firstName} {profile.lastName}
+                            </h1>
+                            {profile.currentJobTitle && (
+                                <div style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '16px', color: 'var(--text-secondary)', marginBottom: 10 }}>
+                                    {profile.currentJobTitle}{profile.currentCompany && ` @ ${profile.currentCompany}`}
+                                </div>
+                            )}
+                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                {profile.openToMentor   && <Badge variant="cyan">Open to Mentor</Badge>}
+                                {profile.openToHire     && <Badge variant="green">Open to Hire</Badge>}
+                                {profile.admissionYear  && <Badge variant="cyan">Class of {profile.admissionYear} (Admission)</Badge>}
+                                {profile.graduationYear && <Badge variant="purple">Class of {profile.graduationYear} (Graduation)</Badge>}
+                                {profile.discipline     && <Badge variant="amber">{profile.discipline}</Badge>}
                             </div>
-                        )}
-                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                            {profile.openToMentor   && <Badge variant="cyan">Open to Mentor</Badge>}
-                            {profile.openToHire     && <Badge variant="green">Open to Hire</Badge>}
-                            {profile.admissionYear  && <Badge variant="cyan">Class of {profile.admissionYear} (Admission)</Badge>}
-                            {profile.graduationYear && <Badge variant="purple">Class of {profile.graduationYear} (Graduation)</Badge>}
-                            {profile.discipline     && <Badge variant="amber">{profile.discipline}</Badge>}
+                        </div>
+
+                        <div ref={progressRef} style={{ minWidth: 120 }}>
+                            <ProgressBar value={progressVisible ? profile.profileScore : 0} />
+                            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 4, letterSpacing: '0.1em', textAlign: 'center' }}>
+                                PROFILE_SCORE
+                            </div>
                         </div>
                     </div>
 
-                    <div ref={progressRef} style={{ minWidth: 120 }}>
-                        <ProgressBar value={progressVisible ? profile.profileScore : 0} />
-                        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', marginTop: 4, letterSpacing: '0.1em', textAlign: 'center' }}>
-                            PROFILE_SCORE
-                        </div>
-                    </div>
-                </div>
+                    <hr className="cp-divider" style={{ marginBottom: 24 }} />
 
-                <hr className="cp-divider" style={{ marginBottom: 24 }} />
+                    {profile.bio && (
+                        <Reveal delay={0.1} style={{ marginBottom: 24 }}>
+                            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 8 }}>BIO</div>
+                            <p style={{ fontFamily: 'Outfit, sans-serif', color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: 'var(--font-size-base)' }}>{profile.bio}</p>
+                        </Reveal>
+                    )}
 
-                {profile.bio && (
-                    <Reveal delay={0.1} style={{ marginBottom: 24 }}>
-                        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 8 }}>BIO</div>
-                        <p style={{ fontFamily: 'Outfit, sans-serif', color: 'var(--text-secondary)', lineHeight: 1.8, fontSize: 'var(--font-size-base)' }}>{profile.bio}</p>
+                    <Reveal delay={0.2} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
+                        {[
+                            { label: 'Email',          value: profile.email },
+                            { label: 'Phone',          value: profile.phone },
+                            { label: 'Location',       value: [profile.city, profile.state, profile.country].filter(Boolean).join(', ') },
+                            { label: 'Admission Year',  value: profile.admissionYear },
+                            { label: 'Graduation Year', value: profile.graduationYear },
+                            { label: 'Program',        value: profile.program },
+                            { label: 'Discipline',     value: profile.discipline },
+                            { label: 'Industry',       value: profile.industry },
+                            { label: 'Experience',     value: profile.experienceYears != null ? `${profile.experienceYears} yrs` : null },
+                            { label: 'Student / Employee ID', value: profile.studentId },
+                        ].filter(f => f.value).map(({ label, value }, idx) => (
+                            <div key={label} className={`reveal-hidden ${progressVisible ? 'reveal-visible' : ''}`} style={{ transitionDelay: `${0.3 + idx * 0.05}s` }}>
+                                <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>
+                                    {label.toUpperCase()}
+                                </div>
+                                <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)', wordBreak: 'break-word' }}>
+                                    {value}
+                                </div>
+                            </div>
+                        ))}
                     </Reveal>
-                )}
 
-                <Reveal delay={0.2} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
-                    {[
-                        { label: 'Email',          value: profile.email },
-                        { label: 'Phone',          value: profile.phone },
-                        { label: 'Location',       value: [profile.city, profile.state, profile.country].filter(Boolean).join(', ') },
-                        { label: 'Admission Year',  value: profile.admissionYear },
-                        { label: 'Graduation Year', value: profile.graduationYear },
-                        { label: 'Program',        value: profile.program },
-                        { label: 'Discipline',     value: profile.discipline },
-                        { label: 'Industry',       value: profile.industry },
-                        { label: 'Experience',     value: profile.experienceYears != null ? `${profile.experienceYears} yrs` : null },
-                        { label: 'Student / Employee ID', value: profile.studentId },
-                    ].filter(f => f.value).map(({ label, value }, idx) => (
-                        <div key={label} className={`reveal-hidden ${progressVisible ? 'reveal-visible' : ''}`} style={{ transitionDelay: `${0.3 + idx * 0.05}s` }}>
-                            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4 }}>
-                                {label.toUpperCase()}
+                    {profile.skills && profile.skills.length > 0 && (
+                        <Reveal delay={0.4} style={{ marginBottom: 24 }}>
+                            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>
+                                SKILLS
                             </div>
-                            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-primary)', wordBreak: 'break-word' }}>
-                                {value}
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                {profile.skills.map((s, i) => (
+                                    <span 
+                                        key={s} 
+                                        className={`cp-skill-tag reveal-hidden ${progressVisible ? 'reveal-visible' : ''}`}
+                                        style={{ transitionDelay: `${0.5 + i * 0.03}s` }}
+                                    >
+                                        {s}
+                                    </span>
+                                ))}
                             </div>
-                        </div>
-                    ))}
+                        </Reveal>
+                    )}
+
+                    {(profile.linkedinUrl || profile.githubUrl || profile.portfolioUrl) && (
+                        <Reveal delay={0.6} style={{ marginBottom: 24 }}>
+                            <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>
+                                LINKS
+                            </div>
+                            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                                {profile.linkedinUrl  && <a href={profile.linkedinUrl}  target="_blank" rel="noreferrer" className="cp-btn cp-btn-outline cp-btn-sm">LinkedIn ↗</a>}
+                                {profile.githubUrl    && <a href={profile.githubUrl}    target="_blank" rel="noreferrer" className="cp-btn cp-btn-ghost cp-btn-sm">GitHub ↗</a>}
+                                {profile.portfolioUrl && <a href={profile.portfolioUrl} target="_blank" rel="noreferrer" className="cp-btn cp-btn-ghost cp-btn-sm">Portfolio ↗</a>}
+                            </div>
+                        </Reveal>
+                    )}
+
+                    {/* Admin Actions */}
+                    <PermissionGuard permission="MANAGE_PERMISSION">
+                        <Reveal delay={0.7} style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--border-subtle)' }}>
+                            <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.2em', marginBottom: 16 }}>
+                                ADMIN_ACTIONS
+                            </div>
+                            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                                <Link to="/admin/users/status" state={{ highlightUser: userId }} className="cp-btn cp-btn-primary cp-btn-sm">
+                                    🛡️ MANAGE PERMISSIONS
+                                </Link>
+                            </div>
+                        </Reveal>
+                    </PermissionGuard>
                 </Reveal>
-
-                {profile.skills && profile.skills.length > 0 && (
-                    <Reveal delay={0.4} style={{ marginBottom: 24 }}>
-                        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>
-                            SKILLS
-                        </div>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                            {profile.skills.map((s, i) => (
-                                <span 
-                                    key={s} 
-                                    className={`cp-skill-tag reveal-hidden ${progressVisible ? 'reveal-visible' : ''}`}
-                                    style={{ transitionDelay: `${0.5 + i * 0.03}s` }}
-                                >
-                                    {s}
-                                </span>
-                            ))}
-                        </div>
-                    </Reveal>
-                )}
-
-                {(profile.linkedinUrl || profile.githubUrl || profile.portfolioUrl) && (
-                    <Reveal delay={0.6} style={{ marginBottom: 24 }}>
-                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10 }}>
-                            LINKS
-                        </div>
-                        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                            {profile.linkedinUrl  && <a href={profile.linkedinUrl}  target="_blank" rel="noreferrer" className="cp-btn cp-btn-outline cp-btn-sm">LinkedIn ↗</a>}
-                            {profile.githubUrl    && <a href={profile.githubUrl}    target="_blank" rel="noreferrer" className="cp-btn cp-btn-ghost cp-btn-sm">GitHub ↗</a>}
-                            {profile.portfolioUrl && <a href={profile.portfolioUrl} target="_blank" rel="noreferrer" className="cp-btn cp-btn-ghost cp-btn-sm">Portfolio ↗</a>}
-                        </div>
-                    </Reveal>
-                )}
-
-                {/* Admin Actions */}
-                <PermissionGuard permission="MANAGE_PERMISSION">
-                    <Reveal delay={0.7} style={{ marginTop: 32, paddingTop: 24, borderTop: '1px solid var(--border-subtle)' }}>
-                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--neon-pink)', letterSpacing: '0.2em', marginBottom: 16 }}>
-                            ADMIN_ACTIONS
-                        </div>
-                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                            <Link to="/admin/users/status" state={{ highlightUser: userId }} className="cp-btn cp-btn-primary cp-btn-sm">
-                                🛡️ MANAGE PERMISSIONS
-                            </Link>
-                        </div>
-                    </Reveal>
-                </PermissionGuard>
-            </Reveal>
+            </div>
         </div>
     );
 };
