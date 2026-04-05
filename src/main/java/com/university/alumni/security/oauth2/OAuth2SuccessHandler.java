@@ -72,7 +72,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                             .profilePhotoUrl(googlePictureUrl)
                             .passwordHash("{noop}" + UUID.randomUUID())
                             .enabled(true)
-                            .accountLocked(false)
+                            .accountLocked(true)
                             .roleSelected(false)    // User must pick Alumni or Faculty
                             .build();
 
