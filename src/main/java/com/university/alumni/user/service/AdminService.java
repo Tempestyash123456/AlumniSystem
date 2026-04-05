@@ -261,9 +261,10 @@ public class AdminService {
     }
 
     private AdminUserDto toAdminDto(User user) {
-        int profileScore = profileRepository.findByUserId(user.getId())
-                .map(AlumniProfile::getProfileScore)
-                .orElse(0);
+        AlumniProfile profile = profileRepository.findByUserId(user.getId()).orElse(null);
+        int profileScore = (profile != null) ? profile.getProfileScore() : 0;
+        Integer admissionYear = (profile != null) ? profile.getAdmissionYear() : null;
+        String studentId = (profile != null) ? profile.getStudentId() : null;
 
         List<String> roles = user.getRoles().stream()
                 .map(Role::getName)
@@ -292,6 +293,8 @@ public class AdminService {
                 user.isEnabled(),
                 user.isAccountLocked(),
                 profileScore,
+                admissionYear,
+                studentId,
                 user.getLastLoginAt(),
                 user.getCreatedAt()
         );

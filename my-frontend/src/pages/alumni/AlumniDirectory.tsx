@@ -118,16 +118,30 @@ const UserCard: React.FC<{
                                 {profile.program}
                             </div>
                         )}
-                        <div style={{ display: 'flex', gap: 4, justifyContent: 'center', flexWrap: 'wrap', marginTop: 4 }}>
-                            {profile.graduationYear && (
-                                <span className="cp-badge cp-badge-purple" style={{ fontSize: 'var(--font-size-xs)' }}>
-                                    {profile.graduationYear}
-                                </span>
+                        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', marginTop: 4 }}>
+                            {(user.admissionYear || profile.admissionYear) && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Adm</span>
+                                    <span className="cp-badge cp-badge-cyan" style={{ fontSize: 'var(--font-size-xs)' }}>
+                                        {user.admissionYear || profile.admissionYear}
+                                    </span>
+                                </div>
+                            )}
+                            {(user.graduationYear || profile.graduationYear) && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Grad</span>
+                                    <span className="cp-badge cp-badge-purple" style={{ fontSize: 'var(--font-size-xs)' }}>
+                                        {user.graduationYear || profile.graduationYear}
+                                    </span>
+                                </div>
                             )}
                             {profile.discipline && (
-                                <span className="cp-badge cp-badge-cyan" style={{ fontSize: 'var(--font-size-xs)' }}>
-                                    {profile.discipline}
-                                </span>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Field</span>
+                                    <span className="cp-badge cp-badge-amber" style={{ fontSize: 'var(--font-size-xs)' }}>
+                                        {profile.discipline}
+                                    </span>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -194,8 +208,13 @@ const UserRow: React.FC<{
                 </div>
             </td>
             <td>
+                <div style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 600, fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)' }}>
+                    {user.admissionYear || profile?.admissionYear || '—'}
+                </div>
+            </td>
+            <td>
                 <div style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 600, fontSize: 'var(--font-size-sm)', color: 'var(--neon-purple)' }}>
-                    {profile?.graduationYear || '—'}
+                    {user.graduationYear || profile?.graduationYear || '—'}
                 </div>
             </td>
             <td>
@@ -226,7 +245,8 @@ export const AlumniDirectoryPage: React.FC = () => {
     const [search, setSearch]             = useState('');
     const [filterProgram, setFilterProgram]   = useState('');
     const [filterDiscipline, setFilterDiscipline] = useState('');
-    const [filterYear, setFilterYear]     = useState('');
+    const [filterYear, setFilterYear]             = useState('');
+    const [filterAdmissionYear, setFilterAdmissionYear] = useState('');
 
     useEffect(() => {
         // Uses public /alumni endpoint — accessible to all authenticated users
@@ -260,8 +280,9 @@ export const AlumniDirectoryPage: React.FC = () => {
         const programs    = [...new Set(profiles.map(p => p.program).filter(Boolean) as string[])].sort();
         const disciplines = [...new Set(profiles.map(p => p.discipline).filter(Boolean) as string[])].sort();
         const years       = [...new Set(profiles.map(p => p.graduationYear).filter(Boolean) as number[])].sort((a, b) => b - a).map(String);
-        return { programs, disciplines, years };
-    }, [profileCache]);
+        const admissionYears = [...new Set(users.map(u => u.admissionYear).filter(Boolean) as number[])].sort((a, b) => b - a).map(String);
+        return { programs, disciplines, years, admissionYears };
+    }, [profileCache, users]);
 
     const filteredUsers = useMemo(() => {
         const q = search.toLowerCase().trim();
@@ -270,10 +291,11 @@ export const AlumniDirectoryPage: React.FC = () => {
             if (q && !`${u.firstName} ${u.lastName} ${u.email}`.toLowerCase().includes(q)) return false;
             if (filterProgram    && profile?.program             !== filterProgram)    return false;
             if (filterDiscipline && profile?.discipline          !== filterDiscipline) return false;
-            if (filterYear       && String(profile?.graduationYear) !== filterYear)   return false;
+            if (filterYear       && String(u.graduationYear || profile?.graduationYear) !== filterYear)   return false;
+            if (filterAdmissionYear && String(u.admissionYear) !== filterAdmissionYear) return false;
             return true;
         });
-    }, [users, profileCache, search, filterProgram, filterDiscipline, filterYear]);
+    }, [users, profileCache, search, filterProgram, filterDiscipline, filterYear, filterAdmissionYear]);
 
     const hasFilters = !!(filterProgram || filterDiscipline || filterYear);
 
@@ -281,6 +303,7 @@ export const AlumniDirectoryPage: React.FC = () => {
         setFilterProgram('');
         setFilterDiscipline('');
         setFilterYear('');
+        setFilterAdmissionYear('');
         setSearch('');
     };
 
@@ -330,7 +353,8 @@ export const AlumniDirectoryPage: React.FC = () => {
                 </div>
                 <FilterSelect label="Program"      value={filterProgram}   onChange={setFilterProgram}   options={filterOptions.programs} placeholder="All Programs" />
                 <FilterSelect label="Discipline"   value={filterDiscipline} onChange={setFilterDiscipline} options={filterOptions.disciplines} placeholder="All Disciplines" />
-                <FilterSelect label="Graduation Year" value={filterYear}   onChange={setFilterYear}   options={filterOptions.years}      placeholder="All Years"       />
+                <FilterSelect label="Admission Year" value={filterAdmissionYear} onChange={setFilterAdmissionYear} options={filterOptions.admissionYears} placeholder="All Adm. Years" />
+                <FilterSelect label="Graduation Year" value={filterYear}   onChange={setFilterYear}   options={filterOptions.years}      placeholder="All Grad. Years" />
                 {hasFilters && (
                     <button
                         onClick={resetFilters}
@@ -359,7 +383,8 @@ export const AlumniDirectoryPage: React.FC = () => {
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', flexShrink: 0 }}>
                     {filterProgram    && <span className="cp-badge cp-badge-cyan">Program: {filterProgram}</span>}
                     {filterDiscipline && <span className="cp-badge cp-badge-purple">Discipline: {filterDiscipline}</span>}
-                    {filterYear       && <span className="cp-badge cp-badge-amber">Year: {filterYear}</span>}
+                    {filterAdmissionYear && <span className="cp-badge cp-badge-cyan">Adm. Year: {filterAdmissionYear}</span>}
+                    {filterYear       && <span className="cp-badge cp-badge-amber">Grad. Year: {filterYear}</span>}
                     <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)', alignSelf: 'center' }}>
                         → {filteredUsers.length} result{filteredUsers.length !== 1 ? 's' : ''}
                     </span>
@@ -422,7 +447,8 @@ export const AlumniDirectoryPage: React.FC = () => {
                                 <th>Member</th>
                                 <th>Program</th>
                                 <th>Discipline</th>
-                                <th>Grad Year</th>
+                                <th>Adm. Year</th>
+                                <th>Grad. Year</th>
                                 <th>Current Role</th>
                                 <th style={{ textAlign: 'right' }}>Action</th>
                             </tr>

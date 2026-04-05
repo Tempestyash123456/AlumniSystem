@@ -7,5 +7,7 @@ public record AlumniDto(
         String firstName,
         String lastName,
         String email,
-        String profilePhotoUrl
+        String profilePhotoUrl,
+        Integer admissionYear,
+        Integer graduationYear
 ) {}

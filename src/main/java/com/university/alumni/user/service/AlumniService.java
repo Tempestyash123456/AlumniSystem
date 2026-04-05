@@ -1,6 +1,8 @@
 package com.university.alumni.user.service;
 
 import com.university.alumni.user.dto.AlumniDto;
+import com.university.alumni.user.entity.AlumniProfile;
+import com.university.alumni.user.repository.AlumniProfileRepository;
 import com.university.alumni.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,20 +15,33 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AlumniService {
 
-    private final UserRepository userRepository;
+    private final UserRepository          userRepository;
+    private final AlumniProfileRepository profileRepository;
 
     @Transactional(readOnly = true)
     public List<AlumniDto> getAllVerifiedAlumni() {
-        // Fetch all enabled users and map them to our safe DTO (so we don't expose passwords!)
+        // Fetch profiles once to join manually in memory for this simple list
+        var profiles = profileRepository.findAll().stream()
+                .filter(p -> p.getUser() != null && p.getDeletedAt() == null)
+                .collect(Collectors.toMap(
+                        p -> p.getUser().getId(),
+                        p -> p,
+                        (existing, replacement) -> existing));
+
         return userRepository.findAll().stream()
                 .filter(user -> user.isEnabled() && user.getDeletedAt() == null)
-                .map(user -> new AlumniDto(
+                .map(user -> {
+                    AlumniProfile profile = profiles.get(user.getId());
+                    return new AlumniDto(
                         user.getId(),
                         user.getFirstName(),
                         user.getLastName(),
                         user.getEmail(),
-                        user.getProfilePhotoUrl()
-                ))
+                        user.getProfilePhotoUrl(),
+                        profile != null ? profile.getAdmissionYear() : null,
+                        profile != null ? profile.getGraduationYear() : null
+                    );
+                })
                 .collect(Collectors.toList());
     }
 }

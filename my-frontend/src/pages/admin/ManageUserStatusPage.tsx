@@ -329,19 +329,29 @@ export const ManageUserStatusPage: React.FC = () => {
                                                             fontFamily: 'Rajdhani, sans-serif', 
                                                             fontWeight: 600, 
                                                             fontSize: 'var(--font-size-md)',
-                                                            color: isAdmin ? 'var(--neon-pink)' : 'inherit'
+                                                            color: isAdmin ? 'var(--neon-pink)' : 'inherit',
+                                                            display: 'flex', alignItems: 'center', gap: 6
                                                         }}>
                                                             {user.firstName} {user.lastName}
+                                                            {user.studentId && (
+                                                                <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace', border: '1px solid var(--border-subtle)', padding: '1px 4px', borderRadius: 2 }}>
+                                                                    ID: {user.studentId}
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <div style={{ 
                                                             fontSize: 'var(--font-size-sm)', 
                                                             fontFamily: 'Outfit, sans-serif',
                                                             color: isAdmin ? 'var(--neon-cyan)' : 'var(--text-muted)',
                                                             fontWeight: isAdmin ? 700 : 400,
-                                                            textShadow: isAdmin ? '0 0 8px var(--neon-cyan)' : 'none',
-                                                            transition: 'all 0.3s ease'
-                                                        }} className={isAdmin ? 'admin-highlight' : ''}>
-                                                            {user.email}
+                                                            display: 'flex', alignItems: 'center', gap: 8
+                                                        }}>
+                                                            <span>{user.email}</span>
+                                                            {user.admissionYear && (
+                                                                <span style={{ color: 'var(--neon-cyan)', fontSize: '11px', fontFamily: 'Orbitron, sans-serif' }}>
+                                                                    [ADM: {user.admissionYear}]
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </Link>

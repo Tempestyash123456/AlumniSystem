@@ -109,6 +109,8 @@ export interface AlumniDto {
     lastName: string;
     email: string;
     profilePhotoUrl?: string;
+    admissionYear?: number;
+    graduationYear?: number;
 }
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
@@ -125,6 +127,8 @@ export interface AdminUserDto {
     enabled: boolean;
     accountLocked: boolean;
     profileScore: number;
+    admissionYear?: number;
+    studentId?: string;
     lastLoginAt?: string;
     createdAt: string;
 }

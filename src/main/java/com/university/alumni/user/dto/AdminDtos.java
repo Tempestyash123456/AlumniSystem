@@ -24,6 +24,8 @@ public final class AdminDtos {
             boolean  enabled,
             boolean  accountLocked,
             int      profileScore,
+            Integer  admissionYear,
+            String   studentId,
             Instant  lastLoginAt,
             Instant  createdAt
     ) {}
