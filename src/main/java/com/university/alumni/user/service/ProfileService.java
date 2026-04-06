@@ -96,6 +96,7 @@ public class ProfileService {
         if (r.profilePublic()   != null) p.setProfilePublic(r.profilePublic());
         if (r.openToMentor()    != null) p.setOpenToMentor(r.openToMentor());
         if (r.openToHire()      != null) p.setOpenToHire(r.openToHire());
+        if (r.bugReportPhotoUrl() != null) p.setBugReportPhotoUrl(r.bugReportPhotoUrl());
     }
 
     public ProfileResponse toResponse(User user, AlumniProfile p) {
@@ -131,7 +132,8 @@ public class ProfileService {
                 p != null ? p.getProfileScore() : 0,
                 p == null || p.isProfilePublic(),
                 p != null && p.isOpenToMentor(),
-                p != null && p.isOpenToHire()
+                p != null && p.isOpenToHire(),
+                p != null ? p.getBugReportPhotoUrl() : null
         );
     }
 }

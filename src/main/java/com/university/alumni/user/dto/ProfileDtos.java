@@ -50,7 +50,8 @@ public final class ProfileDtos {
             int     profileScore,
             boolean profilePublic,
             boolean openToMentor,
-            boolean openToHire
+            boolean openToHire,
+            String  bugReportPhotoUrl
     ) {}
 
     // ── Update request ────────────────────────────────────────────────────────
@@ -88,6 +89,7 @@ public final class ProfileDtos {
             // Visibility
             Boolean profilePublic,
             Boolean openToMentor,
-            Boolean openToHire
+            Boolean openToHire,
+            @Size(max = 500) String bugReportPhotoUrl
     ) {}
 }

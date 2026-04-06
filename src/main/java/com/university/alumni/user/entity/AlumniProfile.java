@@ -102,6 +102,9 @@ public class AlumniProfile extends BaseEntity {
     @Builder.Default
     private boolean openToHire = false;
 
+    @Column(name = "bug_report_photo_url")
+    private String bugReportPhotoUrl;
+
     // ── Score computation ─────────────────────────────────────────────────────
     /**
      * Recomputes completeness score (0-100) based on filled fields.

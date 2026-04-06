@@ -25,6 +25,7 @@ export interface UserInfo {
     accountLocked: boolean;
     enabled: boolean;
     roleSelected: boolean;
+    bugReportPhotoUrl?: string;
 }
 
 export interface AuthResponse {
@@ -73,6 +74,7 @@ export interface ProfileResponse {
     profilePublic: boolean;
     openToMentor: boolean;
     openToHire: boolean;
+    bugReportPhotoUrl?: string;
 }
 
 export interface UpdateProfileRequest {
@@ -100,6 +102,7 @@ export interface UpdateProfileRequest {
     profilePublic?: boolean | null;
     openToMentor?: boolean | null;
     openToHire?: boolean | null;
+    bugReportPhotoUrl?: string | null;
 }
 
 // ── Alumni Directory ──────────────────────────────────────────────────────────

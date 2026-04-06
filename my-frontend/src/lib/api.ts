@@ -113,6 +113,16 @@ export const profileApi = {
         form.append('photo', file);
         return apiFetch<{ profilePhotoUrl: string }>('/profile/photo', { method: 'POST', body: form });
     },
+    uploadBugReportPhoto: (file: File) => {
+        const form = new FormData();
+        form.append('photo', file);
+        return apiFetch<{ bugReportPhotoUrl: string }>('/profile/bug-report/photo', { method: 'POST', body: form });
+    },
+};
+
+export const supportApi = {
+    reportBug: (data: { title: string; information: string; recipients: string[] }) =>
+        apiFetch<void>('/support/bug-report', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 export const alumniApi = {
@@ -180,7 +190,7 @@ export const eventsApi = {
 };
 
 export const getImageUrl = (path: string | null | undefined) => {
-    if (!path) return null;
+    if (!path) return undefined;
     if (path.startsWith('http')) return path;
     return path;
 };
