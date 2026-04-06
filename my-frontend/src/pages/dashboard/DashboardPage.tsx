@@ -199,12 +199,12 @@ export const DashboardPage: React.FC = () => {
                             {/* Alumni Quick Actions */}
                             <div className="cp-panel" style={{ padding: '24px' }}>
                                 <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-purple)', letterSpacing: '0.15em', marginBottom: 20 }}>
-                                    ⬡ QUICK_ACCESS_NODE
+                                    ⬡ QUICK_ACTIONS
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                     <Button variant="outline" onClick={() => navigate('/profile')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
                                         <span style={{ fontSize: 20 }}>👤</span>
-                                        <span>MY_PROFILE</span>
+                                        <span>PROFILE</span>
                                     </Button>
                                     <Button variant="outline" onClick={() => navigate('/membership')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
                                         <span style={{ fontSize: 20 }}>💳</span>
@@ -219,7 +219,7 @@ export const DashboardPage: React.FC = () => {
                                     <PermissionGuard permission="VIEW_POST">
                                         <Button variant="outline" onClick={() => navigate('/posts')} style={{ padding: '12px', display: 'flex', alignItems: 'center', gap: 12, fontSize: 'var(--font-size-sm)', justifyContent: 'flex-start' }}>
                                             <span style={{ fontSize: 20 }}>📑</span>
-                                            <span>STORIES</span>
+                                            <span>POSTS</span>
                                         </Button>
                                     </PermissionGuard>
                                     <PermissionGuard permission="VIEW_EVENT">
@@ -234,7 +234,7 @@ export const DashboardPage: React.FC = () => {
                             {/* Latest Post */}
                             <div className="cp-panel" style={{ padding: '24px', position: 'relative', overflow: 'hidden' }}>
                                 <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-green)', letterSpacing: '0.15em', marginBottom: 20 }}>
-                                    ✦ LATEST_STORY
+                                    ✦ LATEST_POST
                                 </div>
                                 {recentPost ? (
                                     <div style={{ display: 'flex', gap: 20 }}>
@@ -259,7 +259,7 @@ export const DashboardPage: React.FC = () => {
                     ) : (
                         <div className="cp-panel" style={{ padding: '24px', height: 'fit-content' }}>
                             <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-green)', letterSpacing: '0.15em', marginBottom: 20 }}>
-                                ◈ QUICK_ACTIONS_NODE
+                                ◈ QUICK_ACTIONS
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 <PermissionGuard permission="MANAGE_USER">
@@ -285,7 +285,7 @@ export const DashboardPage: React.FC = () => {
                         <div className="cp-panel" style={{ padding: '24px', minHeight: '100%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                                 <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em' }}>
-                                    ◈ LIVE_SYSTEM_LOGS
+                                    ◈ SYSTEM_ACTIVITY
                                 </div>
                                 <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: 'var(--neon-green)', boxShadow: '0 0 6px var(--neon-green)', animation: 'pulse 2s infinite' }} />
                             </div>
@@ -302,7 +302,7 @@ export const DashboardPage: React.FC = () => {
                             {/* Latest Event */}
                             <div className="cp-panel" style={{ padding: '24px' }}>
                                 <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 20 }}>
-                                    ★ UPCOMING_EVENT
+                                    ★ LATEST_ADDED_EVENT
                                 </div>
                                 {recentEvent ? (
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

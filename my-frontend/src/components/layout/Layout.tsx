@@ -22,15 +22,15 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         setLoggingOut(true);
         const refreshToken = tokenStorage.getRefresh();
         if (refreshToken) {
-            try { await authApi.logout(refreshToken); } catch {}
+            try { await authApi.logout(refreshToken); } catch { }
         }
         clearAuth();
         navigate('/');
     };
 
     const NavItem = ({
-                         path, icon, label, exact = false,
-                     }: { path: string; icon: string; label: string; exact?: boolean }) => {
+        path, icon, label, exact = false,
+    }: { path: string; icon: string; label: string; exact?: boolean }) => {
         const active = exact
             ? location.pathname === path
             : location.pathname === path || location.pathname.startsWith(path + '/');
@@ -71,8 +71,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         />
     ) : (
         <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '14px', fontWeight: 700, color: 'var(--bg-void)' }}>
-        {`${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase()}
-    </span>
+            {`${user?.firstName?.[0] ?? ''}${user?.lastName?.[0] ?? ''}`.toUpperCase()}
+        </span>
     );
 
     return (
@@ -104,11 +104,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <nav style={{ flex: 1, padding: '0 12px', paddingBottom: '24px' }}>
                         <SectionLabel text="MAIN" />
                         <NavItem path="/dashboard" icon="⬡" label="Dashboard" exact />
-                        <NavItem path="/profile"   icon="◉" label="My Profile" exact />
+                        <NavItem path="/profile" icon="◉" label="My Profile" exact />
                         {user?.enabled && (!user?.accountLocked || isAdmin) && (
                             <>
-                                <NavItem path="/posts"      icon="◇" label="Posts" exact />
-                                <NavItem path="/events"     icon="◎" label="Events" exact />
+                                <NavItem path="/posts" icon="◇" label="Posts" exact />
+                                <NavItem path="/events" icon="◎" label="Events" exact />
                                 <NavItem path="/membership" icon="🪪" label="Membership" exact />
                             </>
                         )}
@@ -197,7 +197,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                                         color: isAdmin ? 'var(--neon-pink)' : 'var(--neon-cyan)',
                                         letterSpacing: '0.08em', marginTop: '2px'
                                     }}>
-                                        {isAdmin ? '◆ AUTHORIZED_ADMIN' : '◉ MEMBER'}
+                                        {isAdmin ? '◆ ADMIN' : '◉ MEMBER'}
                                     </div>
                                 </div>
                             </div>

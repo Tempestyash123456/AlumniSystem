@@ -47,7 +47,7 @@ export const RegisterPage: React.FC = () => {
                         NEW_USER
                     </div>
                     <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.12em' }}>
-                        REGISTRATION TERMINAL
+                        REGISTRATION PANEL
                     </div>
                     <hr className="cp-divider" style={{ margin: '20px 0 0', borderColor: 'rgba(191,90,242,0.3)' }} />
                 </div>
@@ -104,19 +104,19 @@ export const RegisterPage: React.FC = () => {
 
                         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                <Input label="First Name" value={form.firstName} onChange={set('firstName')} placeholder="Ada" error={fieldErrors.firstName} required />
-                                <Input label="Last Name" value={form.lastName} onChange={set('lastName')} placeholder="Lovelace" error={fieldErrors.lastName} required />
+                                <Input label="First Name" value={form.firstName} onChange={set('firstName')} placeholder="Yash" error={fieldErrors.firstName} required />
+                                <Input label="Last Name" value={form.lastName} onChange={set('lastName')} placeholder="Dwivedi" error={fieldErrors.lastName} required />
                             </div>
-                            <Input label="Email" type="email" value={form.email} onChange={set('email')} placeholder="ada@university.edu" error={fieldErrors.email} required />
+                            <Input label="Email" type="email" value={form.email} onChange={set('email')} placeholder="admin@tempestonline.in" error={fieldErrors.email} required />
                             <Input label="Password" type="password" value={form.password} onChange={set('password')} placeholder="Min 8 chars..." error={fieldErrors.password} required />
-                            
-                            <Input label="Student ID / Employee ID" value={form.studentId} onChange={set('studentId')} placeholder="e.g. 2024CS001" error={fieldErrors.studentId} required />
-                            
+
+                            <Input label="Student ID / Employee ID" value={form.studentId} onChange={set('studentId')} placeholder="e.g. 22BDO10019" error={fieldErrors.studentId} required />
+
                             <div className="cp-input-wrap">
-                                <label className="cp-label">I am an:</label>
-                                <select 
-                                    className="cp-input cp-select" 
-                                    value={form.role} 
+                                <label className="cp-label">I am:</label>
+                                <select
+                                    className="cp-input cp-select"
+                                    value={form.role}
                                     onChange={(e) => setForm(f => ({ ...f, role: e.target.value }))}
                                     style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px' }}
                                     required
@@ -135,7 +135,7 @@ export const RegisterPage: React.FC = () => {
 
                 <hr className="cp-divider" style={{ margin: '24px 0' }} />
                 <p style={{ textAlign: 'center', fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--text-muted)' }}>
-                    Already have access? <Link to="/login" style={{ color: 'var(--neon-cyan)', textDecoration: 'none' }}>Sign In</Link>
+                    Already registered? <Link to="/login" style={{ color: 'var(--neon-cyan)', textDecoration: 'none' }}>Sign In</Link>
                 </p>
             </div>
         </div>

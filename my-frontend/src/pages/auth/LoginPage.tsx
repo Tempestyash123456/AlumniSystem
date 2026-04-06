@@ -45,10 +45,10 @@ export const LoginPage: React.FC = () => {
             <div className="cp-panel cp-corners animate-fade-in" style={{ width: '100%', maxWidth: 440, padding: '40px' }}>
                 <div style={{ textAlign: 'center', marginBottom: 36 }}>
                     <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 800, color: 'var(--neon-cyan)', letterSpacing: '0.25em', textShadow: '0 0 20px var(--neon-cyan)', marginBottom: 8 }}>
-                        ALUMNI_PORTAL
+                        CU_ALUMNI_PORTAL
                     </div>
                     <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em' }}>
-                        SECURE ACCESS TERMINAL
+                        SECURE ACCESS
                     </div>
                     <hr className="cp-divider-glow" style={{ margin: '20px 0 0' }} />
                 </div>
@@ -56,7 +56,7 @@ export const LoginPage: React.FC = () => {
                 {error && <div style={{ marginBottom: 20 }}><Alert type="error" onClose={() => setError('')}>{error}</Alert></div>}
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                    <Input label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="user@university.edu" error={fieldErrors.email} required />
+                    <Input label="Email Address" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@tempestonline.in" error={fieldErrors.email} required />
                     <Input label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="********" error={fieldErrors.password} required />
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

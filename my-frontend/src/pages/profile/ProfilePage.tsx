@@ -63,8 +63,8 @@ const PhotoUpload: React.FC<{
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
                 {/* Avatar */}
-                <div style={{ 
-                    position: 'relative', 
+                <div style={{
+                    position: 'relative',
                     flexShrink: 0,
                     animation: 'pulse-glow 5s infinite alternate ease-in-out',
                     borderRadius: '50%',
@@ -203,8 +203,8 @@ export const ProfilePage: React.FC = () => {
         setLoading(false);
     }, []);
 
-    useEffect(() => { 
-        loadProfile(); 
+    useEffect(() => {
+        loadProfile();
     }, [loadProfile]);
 
     const setStr = (field: keyof UpdateProfileRequest) =>
@@ -403,8 +403,8 @@ export const ProfilePage: React.FC = () => {
                         {activeSection === 'professional' && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                                    <Input label="Job Title" value={form.currentJobTitle ?? ''} onChange={setStr('currentJobTitle')} />
-                                    <Input label="Company" value={form.currentCompany ?? ''} onChange={setStr('currentCompany')} />
+                                    <Input label="Job Title" value={form.currentJobTitle ?? ''} placeholder="Unemployed" onChange={setStr('currentJobTitle')} />
+                                    <Input label="Company" value={form.currentCompany ?? ''} placeholder="Unemployed" onChange={setStr('currentCompany')} />
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <Select label="Industry" value={form.industry ?? ''} onChange={setStr('industry')} options={INDUSTRY_OPTIONS} />

@@ -37,7 +37,7 @@ export const CompleteRegistrationPage: React.FC = () => {
     return (
         <div className="bg-grid" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', position: 'relative', overflow: 'hidden' }}>
             <div className="bg-scanlines" style={{ position: 'absolute', inset: 0, opacity: 0.1, pointerEvents: 'none', zIndex: 0 }}></div>
-            
+
             <div className="cp-panel cp-corners animate-fade-in" style={{ width: '100%', maxWidth: '800px', padding: '40px', position: 'relative', zIndex: 1 }}>
                 <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                     <div className="font-display glow-cyan" style={{ fontSize: '24px', fontWeight: 800, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '12px' }}>
@@ -75,12 +75,12 @@ export const CompleteRegistrationPage: React.FC = () => {
                             overflow: 'hidden'
                         }}
                     >
-                        <div style={{ 
-                            width: '56px', 
-                            height: '56px', 
-                            borderRadius: '8px', 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                        <div style={{
+                            width: '56px',
+                            height: '56px',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
                             justifyContent: 'center',
                             background: selectedRole === 'alumni' ? 'var(--neon-cyan)' : 'var(--bg-dark)',
                             color: selectedRole === 'alumni' ? 'var(--bg-void)' : 'var(--neon-cyan)',
@@ -96,7 +96,7 @@ export const CompleteRegistrationPage: React.FC = () => {
                         </div>
                         {selectedRole === 'alumni' && (
                             <div className="font-mono" style={{ fontSize: '11px', color: 'var(--neon-cyan)', alignSelf: 'flex-end', display: 'flex', alignItems: 'center' }}>
-                                PROTOCOL_SELECTED <ChevronRight size={14} style={{ marginLeft: '4px' }} />
+                                ROLE SELECTED <ChevronRight size={14} style={{ marginLeft: '4px' }} />
                             </div>
                         )}
                     </button>
@@ -120,12 +120,12 @@ export const CompleteRegistrationPage: React.FC = () => {
                             overflow: 'hidden'
                         }}
                     >
-                        <div style={{ 
-                            width: '56px', 
-                            height: '56px', 
-                            borderRadius: '8px', 
-                            display: 'flex', 
-                            alignItems: 'center', 
+                        <div style={{
+                            width: '56px',
+                            height: '56px',
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
                             justifyContent: 'center',
                             background: selectedRole === 'faculty' ? 'var(--neon-purple)' : 'var(--bg-dark)',
                             color: selectedRole === 'faculty' ? '#fff' : 'var(--neon-purple)',
@@ -141,7 +141,7 @@ export const CompleteRegistrationPage: React.FC = () => {
                         </div>
                         {selectedRole === 'faculty' && (
                             <div className="font-mono" style={{ fontSize: '11px', color: 'var(--neon-purple)', alignSelf: 'flex-end', display: 'flex', alignItems: 'center' }}>
-                                PROTOCOL_SELECTED <ChevronRight size={14} style={{ marginLeft: '4px' }} />
+                                ROLE SELECTED <ChevronRight size={14} style={{ marginLeft: '4px' }} />
                             </div>
                         )}
                     </button>
@@ -151,16 +151,16 @@ export const CompleteRegistrationPage: React.FC = () => {
                     <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '11px', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: '8px' }}>
                         REQUIRED_IDENTIFICATION
                     </div>
-                    <input 
-                        type="text" 
-                        value={studentId} 
+                    <input
+                        type="text"
+                        value={studentId}
                         onChange={(e) => setStudentId(e.target.value)}
                         placeholder="ENTER STUDENT / FACULTY ID"
                         className="cp-input"
-                        style={{ 
-                            width: '100%', 
-                            textAlign: 'center', 
-                            fontSize: '14px', 
+                        style={{
+                            width: '100%',
+                            textAlign: 'center',
+                            fontSize: '14px',
                             letterSpacing: '0.1em',
                             padding: '16px',
                             borderStyle: 'solid',
@@ -182,7 +182,7 @@ export const CompleteRegistrationPage: React.FC = () => {
                         {loading ? 'INITIALIZING_PROFILE...' : 'COMPLETE_REGISTRATION'}
                     </button>
                     <div className="font-mono" style={{ fontSize: '11px', color: 'var(--text-muted)', textAlign: 'center' }}>
-                        Note: Chosen protocol can be updated via administrative terminals post-registration.
+                        Note: Chosen role can't be changed later.
                     </div>
                 </div>
             </div>
