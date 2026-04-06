@@ -68,11 +68,11 @@ const PostExpanded: React.FC<{ post: PostDto; onClose: () => void }> = ({ post, 
                         </span>
                     </div>
                     <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-                        {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' })}
                     </span>
                     {post.updatedAt !== post.createdAt && (
                         <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)' }}>
-                            · edited {new Date(post.updatedAt).toLocaleDateString()}
+                            · edited {new Date(post.updatedAt).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' })}
                         </span>
                     )}
                 </div>
@@ -110,7 +110,7 @@ const FeedCard: React.FC<{ post: PostDto; index: number; onClick: () => void }> 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--neon-cyan)' }}>
-                            {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            {new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Kolkata' })}
                         </span>
                         <span style={{ color: 'var(--text-disabled)', fontSize: '10px' }}>·</span>
                         <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-muted)' }}>
@@ -252,7 +252,7 @@ export const PostsFeedPage: React.FC = () => {
                                         </span>
                                         <span style={{ color: 'var(--text-disabled)' }}>·</span>
                                         <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-                                            {new Date(filtered[0].createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                            {new Date(filtered[0].createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'Asia/Kolkata' })}
                                         </span>
                                     </div>
                                 </div>

@@ -51,7 +51,7 @@ const PostCard: React.FC<{
             <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--neon-cyan)', letterSpacing: '0.05em' }}>
-                        {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'Asia/Kolkata' })}
                     </span>
                     <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--text-disabled)' }} />
                     <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
@@ -233,7 +233,7 @@ const PostViewModal: React.FC<{ post: PostDto | null; onClose: () => void }> = (
             )}
             <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: 16, display: 'flex', gap: 12 }}>
                 <span>By {post.authorFirstName} {post.authorLastName}</span>
-                <span>{new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <span>{new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' })}</span>
             </div>
             <div dangerouslySetInnerHTML={{ __html: renderMarkdown(post.description) }} />
         </Modal>

@@ -7,10 +7,10 @@ const BASE_URL = '';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const fmtDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'Asia/Kolkata' });
 
 const fmtTime = (iso: string) =>
-    new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
 
 const fmtDateTime = (iso: string) => `${fmtDate(iso)} · ${fmtTime(iso)}`;
 

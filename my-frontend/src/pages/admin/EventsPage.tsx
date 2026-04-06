@@ -9,10 +9,10 @@ const BASE_URL = '';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const fmtDate = (iso: string) =>
-    new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'Asia/Kolkata' });
 
 const fmtTime = (iso: string) =>
-    new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
 
 const fmtDateTime = (iso: string) => `${fmtDate(iso)} · ${fmtTime(iso)}`;
 
@@ -508,8 +508,12 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
 const toLocalInput = (iso: string | undefined) => {
     if (!iso) return '';
     const d = new Date(iso);
+    // Convert UTC Date to IST Date (manually for display in datetime-local input)
+    // d.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }) returns a string in IST
+    const istDateStr = d.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
+    const istDate = new Date(istDateStr);
     const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return `${istDate.getFullYear()}-${pad(istDate.getMonth() + 1)}-${pad(istDate.getDate())}T${pad(istDate.getHours())}:${pad(istDate.getMinutes())}`;
 };
 
 interface EditorState {

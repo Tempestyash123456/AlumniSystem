@@ -2,6 +2,8 @@ package com.university.alumni;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import jakarta.annotation.PostConstruct;
+import java.util.TimeZone;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -18,5 +20,11 @@ public class AlumniPortalApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(AlumniPortalApplication.class, args);
+	}
+
+	@PostConstruct
+	public void init() {
+		// Set default JVM timezone to IST
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
 	}
 }

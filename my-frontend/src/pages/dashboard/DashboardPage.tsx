@@ -32,7 +32,7 @@ const LOG_CONFIG: Record<string, { color: string; icon: string; label: string }>
 
 const LiveLogEntry: React.FC<{ log: AuditEntry }> = ({ log }) => {
     const cfg = LOG_CONFIG[log.actionType] ?? { color: 'var(--text-muted)', icon: '·', label: log.actionType };
-    const time = new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const time = new Date(log.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Kolkata' });
     const resource = log.resourceName ? ` (${log.resourceName})` : '';
     return (
         <div style={{
@@ -139,7 +139,8 @@ export const DashboardPage: React.FC = () => {
         );
     }
 
-    const hour = new Date().getHours();
+    const istNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const hour = istNow.getHours();
     const greeting = hour < 12 ? 'GOOD_MORNING' : hour < 17 ? 'GOOD_AFTERNOON' : 'GOOD_EVENING';
 
     return (
@@ -307,7 +308,7 @@ export const DashboardPage: React.FC = () => {
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif' }}>
                                                 <span style={{ color: 'var(--neon-cyan)' }}>📅</span>
-                                                {new Date(recentEvent.startTime).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                {new Date(recentEvent.startTime).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })}
                                             </div>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', fontFamily: 'Outfit, sans-serif' }}>
                                                 <span style={{ color: 'var(--neon-pink)' }}>📍</span>
