@@ -600,22 +600,38 @@ export const AlumniProfileViewPage: React.FC = () => {
 
                         <div style={{ 
                             position: 'relative', 
-                            animation: 'pulse-glow 4s infinite alternate ease-in-out',
-                            borderRadius: '50%'
+                            animation: 'pulse-glow 5s infinite alternate ease-in-out',
+                            borderRadius: '50%',
+                            width: 120,
+                            height: 120,
+                            padding: 3,
+                            background: 'rgba(0, 245, 255, 0.1)',
+                            border: '1px solid rgba(0, 245, 255, 0.2)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0
                         }}>
                             {profile.profilePhotoUrl ? (
                                 <img
                                     src={getImageUrl(profile.profilePhotoUrl)!}
                                     alt="Profile"
                                     referrerPolicy="no-referrer"
-                                    style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--neon-cyan)' }}
+                                    style={{ 
+                                        width: '100%', 
+                                        height: '100%', 
+                                        borderRadius: '50%', 
+                                        objectFit: 'cover', 
+                                        border: '2px solid var(--neon-cyan)',
+                                        boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.5)'
+                                    }}
                                 />
                             ) : (
                                 <div style={{
-                                    width: 80, height: 80, borderRadius: '50%', flexShrink: 0,
+                                    width: '100%', height: '100%', borderRadius: '50%', flexShrink: 0,
                                     background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontFamily: 'Orbitron, monospace', fontSize: '28px', fontWeight: 700,
+                                    fontFamily: 'Orbitron, monospace', fontSize: '32px', fontWeight: 700,
                                     color: 'var(--bg-void)', boxShadow: '0 0 20px rgba(0,245,255,0.3)',
                                 }}>
                                     {profile.firstName?.[0]}{profile.lastName?.[0]}

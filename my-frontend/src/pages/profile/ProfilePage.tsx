@@ -63,11 +63,24 @@ const PhotoUpload: React.FC<{
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
                 {/* Avatar */}
-                <div style={{ position: 'relative', flexShrink: 0 }}>
+                <div style={{ 
+                    position: 'relative', 
+                    flexShrink: 0,
+                    animation: 'pulse-glow 5s infinite alternate ease-in-out',
+                    borderRadius: '50%',
+                    width: 120,
+                    height: 120,
+                    padding: 3,
+                    background: 'rgba(0, 245, 255, 0.1)',
+                    border: '1px solid rgba(0, 245, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}>
                     <div style={{
-                        width: 80, height: 80, borderRadius: '50%', overflow: 'hidden',
+                        width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden',
                         border: '2px solid var(--neon-cyan)',
-                        boxShadow: '0 0 16px rgba(0,245,255,0.3)',
+                        boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.5)',
                         background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
@@ -78,7 +91,7 @@ const PhotoUpload: React.FC<{
                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
                         ) : (
-                            <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '24px', fontWeight: 700, color: 'var(--bg-void)' }}>
+                            <span style={{ fontFamily: 'Orbitron, monospace', fontSize: '32px', fontWeight: 700, color: 'var(--bg-void)' }}>
                                 {initials}
                             </span>
                         )}
@@ -88,8 +101,9 @@ const PhotoUpload: React.FC<{
                             position: 'absolute', inset: 0, borderRadius: '50%',
                             background: 'rgba(0,0,0,0.7)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            zIndex: 10
                         }}>
-                            <span className="cp-spinner" style={{ width: 20, height: 20 }} />
+                            <span className="cp-spinner" style={{ width: 24, height: 24 }} />
                         </div>
                     )}
                 </div>
