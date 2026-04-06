@@ -100,19 +100,26 @@ public class EventService {
         if (req.place()       != null && !req.place().isBlank())        event.setPlace(req.place());
         if (req.description() != null)                                  event.setDescription(req.description());
 
-        if (Boolean.TRUE.equals(req.removeMedia())) {
-            event.setMedia(new java.util.ArrayList<>());
-        } else if (mediaFiles != null && !mediaFiles.isEmpty()) {
-            java.util.List<Event.EventMedia> newList = new java.util.ArrayList<>();
+        java.util.List<Event.EventMedia> finalMedia = new java.util.ArrayList<>();
+        if (req.media() != null) {
+            for (EventMediaResponse mReq : req.media()) {
+                event.getMedia().stream()
+                        .filter(exist -> exist.getUrl().equals(mReq.url()))
+                        .findFirst()
+                        .ifPresent(finalMedia::add);
+            }
+        }
+
+        if (mediaFiles != null && !mediaFiles.isEmpty()) {
             for (MultipartFile file : mediaFiles) {
                 if (file != null && !file.isEmpty()) {
                     String url = fileStorageService.storeEventMedia(file);
                     String type = file.getContentType() != null && file.getContentType().startsWith("video") ? "VIDEO" : "IMAGE";
-                    newList.add(new Event.EventMedia(url, type));
+                    finalMedia.add(new Event.EventMedia(url, type));
                 }
             }
-            event.setMedia(newList);
         }
+        event.setMedia(finalMedia);
 
         EventResponse saved = toResponse(eventRepository.save(event));
         User author = event.getAuthor();

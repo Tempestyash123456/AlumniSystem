@@ -50,6 +50,6 @@ public final class EventDtos {
             Instant endTime,
             @Size(max = 500) String place,
             String description,
-            Boolean removeMedia
+            java.util.List<EventMediaResponse> media
     ) {}
 }

@@ -34,6 +34,6 @@ public final class PostDtos {
     public record UpdatePostRequest(
             @Size(max = 300) String title,
             String description,
-            Boolean removeImage
+            java.util.List<String> imageUrls
     ) {}
 }

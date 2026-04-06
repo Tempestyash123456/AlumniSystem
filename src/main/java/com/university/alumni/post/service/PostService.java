@@ -70,19 +70,23 @@ public class PostService {
         if (request.title()       != null && !request.title().isBlank())       post.setTitle(request.title());
         if (request.description() != null && !request.description().isBlank()) post.setDescription(request.description());
 
-        if (Boolean.TRUE.equals(request.removeImage())) {
-            post.setImageUrls(new java.util.ArrayList<>());
-        } else if (images != null && !images.isEmpty()) {
-            java.util.List<String> newUrls = new java.util.ArrayList<>();
-            for (MultipartFile image : images) {
-                if (image != null && !image.isEmpty()) {
-                    newUrls.add(fileStorageService.storePostImage(image));
+        java.util.List<String> finalUrls = new java.util.ArrayList<>();
+        if (request.imageUrls() != null) {
+            for (String url : request.imageUrls()) {
+                if (post.getImageUrls().contains(url)) {
+                    finalUrls.add(url);
                 }
             }
-            // For now, let's just replace the entire list if new images are provided.
-            // Or we could append. User said "upload multiple images", so replacing seems safer for "update".
-            post.setImageUrls(newUrls);
         }
+
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile image : images) {
+                if (image != null && !image.isEmpty()) {
+                    finalUrls.add(fileStorageService.storePostImage(image));
+                }
+            }
+        }
+        post.setImageUrls(finalUrls);
 
         PostResponse saved = toResponse(postRepository.save(post));
         User author = post.getAuthor();

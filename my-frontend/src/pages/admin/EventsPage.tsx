@@ -324,7 +324,7 @@ const EventEditorModal: React.FC<{
     open: boolean;
     editTarget: EventDto | null;
     onClose: () => void;
-    onSave: (state: EditorState, mediaFiles: File[], removeMedia: boolean) => Promise<void>;
+    onSave: (state: EditorState, mediaFiles: File[], currentMedia: any[]) => Promise<void>;
     saving: boolean;
     error: string;
     onClearError: () => void;
@@ -333,7 +333,7 @@ const EventEditorModal: React.FC<{
         name: '', startTime: null, endTime: null, place: '', description: '',
     });
     const [mediaFiles, setMediaFiles] = useState<File[]>([]);
-    const [removeMedia, setRemoveMedia] = useState(false);
+    const [currentMedia, setCurrentMedia] = useState<any[]>([]);
 
     useEffect(() => {
         if (editTarget) {
@@ -344,11 +344,12 @@ const EventEditorModal: React.FC<{
                 place: editTarget.place,
                 description: editTarget.description ?? '',
             });
+            setCurrentMedia(editTarget.media || []);
         } else {
             setForm({ name: '', startTime: null, endTime: null, place: '', description: '' });
+            setCurrentMedia([]);
         }
         setMediaFiles([]);
-        setRemoveMedia(false);
     }, [editTarget, open]);
 
     const set = (field: keyof EditorState) => (val: any) =>
@@ -404,10 +405,10 @@ const EventEditorModal: React.FC<{
                 </div>
 
                 <MediaUploadZone
-                    current={removeMedia ? [] : editTarget?.media}
+                    current={currentMedia}
                     pendingFiles={mediaFiles}
                     onFiles={setMediaFiles}
-                    onRemoveCurrent={() => setRemoveMedia(true)}
+                    onRemoveCurrent={idx => setCurrentMedia(prev => prev.filter((_, i) => i !== idx))}
                     onRemovePending={idx => setMediaFiles(prev => prev.filter((_, i) => i !== idx))}
                 />
 
@@ -418,7 +419,7 @@ const EventEditorModal: React.FC<{
                     <Button variant="ghost" onClick={onClose}>Cancel</Button>
                     <Button
                         loading={saving}
-                        onClick={() => onSave(form, mediaFiles, removeMedia)}
+                        onClick={() => onSave(form, mediaFiles, currentMedia)}
                     >
                         {saving ? 'SAVING...' : editTarget ? 'UPDATE EVENT' : 'CREATE EVENT'}
                     </Button>
@@ -463,7 +464,7 @@ export const EventsPage: React.FC = () => {
     const handleSave = async (
         form: { name: string; startTime: Date | null; endTime: Date | null; place: string; description: string },
         mediaFiles: File[],
-        removeMedia: boolean
+        currentMedia: any[]
     ) => {
         if (!form.name.trim()) { setError('Event name is required'); return; }
         if (!form.startTime) { setError('Start date & time is required'); return; }
@@ -481,7 +482,7 @@ export const EventsPage: React.FC = () => {
 
         let res;
         if (editTarget) {
-            const updateData = { ...data, removeMedia };
+            const updateData = { ...data, media: currentMedia };
             res = await eventsApi.update(editTarget.id, updateData, mediaFiles);
         } else {
             res = await eventsApi.create(data, mediaFiles);

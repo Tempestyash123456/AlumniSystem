@@ -277,7 +277,7 @@ export const PostsPage: React.FC = () => {
     const [title, setTitle]               = useState('');
     const [body, setBody]                 = useState('');
     const [imageFiles, setImageFiles]     = useState<File[]>([]);
-    const [removeImages, setRemoveImages] = useState(false);
+    const [currentImages, setCurrentImages] = useState<string[]>([]);
 
     const load = async () => {
         setLoading(true);
@@ -290,12 +290,12 @@ export const PostsPage: React.FC = () => {
     useEffect(() => { load(); }, []);
 
     const openCreate = () => {
-        setEditTarget(null); setTitle(''); setBody(''); setImageFiles([]); setRemoveImages(false);
+        setEditTarget(null); setTitle(''); setBody(''); setImageFiles([]); setCurrentImages([]);
         setEditorOpen(true);
     };
 
     const openEdit = (post: PostDto) => {
-        setEditTarget(post); setTitle(post.title); setBody(post.description); setImageFiles([]); setRemoveImages(false);
+        setEditTarget(post); setTitle(post.title); setBody(post.description); setImageFiles([]); setCurrentImages(post.imageUrls || []);
         setEditorOpen(true);
     };
 
@@ -304,7 +304,7 @@ export const PostsPage: React.FC = () => {
         setSaving(true); setError('');
         let res;
         if (editTarget) {
-            res = await postsApi.update(editTarget.id, title, body, imageFiles, removeImages);
+            res = await postsApi.update(editTarget.id, title, body, imageFiles, currentImages);
         } else {
             res = await postsApi.create(title, body, imageFiles);
         }
@@ -417,10 +417,10 @@ export const PostsPage: React.FC = () => {
                     <MarkdownEditor label="Content (Markdown)" value={body} onChange={setBody} />
                     
                     <ImageUploadZone
-                        current={removeImages ? [] : editTarget?.imageUrls}
+                        current={currentImages}
                         pendingFiles={imageFiles}
                         onFiles={setImageFiles}
-                        onRemoveCurrent={() => setRemoveImages(true)}
+                        onRemoveCurrent={idx => setCurrentImages(prev => prev.filter((_, i) => i !== idx))}
                         onRemovePending={idx => setImageFiles(prev => prev.filter((_, i) => i !== idx))}
                     />
 

@@ -141,9 +141,9 @@ export const postsApi = {
         if (images) images.forEach(img => form.append('image', img));
         return apiFetch<PostDto>('/posts', { method: 'POST', body: form });
     },
-    update: (postId: string, title: string, description: string, images?: File[] | null, removeImage?: boolean) => {
+    update: (postId: string, title: string, description: string, images?: File[] | null, imageUrls?: string[]) => {
         const form = new FormData();
-        form.append('data', JSON.stringify({ title, description, removeImage }));
+        form.append('data', JSON.stringify({ title, description, imageUrls }));
         if (images) images.forEach(img => form.append('image', img));
         return apiFetch<PostDto>(`/posts/${postId}`, { method: 'PUT', body: form });
     },
@@ -167,7 +167,7 @@ export const eventsApi = {
 
     update: (
         id: string,
-        data: { name?: string; startTime?: string; endTime?: string | null; place?: string; description?: string | null; removeMedia?: boolean },
+        data: { name?: string; startTime?: string; endTime?: string | null; place?: string; description?: string | null; media?: any[] },
         media?: File[] | null
     ) => {
         const form = new FormData();
