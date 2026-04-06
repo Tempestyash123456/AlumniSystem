@@ -120,7 +120,6 @@ const UserCard: React.FC<{
                         <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', marginTop: 4 }}>
                             {(user.admissionYear || profile.admissionYear) && (
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Adm</span>
                                     <span className="cp-badge cp-badge-cyan" style={{ fontSize: 'var(--font-size-xs)' }}>
                                         {user.admissionYear || profile.admissionYear}
                                     </span>
@@ -128,7 +127,6 @@ const UserCard: React.FC<{
                             )}
                             {(user.graduationYear || profile.graduationYear) && (
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Grad</span>
                                     <span className="cp-badge cp-badge-purple" style={{ fontSize: 'var(--font-size-xs)' }}>
                                         {user.graduationYear || profile.graduationYear}
                                     </span>
@@ -136,7 +134,6 @@ const UserCard: React.FC<{
                             )}
                             {profile.discipline && (
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '9px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Field</span>
                                     <span className="cp-badge cp-badge-amber" style={{ fontSize: 'var(--font-size-xs)' }}>
                                         {profile.discipline}
                                     </span>

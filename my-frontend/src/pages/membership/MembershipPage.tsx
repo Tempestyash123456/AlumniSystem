@@ -10,12 +10,19 @@ import { LoadingScreen } from '../../components/ui';
 interface MembershipCardProps {
     isDark: boolean;
     profile: ProfileResponse | null;
+    roles?: string[]; // Added roles for dynamic labeling
     qrData: string;
     cardRef?: React.RefObject<HTMLDivElement | null>;
     style?: React.CSSProperties;
 }
 
-const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData, cardRef, style }) => {
+const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, roles = [], qrData, cardRef, style }) => {
+    // Role labeling logic
+    let roleLabel = '';
+    if (roles.includes('ROLE_FACULTY')) roleLabel = 'FACULTY';
+    else if (roles.includes('ROLE_ALUMNI')) roleLabel = 'ALUMNI';
+    // ADMIN only -> hide label
+
     return (
         <div
             ref={cardRef}
@@ -27,7 +34,7 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
                     ? 'linear-gradient(135deg, rgba(13, 21, 40, 0.95), rgba(7, 11, 20, 0.98))'
                     : 'linear-gradient(135deg, #ffffff, #f8f9fa)',
                 backdropFilter: 'blur(10px)',
-                border: `1px solid ${isDark ? 'var(--border-active)' : 'var(--neon-cyan)'}`,
+                border: `1px solid ${isDark ? 'var(--border-active)' : '#00f5ff'}`, // Fixed color for light mode capture
                 borderRadius: 'var(--radius-lg)',
                 padding: '32px',
                 position: 'relative',
@@ -48,11 +55,11 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
                 top: 0, 
                 right: 0, 
                 padding: '12px 24px', 
-                borderLeft: `1px solid ${isDark ? '#1a2540' : 'rgba(211, 47, 47, 0.2)'}`, 
-                borderBottom: `1px solid ${isDark ? '#1a2540' : 'rgba(211, 47, 47, 0.2)'}`, 
+                borderLeft: `1px solid ${isDark ? '#1a2540' : 'rgba(0, 245, 255, 0.2)'}`, 
+                borderBottom: `1px solid ${isDark ? '#1a2540' : 'rgba(0, 245, 255, 0.2)'}`, 
                 fontFamily: 'Orbitron, sans-serif', 
-                fontSize: 'var(--font-size-xs)', 
-                color: isDark ? 'var(--neon-cyan)' : 'var(--neon-cyan)', 
+                fontSize: '11px', 
+                color: isDark ? '#00f5ff' : '#0099aa', // Use explicit cyan tone for light mode
                 background: isDark ? 'rgba(0,245,255,0.08)' : 'rgba(0,245,255,0.05)', 
                 backdropFilter: 'blur(4px)', 
                 borderBottomLeftRadius: 'var(--radius-md)' 
@@ -65,10 +72,10 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
                 <div style={{
                     width: '110px',
                     height: '110px',
-                    border: `2px solid ${isDark ? '#00f5ff' : '#d32f2f'}`,
+                    border: `2px solid ${isDark ? '#00f5ff' : '#ff2d78'}`, // Using explicit pink for light accent
                     borderRadius: '8px',
                     overflow: 'hidden',
-                    boxShadow: isDark ? '0 0 15px rgba(0,245,255,0.3)' : '0 4px 12px rgba(211, 47, 47, 0.2)',
+                    boxShadow: isDark ? '0 0 15px rgba(0,245,255,0.3)' : '0 4px 12px rgba(255, 45, 120, 0.15)',
                     background: isDark ? '#030409' : '#fff',
                     flexShrink: 0
                 }}>
@@ -83,37 +90,39 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <h2 className="font-display" style={{ 
-                        fontSize: 'var(--font-size-2xl)', 
+                        fontSize: '28px', 
                         textTransform: 'uppercase', 
                         letterSpacing: '0.05em', 
                         margin: 0,
-                        color: 'var(--text-primary)',
+                        color: isDark ? '#e2eaf8' : '#1a1a1a', 
                         textShadow: isDark ? '0 0 10px rgba(0, 245, 255, 0.4)' : 'none'
                     }}>
                         {profile?.firstName} {profile?.lastName}
                     </h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '40px', height: '1px', background: isDark ? '#00f5ff' : '#d32f2f' }}></div>
-                        <p style={{ 
-                            color: 'var(--neon-cyan)', 
-                            fontFamily: 'Rajdhani, sans-serif', 
-                            fontSize: 'var(--font-size-sm)', 
-                            letterSpacing: '2px', 
-                            margin: 0,
-                            fontWeight: 700
-                        }}>
-                            NETWORK MEMBER
-                        </p>
-                    </div>
+                    {roleLabel && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <div style={{ width: '40px', height: '1px', background: isDark ? '#00f5ff' : '#ff2d78' }}></div>
+                            <p style={{ 
+                                color: isDark ? '#00f5ff' : '#ff2d78', 
+                                fontFamily: 'Rajdhani, sans-serif', 
+                                fontSize: '14px', 
+                                letterSpacing: '2px', 
+                                margin: 0,
+                                fontWeight: 700
+                            }}>
+                                {roleLabel} MEMBER
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Details / QR Section */}
             <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', zIndex: 1 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 40px' }}>
-                    <DetailRow label="PROGRAM" value={profile?.program || 'N/A'} />
-                    <DetailRow label="DISCIPLINE" value={profile?.discipline || 'N/A'} />
-                    <DetailRow label="GRAD YEAR" value={profile?.graduationYear?.toString() || 'N/A'} />
+                    <DetailRow label="PROGRAM" value={profile?.program || 'N/A'} isDark={isDark} />
+                    <DetailRow label="DISCIPLINE" value={profile?.discipline || 'N/A'} isDark={isDark} />
+                    <DetailRow label="GRAD YEAR" value={profile?.graduationYear?.toString() || 'N/A'} isDark={isDark} />
                 </div>
 
                 <div style={{
@@ -152,19 +161,19 @@ const MembershipCard: React.FC<MembershipCardProps> = ({ isDark, profile, qrData
     );
 };
 
-const DetailRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+const DetailRow: React.FC<{ label: string; value: string; isDark: boolean }> = ({ label, value, isDark }) => (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
         <span style={{ 
-            fontSize: 'var(--font-size-xs)', 
-            color: 'var(--text-secondary)', 
+            fontSize: '10px', 
+            color: isDark ? '#8a99b3' : '#666', 
             fontFamily: 'Orbitron, sans-serif', 
             letterSpacing: '1px',
             marginBottom: '2px'
         }}>{label}</span>
         <span style={{ 
-            fontSize: 'var(--font-size-base)', 
+            fontSize: '15px', 
             fontWeight: 600, 
-            color: 'var(--text-primary)',
+            color: isDark ? '#e2eaf8' : '#1a1a1a',
             fontFamily: 'Outfit, sans-serif'
         }}>{value}</span>
     </div>
@@ -253,6 +262,7 @@ export const MembershipPage: React.FC = () => {
                     cardRef={downloadRef}
                     isDark={false} 
                     profile={profile} 
+                    roles={user?.roles || []}
                     qrData={qrData} 
                 />
             </div>
@@ -303,6 +313,7 @@ export const MembershipPage: React.FC = () => {
                         cardRef={cardRef}
                         isDark={isDark} 
                         profile={profile} 
+                        roles={user?.roles || []}
                         qrData={qrData} 
                     />
 

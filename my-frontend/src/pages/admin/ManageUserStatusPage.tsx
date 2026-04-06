@@ -335,7 +335,7 @@ export const ManageUserStatusPage: React.FC = () => {
                                                             {user.firstName} {user.lastName}
                                                             {user.studentId && (
                                                                 <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'Share Tech Mono, monospace', border: '1px solid var(--border-subtle)', padding: '1px 4px', borderRadius: 2 }}>
-                                                                    ID: {user.studentId}
+                                                                    {user.studentId}
                                                                 </span>
                                                             )}
                                                         </div>
@@ -347,11 +347,6 @@ export const ManageUserStatusPage: React.FC = () => {
                                                             display: 'flex', alignItems: 'center', gap: 8
                                                         }}>
                                                             <span>{user.email}</span>
-                                                            {user.admissionYear && (
-                                                                <span style={{ color: 'var(--neon-cyan)', fontSize: '11px', fontFamily: 'Orbitron, sans-serif' }}>
-                                                                    [ADM: {user.admissionYear}]
-                                                                </span>
-                                                            )}
                                                         </div>
                                                     </div>
                                                 </Link>
