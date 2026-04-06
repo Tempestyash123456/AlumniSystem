@@ -11,6 +11,8 @@ public final class EventDtos {
 
     private EventDtos() {}
 
+    public record EventMediaResponse(String url, String type) {}
+
     public record EventResponse(
             UUID    id,
             String  name,
@@ -18,10 +20,7 @@ public final class EventDtos {
             Instant endTime,
             String  place,
             String  description,
-            String  mediaUrl,
-            String  mediaType,
-            String  documentUrl,
-            String  documentName,
+            java.util.List<EventMediaResponse> media,
             String  authorFirstName,
             String  authorLastName,
             Instant createdAt,
@@ -51,7 +50,6 @@ public final class EventDtos {
             Instant endTime,
             @Size(max = 500) String place,
             String description,
-            Boolean removeMedia,
-            Boolean removeDocument
+            Boolean removeMedia
     ) {}
 }

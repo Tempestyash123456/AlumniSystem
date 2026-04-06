@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+// @ts-ignore
 import { postsApi } from '../../lib/api.ts';
 import type { PostDto } from '../../types';
-import { Input, Spinner } from '../../components/ui';
+import { Input, Spinner, Carousel } from '../../components/ui';
 
 const BASE_URL = '';
 
@@ -25,62 +26,56 @@ const renderMarkdown = (md: string): string => {
 };
 
 // ── Full Post View (expanded inline) ─────────────────────────────────────────
-const PostExpanded: React.FC<{ post: PostDto; onClose: () => void }> = ({ post, onClose }) => (
-    <div className="animate-fade-in" style={{ maxWidth: 760, margin: '0 auto' }}>
-        <button onClick={onClose} style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontFamily: 'Share Tech Mono, monospace', fontSize: '12px',
-            color: 'var(--neon-cyan)', marginBottom: 20, padding: 0,
-            display: 'flex', alignItems: 'center', gap: 6,
-        }}>
-            ← Back to Feed
-        </button>
-        <article className="cp-panel cp-corners" style={{ overflow: 'hidden' }}>
-            {post.imageUrl && (
-                <div style={{ height: 320, overflow: 'hidden', position: 'relative' }}>
-                    <img
-                        src={`${BASE_URL}${post.imageUrl}`}
-                        alt={post.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, var(--bg-panel))' }} />
-                    <div style={{ position: 'absolute', bottom: 24, left: 32, right: 32 }}>
-                        <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.05em', lineHeight: 1.3, textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
-                            {post.title}
-                        </h1>
+const PostExpanded: React.FC<{ post: PostDto; onClose: () => void }> = ({ post, onClose }) => {
+    const carouselItems = post.imageUrls?.map(url => ({
+        url: `${BASE_URL}${url}`,
+        type: 'IMAGE' as const
+    })) || [];
+
+    return (
+        <div className="animate-fade-in" style={{ maxWidth: 760, margin: '0 auto' }}>
+            <button onClick={onClose} style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontFamily: 'Share Tech Mono, monospace', fontSize: '12px',
+                color: 'var(--neon-cyan)', marginBottom: 20, padding: 0,
+                display: 'flex', alignItems: 'center', gap: 6,
+            }}>
+                ← Back to Feed
+            </button>
+            <article className="cp-panel cp-corners" style={{ overflow: 'hidden' }}>
+                {carouselItems.length > 0 && (
+                    <div style={{ height: 320, overflow: 'hidden', position: 'relative', background: '#000' }}>
+                        <Carousel items={carouselItems} />
                     </div>
-                </div>
-            )}
-            <div style={{ padding: '32px' }}>
-                {!post.imageUrl && (
+                )}
+                <div style={{ padding: '32px' }}>
                     <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '22px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.05em', lineHeight: 1.3, marginBottom: 20 }}>
                         {post.title}
                     </h1>
-                )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid var(--border-subtle)', flexWrap: 'wrap' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: 'rgba(0,245,255,0.06)', border: '1px solid rgba(0,245,255,0.15)', borderRadius: 4 }}>
-                        <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--bg-void)', fontWeight: 700 }}>
-                            {post.authorFirstName[0]}{post.authorLastName[0]}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, paddingBottom: 20, borderBottom: '1px solid var(--border-subtle)', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: 'rgba(0,245,255,0.06)', border: '1px solid rgba(0,245,255,0.15)', borderRadius: 4 }}>
+                            <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-purple))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Orbitron, monospace', fontSize: '9px', color: 'var(--bg-void)', fontWeight: 700 }}>
+                                {post.authorFirstName[0]}{post.authorLastName[0]}
+                            </div>
+                            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                {post.authorFirstName} {post.authorLastName}
+                            </span>
                         </div>
-                        <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                            {post.authorFirstName} {post.authorLastName}
+                        <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
+                            {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' })}
                         </span>
+                        {post.updatedAt !== post.createdAt && (
+                            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)' }}>
+                                · edited {new Date(post.updatedAt).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' })}
+                            </span>
+                        )}
                     </div>
-                    <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--text-muted)' }}>
-                        {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Kolkata' })}
-                    </span>
-                    {post.updatedAt !== post.createdAt && (
-                        <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)' }}>
-                            · edited {new Date(post.updatedAt).toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata' })}
-                        </span>
-                    )}
+                    <div dangerouslySetInnerHTML={{ __html: renderMarkdown(post.description) }} />
                 </div>
-                <div dangerouslySetInnerHTML={{ __html: renderMarkdown(post.description) }} />
-            </div>
-        </article>
-    </div>
-);
+            </article>
+        </div>
+    );
+};
 
 // ── Post Card (feed) ──────────────────────────────────────────────────────────
 const FeedCard: React.FC<{ post: PostDto; index: number; onClick: () => void }> = ({ post, index, onClick }) => {
@@ -93,10 +88,10 @@ const FeedCard: React.FC<{ post: PostDto; index: number; onClick: () => void }> 
             onClick={onClick}
             style={{ padding: 0, overflow: 'hidden', cursor: 'pointer', display: 'flex', flexDirection: 'column', animation: `fadeIn 0.3s ease-out ${index * 0.05}s both` }}
         >
-            {post.imageUrl && (
+            {post.imageUrls && post.imageUrls.length > 0 && (
                 <div style={{ height: 200, overflow: 'hidden', position: 'relative', flexShrink: 0 }}>
                     <img
-                        src={`${BASE_URL}${post.imageUrl}`}
+                        src={`${BASE_URL}${post.imageUrls[0]}`}
                         alt={post.title}
                         style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
                         onMouseEnter={e => { (e.target as HTMLImageElement).style.transform = 'scale(1.04)'; }}
@@ -104,6 +99,11 @@ const FeedCard: React.FC<{ post: PostDto; index: number; onClick: () => void }> 
                         onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }}
                     />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 60%, var(--bg-card))' }} />
+                    {post.imageUrls.length > 1 && (
+                        <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: 4, fontSize: 10, color: 'var(--neon-cyan)', fontFamily: 'Share Tech Mono' }}>
+                            +{post.imageUrls.length - 1} IMAGES
+                        </div>
+                    )}
                 </div>
             )}
             <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
@@ -220,16 +220,16 @@ export const PostsFeedPage: React.FC = () => {
                                 onClick={() => setSelected(filtered[0])}
                                 style={{
                                     display: 'grid',
-                                    gridTemplateColumns: filtered[0].imageUrl ? '1fr 1fr' : '1fr',
+                                    gridTemplateColumns: (filtered[0].imageUrls && filtered[0].imageUrls.length > 0) ? '1fr 1fr' : '1fr',
                                     overflow: 'hidden', cursor: 'pointer',
                                     animation: 'fadeIn 0.4s ease-out both',
                                     minHeight: 240,
                                 }}
                             >
-                                {filtered[0].imageUrl && (
+                                {filtered[0].imageUrls && filtered[0].imageUrls.length > 0 && (
                                     <div style={{ overflow: 'hidden', minHeight: 240 }}>
                                         <img
-                                            src={`${BASE_URL}${filtered[0].imageUrl}`}
+                                            src={`${BASE_URL}${filtered[0].imageUrls[0]}`}
                                             alt={filtered[0].title}
                                             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                                             onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none'; }}
@@ -260,7 +260,7 @@ export const PostsFeedPage: React.FC = () => {
                         )}
 
                         {/* Remaining posts grid */}
-                        {filtered.length > 1 && (
+                        {(search || filtered.length > 1) && (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 18 }}>
                                 {(search ? filtered : filtered.slice(1)).map((post, i) => (
                                     <FeedCard key={post.id} post={post} index={i} onClick={() => setSelected(post)} />

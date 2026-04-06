@@ -31,21 +31,24 @@ public class Event extends BaseEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    /** Relative URL: /uploads/events/img_xxx.jpg  or absolute Google URL */
-    @Column(name = "media_url", length = 500)
-    private String mediaUrl;
+    /** Collection of media: URL and Type (IMAGE | VIDEO) */
+    @ElementCollection
+    @CollectionTable(name = "event_media", joinColumns = @JoinColumn(name = "event_id"))
+    private java.util.List<EventMedia> media;
 
-    /** "IMAGE" | "VIDEO" */
-    @Column(name = "media_type", length = 20)
-    private String mediaType;
+    @Embeddable
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EventMedia {
+        @Column(name = "url", length = 500)
+        private String url;
 
-    /** Relative URL: /uploads/events/docs/doc_xxx.pdf */
-    @Column(name = "document_url", length = 500)
-    private String documentUrl;
+        @Column(name = "type", length = 20)
+        private String type; // "IMAGE" | "VIDEO"
+    }
 
-    /** Original filename, so the browser can show it nicely */
-    @Column(name = "document_name", length = 255)
-    private String documentName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)

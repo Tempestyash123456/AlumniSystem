@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 
+/* Swiper Styles */
+@import 'swiper/css';
+@import 'swiper/css/navigation';
+@import 'swiper/css/pagination';
+@import 'swiper/css/effect-fade';
+
+/* DatePicker Styles */
+@import 'react-datepicker/dist/react-datepicker.css';
+
 /* ── Dark Theme Variables (Default) ─────────────────────────────────────── */
 :root, .theme-dark {
     --bg-void:        #030409;
@@ -536,4 +545,124 @@ h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 600; letter-spacing
     display: flex;
     gap: 12px;
     justify-content: flex-end;
+}
+
+/* ── Swiper (Carousel) Customization ────────────────────────────────────── */
+.cp-carousel {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.swiper {
+    width: 100%;
+    height: 100%;
+}
+
+.swiper-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.swiper-button-next, .swiper-button-prev {
+    color: var(--neon-cyan) !important;
+    background: rgba(3, 4, 9, 0.4);
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s;
+    border: 1px solid rgba(0, 245, 255, 0.2);
+}
+
+.swiper-button-next:hover, .swiper-button-prev:hover {
+    background: rgba(0, 245, 255, 0.1);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+}
+
+.swiper-button-next::after, .swiper-button-prev::after {
+    font-size: 14px !important;
+    font-weight: 900;
+}
+
+.swiper-pagination-bullet {
+    background: var(--text-muted) !important;
+    opacity: 0.5;
+}
+
+.swiper-pagination-bullet-active {
+    background: var(--neon-cyan) !important;
+    opacity: 1;
+    box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+/* ── React-Datepicker Customization ────────────────────────────────────────── */
+.react-datepicker {
+    font-family: 'Outfit', sans-serif !important;
+    background-color: var(--bg-panel) !important;
+    border: 1px solid var(--border-subtle) !important;
+    color: var(--text-primary) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-panel) !important;
+}
+
+.react-datepicker__header {
+    background-color: var(--bg-dark) !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+.react-datepicker__current-month, .react-datepicker__day-name {
+    color: var(--neon-cyan) !important;
+    font-family: 'Orbitron', sans-serif !important;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.react-datepicker__day {
+    color: var(--text-secondary) !important;
+    transition: all 0.2s;
+}
+
+.react-datepicker__day:hover {
+    background-color: var(--bg-hover) !important;
+    color: var(--neon-cyan) !important;
+}
+
+.react-datepicker__day--selected, .react-datepicker__day--keyboard-selected {
+    background-color: var(--neon-cyan) !important;
+    color: var(--bg-void) !important;
+    font-weight: 700;
+}
+
+.react-datepicker__time-container {
+    border-left: 1px solid var(--border-subtle) !important;
+}
+
+.react-datepicker__time {
+    background-color: var(--bg-panel) !important;
+}
+
+.react-datepicker__time-box {
+    background-color: var(--bg-panel) !important;
+}
+
+.react-datepicker__time-list-item {
+    color: var(--text-secondary) !important;
+}
+
+.react-datepicker__time-list-item:hover {
+    background-color: var(--bg-hover) !important;
+    color: var(--neon-cyan) !important;
+}
+
+.react-datepicker__time-list-item--selected {
+    background-color: var(--neon-cyan) !important;
+    color: var(--bg-void) !important;
+}
+
+/* Custom styling for the datepicker input to match our UI */
+.cp-datepicker-input {
+    cursor: pointer;
 }

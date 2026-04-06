@@ -58,12 +58,12 @@ public class PostController {
     @PreAuthorize("hasAuthority('CREATE_POST')")
     public ResponseEntity<ApiResponse<PostResponse>> create(
             @RequestPart("data") String dataJson,
-            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "image", required = false) List<MultipartFile> images,
             @AuthenticationPrincipal CachedUserDetails currentUser) throws Exception {
 
         CreatePostRequest request = objectMapper.readValue(dataJson, CreatePostRequest.class);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(postService.createPost(currentUser.getId(), request, image)));
+                .body(ApiResponse.success(postService.createPost(currentUser.getId(), request, images)));
     }
 
     @PutMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -71,10 +71,10 @@ public class PostController {
     public ResponseEntity<ApiResponse<PostResponse>> update(
             @PathVariable UUID postId,
             @RequestPart("data") String dataJson,
-            @RequestPart(value = "image", required = false) MultipartFile image) throws Exception {
+            @RequestPart(value = "image", required = false) List<MultipartFile> images) throws Exception {
 
         UpdatePostRequest request = objectMapper.readValue(dataJson, UpdatePostRequest.class);
-        return ResponseEntity.ok(ApiResponse.success(postService.updatePost(postId, request, image)));
+        return ResponseEntity.ok(ApiResponse.success(postService.updatePost(postId, request, images)));
     }
 
     @DeleteMapping("/{postId}")

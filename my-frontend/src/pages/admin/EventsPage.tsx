@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 // @ts-ignore
 import { eventsApi, getImageUrl } from '../../lib/api';
 import type { EventDto } from '../../types';
-import { Button, Alert, Input, Spinner, Confirm, Modal } from '../../components/ui';
+import { Button, Alert, Input, Spinner, Confirm, Modal, Carousel, DateTimePicker } from '../../components/ui';
 import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
 const BASE_URL = '';
@@ -35,15 +35,6 @@ const STATUS_STYLES: Record<EventStatus, { bg: string; text: string; border: str
     PAST: { bg: 'rgba(255,184,0,0.12)', text: 'var(--neon-amber)', border: 'rgba(255,184,0,0.3)' }
 };
 
-const docIcon = (name: string | undefined) => {
-    if (!name) return '📎';
-    const ext = name.split('.').pop()?.toLowerCase();
-    if (ext === 'pdf') return '📄';
-    if (ext === 'pptx' || ext === 'ppt') return '📊';
-    if (ext === 'docx' || ext === 'doc') return '📝';
-    return '📎';
-};
-
 // ── Markdown Renderer ─────────────────────────────────────────────────────────
 const renderMarkdown = (md: string): string => {
     const html = md
@@ -58,32 +49,24 @@ const renderMarkdown = (md: string): string => {
 
 // ── Media Upload Zone ─────────────────────────────────────────────────────────
 const MediaUploadZone: React.FC<{
-    current?: string | null;
-    currentType?: string | null;
-    onFile: (f: File | null) => void;
-    pendingFile?: File | null;
-    onRemove?: () => void;
-}> = ({ current, currentType, onFile, pendingFile, onRemove }) => {
+    current?: any[];
+    onFiles: (files: File[]) => void;
+    pendingFiles: File[];
+    onRemoveCurrent: (idx: number) => void;
+    onRemovePending: (idx: number) => void;
+}> = ({ current, onFiles, pendingFiles, onRemoveCurrent, onRemovePending }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [drag, setDrag] = useState(false);
 
-    const previewUrl = pendingFile
-        ? URL.createObjectURL(pendingFile)
-        : current ? `${BASE_URL}${current}` : null;
-
-    const isVideo = pendingFile
-        ? pendingFile.type.startsWith('video/')
-        : currentType === 'VIDEO';
-
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault(); setDrag(false);
-        const file = e.dataTransfer.files[0];
-        if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) onFile(file);
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+        if (files.length > 0) onFiles([...pendingFiles, ...files]);
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label className="cp-label">Media — Image or Video</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <label className="cp-label">Media — Images or Videos</label>
             <div
                 onClick={() => inputRef.current?.click()}
                 onDragOver={e => { e.preventDefault(); setDrag(true); }}
@@ -91,175 +74,51 @@ const MediaUploadZone: React.FC<{
                 onDrop={handleDrop}
                 style={{
                     border: `2px dashed ${drag ? 'var(--neon-cyan)' : 'var(--border-subtle)'}`,
-                    borderRadius: 6, cursor: 'pointer', overflow: 'hidden',
+                    borderRadius: 6, cursor: 'pointer',
                     background: drag ? 'rgba(0,245,255,0.04)' : 'var(--bg-dark)',
-                    minHeight: previewUrl ? 'auto' : 110,
+                    minHeight: 100,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     boxShadow: drag ? '0 0 20px rgba(0,245,255,0.2)' : 'none',
                     transition: 'all 0.2s',
+                    padding: 20
                 }}
             >
-                {previewUrl ? (
-                    <div style={{ position: 'relative', width: '100%' }}>
-                        {isVideo ? (
-                            <video
-                                src={previewUrl}
-                                controls
-                                style={{ width: '100%', maxHeight: 220, display: 'block', background: '#000' }}
-                            />
-                        ) : (
-                            <img
-                                src={previewUrl}
-                                alt="Preview"
-                                style={{ width: '100%', maxHeight: 220, objectFit: 'cover', display: 'block' }}
-                            />
-                        )}
-                        <div
-                            style={{
-                                position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                opacity: 0, transition: 'opacity 0.2s',
-                            }}
-                            onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-                            onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
-                        >
-                            <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--neon-cyan)', fontWeight: 700 }}>
-                                CLICK TO REPLACE
-                            </span>
-                        </div>
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 32, marginBottom: 8, opacity: 0.3 }}>◈</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
+                        Drop media here · click to browse
                     </div>
-                ) : (
-                    <div style={{ textAlign: 'center', padding: 24 }}>
-                        <div style={{ fontSize: 32, marginBottom: 8, opacity: 0.3 }}>◈</div>
-                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
-                            Drop image or video · click to browse
-                        </div>
-                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-disabled)', marginTop: 4 }}>
-                            JPG / PNG / WEBP · MP4 / WEBM · max 100 MB
-                        </div>
-                    </div>
-                )}
+                </div>
             </div>
-            {previewUrl && (
-                <button type="button" onClick={() => onRemove ? onRemove() : onFile(null)} style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    color: 'var(--neon-pink)', fontFamily: 'Outfit, sans-serif',
-                    fontSize: 'var(--font-size-sm)', textAlign: 'left', fontWeight: 600
-                }}>
-                    ✕ Remove media
-                </button>
-            )}
             <input
                 ref={inputRef}
                 type="file"
+                multiple
                 accept="image/*,video/*"
                 style={{ display: 'none' }}
-                onChange={e => onFile(e.target.files?.[0] || null)}
+                onChange={e => onFiles([...pendingFiles, ...Array.from(e.target.files || [])])}
             />
-        </div>
-    );
-};
 
-// ── Document Upload Zone ──────────────────────────────────────────────────────
-const DocUploadZone: React.FC<{
-    currentName?: string | null;
-    currentUrl?: string | null;
-    onFile: (f: File | null) => void;
-    pendingFile?: File | null;
-    onRemove?: () => void;
-}> = ({ currentName, currentUrl, onFile, pendingFile, onRemove }) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const [drag, setDrag] = useState(false);
-
-    const displayName = pendingFile ? pendingFile.name : currentName;
-    const displayUrl = !pendingFile && currentUrl ? `${BASE_URL}${currentUrl}` : null;
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault(); setDrag(false);
-        const file = e.dataTransfer.files[0];
-        if (file) onFile(file);
-    };
-
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label className="cp-label">Document — PDF / DOCX / PPTX (optional)</label>
-            <div
-                onClick={() => !displayName && inputRef.current?.click()}
-                onDragOver={e => { e.preventDefault(); setDrag(true); }}
-                onDragLeave={() => setDrag(false)}
-                onDrop={handleDrop}
-                style={{
-                    border: `2px dashed ${drag ? 'var(--neon-purple)' : 'var(--border-subtle)'}`,
-                    borderRadius: 6, cursor: displayName ? 'default' : 'pointer',
-                    background: drag ? 'rgba(191,90,242,0.04)' : 'var(--bg-dark)',
-                    padding: '16px 20px', transition: 'all 0.2s',
-                    boxShadow: drag ? '0 0 20px rgba(191,90,242,0.2)' : 'none',
-                }}
-            >
-                {displayName ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ fontSize: 28 }}>{docIcon(displayName)}</span>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{
-                                fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)',
-                                color: 'var(--text-primary)', overflow: 'hidden',
-                                textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 600
-                            }}>
-                                {displayName}
-                            </div>
-                            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--neon-purple)', marginTop: 2, fontWeight: 500 }}>
-                                {pendingFile ? 'NEW FILE — not saved yet' : 'CURRENT ATTACHMENT'}
-                            </div>
-                        </div>
-                        {displayUrl && !pendingFile && (
-                            <a
-                                href={displayUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                onClick={e => e.stopPropagation()}
-                                className="cp-btn cp-btn-ghost cp-btn-sm"
-                                style={{ flexShrink: 0 }}
-                            >
-                                Open ↗
-                            </a>
-                        )}
-                        <button
-                            type="button"
-                            onClick={e => { e.stopPropagation(); onRemove ? onRemove() : onFile(null); }}
-                            style={{
-                                background: 'none', border: 'none', cursor: 'pointer',
-                                color: 'var(--neon-pink)', fontSize: 18, lineHeight: 1, flexShrink: 0,
-                            }}
-                        >
-                            ×
-                        </button>
+            {/* Previews */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 10 }}>
+                {current?.map((m, idx) => (
+                    <div key={`curr-${idx}`} style={{ position: 'relative', aspectRatio: '1', borderRadius: 4, overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+                        {m.type === 'VIDEO' ? <div style={{ background: '#000', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📹</div> 
+                        : <img src={`${BASE_URL}${m.url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                        <button onClick={() => onRemoveCurrent(idx)} style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(255,45,120,0.8)', border: 'none', color: '#fff', borderRadius: '50%', width: 18, height: 18, cursor: 'pointer', fontSize: 12 }}>×</button>
                     </div>
-                ) : (
-                    <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: 28, marginBottom: 6, opacity: 0.3 }}>📎</div>
-                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
-                            Drop document here or click to browse
-                        </div>
-                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-disabled)', marginTop: 3 }}>
-                            PDF · DOCX · PPTX · max 50 MB
-                        </div>
+                ))}
+                {pendingFiles.map((f, idx) => (
+                    <div key={`pending-${idx}`} style={{ position: 'relative', aspectRatio: '1', borderRadius: 4, overflow: 'hidden', border: '1px solid var(--neon-cyan)' }}>
+                        {f.type.startsWith('video/') ? <div style={{ background: '#000', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>📹</div>
+                        : <img src={URL.createObjectURL(f)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                        <button onClick={() => onRemovePending(idx)} style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(255,45,120,0.8)', border: 'none', color: '#fff', borderRadius: '50%', width: 18, height: 18, cursor: 'pointer', fontSize: 12 }}>×</button>
                     </div>
-                )}
+                ))}
             </div>
-            {!displayName && (
-                <input
-                    ref={inputRef}
-                    type="file"
-                    accept=".pdf,.doc,.docx,.ppt,.pptx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation"
-                    style={{ display: 'none' }}
-                    onChange={e => onFile(e.target.files?.[0] || null)}
-                />
-            )}
         </div>
     );
 };
-
-import { useAuthStore } from '../../store/authStore';
 
 const EventCard: React.FC<{
     event: EventDto;
@@ -268,7 +127,6 @@ const EventCard: React.FC<{
     onView: () => void;
     index: number;
 }> = ({ event, onEdit, onDelete, onView, index }) => {
-    const {} = useAuthStore();
     const status = getEventStatus(event.startTime, event.endTime);
     const styleConf = STATUS_STYLES[status];
 
@@ -279,16 +137,16 @@ const EventCard: React.FC<{
         >
             {/* Media thumbnail */}
             <div style={{ height: 160, overflow: 'hidden', position: 'relative', background: 'var(--bg-hover)', flexShrink: 0 }}>
-                {event.mediaUrl ? (
-                    event.mediaType === 'VIDEO' ? (
+                {event.media && event.media.length > 0 ? (
+                    event.media[0].type === 'VIDEO' ? (
                         <video
-                            src={`${BASE_URL}${event.mediaUrl}`}
+                            src={`${BASE_URL}${event.media[0].url}`}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             muted
                         />
                     ) : (
                         <img
-                            src={`${BASE_URL}${event.mediaUrl}`}
+                            src={`${BASE_URL}${event.media[0].url}`}
                             alt={event.name}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -315,6 +173,11 @@ const EventCard: React.FC<{
                         {status}
                     </span>
                 </div>
+                {event.media && event.media.length > 1 && (
+                    <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: 4, fontSize: 10, color: 'var(--neon-cyan)', fontFamily: 'Share Tech Mono' }}>
+                        +{event.media.length - 1} MEDIA
+                    </div>
+                )}
             </div>
 
             {/* Content */}
@@ -355,16 +218,6 @@ const EventCard: React.FC<{
                             {event.place}
                         </span>
                     </div>
-
-                    {/* Document chip */}
-                    {event.documentName && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <span style={{ fontSize: 11, paddingLeft: 2 }}>{docIcon(event.documentName)}</span>
-                            <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--neon-purple)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140, fontWeight: 500 }}>
-                                {event.documentName}
-                            </span>
-                        </div>
-                    )}
                 </div>
 
                 {/* Actions */}
@@ -388,24 +241,16 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
     const status = getEventStatus(event.startTime, event.endTime);
     const styleConf = STATUS_STYLES[status];
 
+    const carouselItems = event.media?.map(m => ({
+        url: `${BASE_URL}${m.url}`,
+        type: m.type as 'IMAGE' | 'VIDEO'
+    })) || [];
+
     return (
         <Modal open={!!event} title={event.name} onClose={onClose} width={720}>
-            {/* Media */}
-            {event.mediaUrl && (
-                <div style={{ margin: '-24px -24px 24px', maxHeight: 280, overflow: 'hidden', background: '#000' }}>
-                    {event.mediaType === 'VIDEO' ? (
-                        <video
-                            src={`${BASE_URL}${event.mediaUrl}`}
-                            controls
-                            style={{ width: '100%', maxHeight: 280, display: 'block' }}
-                        />
-                    ) : (
-                        <img
-                            src={`${BASE_URL}${event.mediaUrl}`}
-                            alt={event.name}
-                            style={{ width: '100%', maxHeight: 280, objectFit: 'cover', display: 'block' }}
-                        />
-                    )}
+            {carouselItems.length > 0 && (
+                <div style={{ margin: '-24px -24px 24px', background: '#000' }}>
+                    <Carousel items={carouselItems} />
                 </div>
             )}
 
@@ -453,7 +298,6 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
                 </div>
             </div>
 
-            {/* Description */}
             {event.description && (
                 <>
                     <hr className="cp-divider" style={{ marginBottom: 16 }} />
@@ -463,63 +307,15 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
                     />
                 </>
             )}
-
-            {/* Document */}
-            {event.documentUrl && event.documentName && (
-                <>
-                    <hr className="cp-divider" style={{ marginBottom: 16 }} />
-                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10, fontWeight: 600 }}>
-                        ATTACHMENT
-                    </div>
-                    <a
-                        href={`${BASE_URL}${event.documentUrl}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 10,
-                            padding: '10px 16px',
-                            background: 'rgba(191,90,242,0.06)',
-                            border: '1px solid rgba(191,90,242,0.25)',
-                            borderRadius: 4,
-                            textDecoration: 'none',
-                            transition: 'all 0.2s',
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--neon-purple)')}
-                        onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(191,90,242,0.25)')}
-                    >
-                        <span style={{ fontSize: 20 }}>{docIcon(event.documentName)}</span>
-                        <div>
-                            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-purple)', fontWeight: 600 }}>
-                                {event.documentName}
-                            </div>
-                            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-disabled)', marginTop: 2 }}>
-                                Click to open ↗
-                            </div>
-                        </div>
-                    </a>
-                </>
-            )}
         </Modal>
     );
 };
 
 // ── Event Editor Form ─────────────────────────────────────────────────────────
-// Converts JS Date to "YYYY-MM-DDTHH:mm" for datetime-local input
-const toLocalInput = (iso: string | undefined) => {
-    if (!iso) return '';
-    const d = new Date(iso);
-    // Convert UTC Date to IST Date (manually for display in datetime-local input)
-    // d.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }) returns a string in IST
-    const istDateStr = d.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' });
-    const istDate = new Date(istDateStr);
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${istDate.getFullYear()}-${pad(istDate.getMonth() + 1)}-${pad(istDate.getDate())}T${pad(istDate.getHours())}:${pad(istDate.getMinutes())}`;
-};
-
 interface EditorState {
     name: string;
-    startTime: string;
-    endTime: string;
+    startTime: Date | null;
+    endTime: Date | null;
     place: string;
     description: string;
 }
@@ -528,41 +324,35 @@ const EventEditorModal: React.FC<{
     open: boolean;
     editTarget: EventDto | null;
     onClose: () => void;
-    onSave: (state: EditorState, mediaFile: File | null, docFile: File | null, removeMedia: boolean, removeDoc: boolean) => Promise<void>;
+    onSave: (state: EditorState, mediaFiles: File[], removeMedia: boolean) => Promise<void>;
     saving: boolean;
     error: string;
     onClearError: () => void;
 }> = ({ open, editTarget, onClose, onSave, saving, error, onClearError }) => {
     const [form, setForm] = useState<EditorState>({
-        name: '', startTime: '', endTime: '', place: '', description: '',
+        name: '', startTime: null, endTime: null, place: '', description: '',
     });
-    const [mediaFile, setMediaFile] = useState<File | null>(null);
-    const [docFile, setDocFile] = useState<File | null>(null);
-
+    const [mediaFiles, setMediaFiles] = useState<File[]>([]);
     const [removeMedia, setRemoveMedia] = useState(false);
-    const [removeDoc, setRemoveDoc] = useState(false);
 
     useEffect(() => {
         if (editTarget) {
             setForm({
                 name: editTarget.name,
-                startTime: toLocalInput(editTarget.startTime),
-                endTime: toLocalInput(editTarget.endTime ?? ''),
+                startTime: editTarget.startTime ? new Date(editTarget.startTime) : null,
+                endTime: editTarget.endTime ? new Date(editTarget.endTime) : null,
                 place: editTarget.place,
                 description: editTarget.description ?? '',
             });
         } else {
-            setForm({ name: '', startTime: '', endTime: '', place: '', description: '' });
+            setForm({ name: '', startTime: null, endTime: null, place: '', description: '' });
         }
-        setMediaFile(null);
-        setDocFile(null);
+        setMediaFiles([]);
         setRemoveMedia(false);
-        setRemoveDoc(false);
     }, [editTarget, open]);
 
-    const set = (field: keyof EditorState) =>
-        (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-            setForm(prev => ({ ...prev, [field]: e.target.value }));
+    const set = (field: keyof EditorState) => (val: any) =>
+        setForm(prev => ({ ...prev, [field]: val }));
 
     return (
         <Modal
@@ -574,70 +364,53 @@ const EventEditorModal: React.FC<{
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 {error && <Alert type="error" onClose={onClearError}>{error}</Alert>}
 
-                {/* Name */}
                 <Input
                     label="Event Name"
                     value={form.name}
-                    onChange={set('name')}
+                    onChange={e => set('name')(e.target.value)}
                     placeholder="Annual Alumni Meetup 2025"
                 />
 
-                {/* Timings */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                    <Input
+                    <DateTimePicker
                         label="Start Date & Time"
-                        type="datetime-local"
-                        value={form.startTime}
+                        selected={form.startTime}
                         onChange={set('startTime')}
                     />
-                    <Input
+                    <DateTimePicker
                         label="End Date & Time (optional)"
-                        type="datetime-local"
-                        value={form.endTime}
+                        selected={form.endTime}
                         onChange={set('endTime')}
                     />
                 </div>
 
-                {/* Place */}
                 <Input
                     label="Location / Venue"
                     value={form.place}
-                    onChange={set('place')}
+                    onChange={e => set('place')(e.target.value)}
                     placeholder="Main Auditorium, Block A"
                     icon={<span>📍</span>}
                 />
 
-                {/* Description */}
                 <div className="cp-input-wrap">
                     <label className="cp-label">Description (optional · Markdown supported)</label>
                     <textarea
                         className="cp-input"
                         value={form.description}
-                        onChange={set('description')}
+                        onChange={e => set('description')(e.target.value)}
                         placeholder="Tell attendees what to expect..."
                         style={{ minHeight: 100, resize: 'vertical', fontFamily: 'Share Tech Mono, monospace', fontSize: '13px', lineHeight: 1.6 }}
                     />
                 </div>
 
-                {/* Media */}
                 <MediaUploadZone
-                    current={removeMedia ? null : editTarget?.mediaUrl}
-                    currentType={editTarget?.mediaType}
-                    pendingFile={mediaFile}
-                    onFile={f => { setMediaFile(f); if (f) setRemoveMedia(false); }}
-                    onRemove={() => { setMediaFile(null); setRemoveMedia(true); }}
+                    current={removeMedia ? [] : editTarget?.media}
+                    pendingFiles={mediaFiles}
+                    onFiles={setMediaFiles}
+                    onRemoveCurrent={() => setRemoveMedia(true)}
+                    onRemovePending={idx => setMediaFiles(prev => prev.filter((_, i) => i !== idx))}
                 />
 
-                {/* Document */}
-                <DocUploadZone
-                    currentName={removeDoc ? null : editTarget?.documentName}
-                    currentUrl={removeDoc ? null : editTarget?.documentUrl}
-                    pendingFile={docFile}
-                    onFile={f => { setDocFile(f); if (f) setRemoveDoc(false); }}
-                    onRemove={() => { setDocFile(null); setRemoveDoc(true); }}
-                />
-
-                {/* Actions */}
                 <div style={{
                     display: 'flex', justifyContent: 'flex-end', gap: 10,
                     paddingTop: 8, borderTop: '1px solid var(--border-subtle)',
@@ -645,7 +418,7 @@ const EventEditorModal: React.FC<{
                     <Button variant="ghost" onClick={onClose}>Cancel</Button>
                     <Button
                         loading={saving}
-                        onClick={() => onSave(form, mediaFile, docFile, removeMedia, removeDoc)}
+                        onClick={() => onSave(form, mediaFiles, removeMedia)}
                     >
                         {saving ? 'SAVING...' : editTarget ? 'UPDATE EVENT' : 'CREATE EVENT'}
                     </Button>
@@ -688,11 +461,9 @@ export const EventsPage: React.FC = () => {
     };
 
     const handleSave = async (
-        form: { name: string; startTime: string; endTime: string; place: string; description: string },
-        mediaFile: File | null,
-        docFile: File | null,
-        removeMedia: boolean,
-        removeDoc: boolean
+        form: { name: string; startTime: Date | null; endTime: Date | null; place: string; description: string },
+        mediaFiles: File[],
+        removeMedia: boolean
     ) => {
         if (!form.name.trim()) { setError('Event name is required'); return; }
         if (!form.startTime) { setError('Start date & time is required'); return; }
@@ -702,18 +473,18 @@ export const EventsPage: React.FC = () => {
 
         const data = {
             name: form.name,
-            startTime: new Date(form.startTime).toISOString(),
-            endTime: form.endTime ? new Date(form.endTime).toISOString() : null,
+            startTime: form.startTime.toISOString(),
+            endTime: form.endTime ? form.endTime.toISOString() : null,
             place: form.place,
             description: form.description || null,
         };
 
         let res;
         if (editTarget) {
-            const updateData = { ...data, removeMedia, removeDocument: removeDoc };
-            res = await eventsApi.update(editTarget.id, updateData, mediaFile, docFile);
+            const updateData = { ...data, removeMedia };
+            res = await eventsApi.update(editTarget.id, updateData, mediaFiles);
         } else {
-            res = await eventsApi.create(data, mediaFile, docFile);
+            res = await eventsApi.create(data, mediaFiles);
         }
 
         if (res.data) {
@@ -773,21 +544,6 @@ export const EventsPage: React.FC = () => {
                     <Button onClick={openCreate} variant="primary">+ NEW EVENT</Button>
                 </PermissionGuard>
             </div>
-
-            {/* ── Stat cards ── */}
-            {/* <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 14, flexShrink: 0 }}>
-                {[
-                    { label: 'Total',    value: events.length, color: 'purple' },
-                    { label: 'Ongoing',  value: ongoingCount,  color: 'cyan'   },
-                    { label: 'Upcoming', value: upcomingCount, color: 'green'  },
-                    { label: 'Past',     value: pastCount,     color: 'amber'  },
-                ].map(({ label, value, color }) => (
-                    <div key={label} className={`cp-stat-card ${color}`}>
-                        <div className={`cp-stat-value text-neon-${color}`} style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700 }}>{value}</div>
-                        <div className="cp-stat-label" style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', fontWeight: 600 }}>{label}</div>
-                    </div>
-                ))}
-            </div> */}
 
             {/* ── Alerts ── */}
             {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}

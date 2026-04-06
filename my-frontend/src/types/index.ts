@@ -153,7 +153,7 @@ export interface PostDto {
     id: string;
     title: string;
     description: string;   // Raw Markdown
-    imageUrl?: string;
+    imageUrls: string[];
     authorFirstName: string;
     authorLastName: string;
     createdAt: string;
@@ -161,6 +161,11 @@ export interface PostDto {
 }
 
 // -- Events ---------------------------------------------------------------------
+export interface EventMediaDto {
+    url: string;
+    type: 'IMAGE' | 'VIDEO';
+}
+
 export interface EventDto {
     id: string;
     name: string;
@@ -168,10 +173,7 @@ export interface EventDto {
     endTime?: string;         // ISO string, optional
     place: string;
     description?: string;     // Raw Markdown, optional
-    mediaUrl?: string;        // Relative or absolute URL
-    mediaType?: string;       // "IMAGE" | "VIDEO"
-    documentUrl?: string;     // Relative URL
-    documentName?: string;    // Original filename
+    media: EventMediaDto[];
     authorFirstName: string;
     authorLastName: string;
     createdAt: string;

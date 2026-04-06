@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { eventsApi } from '../../lib/api';
 import type { EventDto } from '../../types';
-import { Button, Alert, Input, Spinner, Modal } from '../../components/ui';
+import { Button, Alert, Input, Spinner, Modal, Carousel } from '../../components/ui';
 
 const BASE_URL = '';
 
@@ -33,15 +33,6 @@ const STATUS_STYLES: Record<EventStatus, { bg: string; text: string; border: str
     PAST: { bg: 'rgba(255,184,0,0.12)', text: 'var(--neon-amber)', border: 'rgba(255,184,0,0.3)' }
 };
 
-const docIcon = (name: string | undefined) => {
-    if (!name) return '📎';
-    const ext = name.split('.').pop()?.toLowerCase();
-    if (ext === 'pdf') return '📄';
-    if (ext === 'pptx' || ext === 'ppt') return '📊';
-    if (ext === 'docx' || ext === 'doc') return '📝';
-    return '📎';
-};
-
 // ── Markdown Renderer ─────────────────────────────────────────────────────────
 const renderMarkdown = (md: string): string => {
     const html = md
@@ -70,16 +61,16 @@ const EventCard: React.FC<{
         >
             {/* Media thumbnail */}
             <div style={{ height: 160, overflow: 'hidden', position: 'relative', background: 'var(--bg-hover)', flexShrink: 0 }}>
-                {event.mediaUrl ? (
-                    event.mediaType === 'VIDEO' ? (
+                {event.media && event.media.length > 0 ? (
+                    event.media[0].type === 'VIDEO' ? (
                         <video
-                            src={`${BASE_URL}${event.mediaUrl}`}
+                            src={`${BASE_URL}${event.media[0].url}`}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             muted
                         />
                     ) : (
                         <img
-                            src={`${BASE_URL}${event.mediaUrl}`}
+                            src={`${BASE_URL}${event.media[0].url}`}
                             alt={event.name}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -106,6 +97,11 @@ const EventCard: React.FC<{
                         {status}
                     </span>
                 </div>
+                {event.media && event.media.length > 1 && (
+                    <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: 4, fontSize: 10, color: 'var(--neon-cyan)', fontFamily: 'Share Tech Mono' }}>
+                        +{event.media.length - 1} MEDIA
+                    </div>
+                )}
             </div>
 
             {/* Content */}
@@ -115,7 +111,6 @@ const EventCard: React.FC<{
                 </h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {/* Separate Start & End Times */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, background: 'rgba(0,0,0,0.15)', padding: '8px 10px', borderRadius: 4, border: '1px solid var(--border-subtle)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span style={{ color: 'var(--neon-cyan)', fontSize: 10, width: 12, textAlign: 'center' }}>▶</span>
@@ -139,26 +134,14 @@ const EventCard: React.FC<{
                         )}
                     </div>
 
-                    {/* Place */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{ color: 'var(--neon-pink)', fontSize: 12, paddingLeft: 2 }}>📍</span>
                         <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {event.place}
                         </span>
                     </div>
-
-                    {/* Document chip */}
-                    {event.documentName && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <span style={{ fontSize: 11, paddingLeft: 2 }}>{docIcon(event.documentName)}</span>
-                            <span style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--neon-purple)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140 }}>
-                                {event.documentName}
-                            </span>
-                        </div>
-                    )}
                 </div>
 
-                {/* Actions */}
                 <div style={{ display: 'flex', gap: 6, marginTop: 'auto', paddingTop: 8 }}>
                     <Button variant="outline" size="sm" onClick={onView} style={{ flex: 1 }}>View Details</Button>
                 </div>
@@ -173,28 +156,19 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
     const status = getEventStatus(event.startTime, event.endTime);
     const styleConf = STATUS_STYLES[status];
 
+    const carouselItems = event.media?.map(m => ({
+        url: `${BASE_URL}${m.url}`,
+        type: m.type as 'IMAGE' | 'VIDEO'
+    })) || [];
+
     return (
         <Modal open={!!event} title={event.name} onClose={onClose} width={720}>
-            {/* Media */}
-            {event.mediaUrl && (
-                <div style={{ margin: '-24px -24px 24px', maxHeight: 280, overflow: 'hidden', background: '#000' }}>
-                    {event.mediaType === 'VIDEO' ? (
-                        <video
-                            src={`${BASE_URL}${event.mediaUrl}`}
-                            controls
-                            style={{ width: '100%', maxHeight: 280, display: 'block' }}
-                        />
-                    ) : (
-                        <img
-                            src={`${BASE_URL}${event.mediaUrl}`}
-                            alt={event.name}
-                            style={{ width: '100%', maxHeight: 280, objectFit: 'cover', display: 'block' }}
-                        />
-                    )}
+            {carouselItems.length > 0 && (
+                <div style={{ margin: '-24px -24px 24px', background: '#000' }}>
+                    <Carousel items={carouselItems} />
                 </div>
             )}
 
-            {/* Meta strip */}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
                 <span style={{
                     fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', letterSpacing: '0.15em',
@@ -208,7 +182,6 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
                 </span>
             </div>
 
-            {/* Info grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
                 <div>
                     <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.12em', marginBottom: 4, fontWeight: 600 }}>START TIME</div>
@@ -238,7 +211,6 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
                 </div>
             </div>
 
-            {/* Description */}
             {event.description && (
                 <>
                     <hr className="cp-divider" style={{ marginBottom: 16 }} />
@@ -249,49 +221,12 @@ const EventDetailModal: React.FC<{ event: EventDto | null; onClose: () => void }
                 </>
             )}
 
-            {/* Document */}
-            {event.documentUrl && event.documentName && (
-                <>
-                    <hr className="cp-divider" style={{ marginBottom: 16 }} />
-                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 10, fontWeight: 600 }}>
-                        ATTACHMENT
-                    </div>
-                    <a
-                        href={`${BASE_URL}${event.documentUrl}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                            display: 'inline-flex', alignItems: 'center', gap: 10,
-                            padding: '10px 16px',
-                            background: 'rgba(191,90,242,0.06)',
-                            border: '1px solid rgba(191,90,242,0.25)',
-                            borderRadius: 4,
-                            textDecoration: 'none',
-                            transition: 'all 0.2s',
-                        }}
-                        onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--neon-purple)')}
-                        onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(191,90,242,0.25)')}
-                    >
-                        <span style={{ fontSize: 20 }}>{docIcon(event.documentName)}</span>
-                        <div>
-                            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '12px', color: 'var(--neon-purple)' }}>
-                                {event.documentName}
-                            </div>
-                            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '10px', color: 'var(--text-disabled)', marginTop: 2 }}>
-                                Click to open ↗
-                            </div>
-                        </div>
-                    </a>
-                </>
-            )}
-
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 24, paddingTop: 16, borderTop: '1px solid var(--border-subtle)' }}>
                 <Button variant="primary" onClick={onClose}>Close</Button>
             </div>
         </Modal>
     );
 };
-
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export const AlumniEventsPage: React.FC = () => {
@@ -312,7 +247,6 @@ export const AlumniEventsPage: React.FC = () => {
 
     useEffect(() => { load(); }, []);
 
-    // Filtering logic combining search text and status
     const filtered = events.filter(ev => {
         const q = search.toLowerCase();
         const matchSearch = !q ||
@@ -325,8 +259,6 @@ export const AlumniEventsPage: React.FC = () => {
 
     return (
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
-
-            {/* ── Header ── */}
             <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, flexShrink: 0 }}>
                 <div>
                     <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-pink)', letterSpacing: '0.1em', marginBottom: 6, fontWeight: 600 }}>
@@ -341,10 +273,8 @@ export const AlumniEventsPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* ── Alerts ── */}
             {error && <Alert type="error" onClose={() => setError('')}>{error}</Alert>}
 
-            {/* ── Search + Filter ── */}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center', flexShrink: 0 }}>
                 <div style={{ flex: '1 1 220px', maxWidth: 360 }}>
                     <Input
@@ -355,7 +285,6 @@ export const AlumniEventsPage: React.FC = () => {
                     />
                 </div>
 
-                {/* Status filter tabs */}
                 <div style={{ display: 'flex', border: '1px solid var(--border-subtle)', borderRadius: 4, overflow: 'hidden' }}>
                     {(['all', 'ongoing', 'upcoming', 'past'] as const).map(s => (
                         <button
@@ -377,7 +306,6 @@ export const AlumniEventsPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* ── Grid ── */}
             <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 2 }}>
                 {loading ? (
                     <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
@@ -404,7 +332,6 @@ export const AlumniEventsPage: React.FC = () => {
                 )}
             </div>
 
-            {/* ── Modals ── */}
             <EventDetailModal
                 event={viewEvent}
                 onClose={() => setViewEvent(null)}

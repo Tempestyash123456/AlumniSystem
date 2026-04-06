@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useToastStore } from '../../store/toastStore';
 import { useConfirmStore } from '../../store/confirmStore';
 import type { ToastType } from '../../store/toastStore';
+import DatePicker from 'react-datepicker';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, EffectFade, Autoplay } from 'swiper/modules';
 
 // ── Input ─────────────────────────────────────────────────────────────────────
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -487,3 +490,84 @@ export const Checkbox: React.FC<CheckboxProps> = ({ checked, onChange, label, di
         )}
     </label>
 );
+
+// ── DateTimePicker ────────────────────────────────────────────────────────────
+interface DateTimePickerProps {
+    selected?: Date | null;
+    onChange: (date: Date | null) => void;
+    label?: string;
+    placeholder?: string;
+    showTime?: boolean;
+    error?: string;
+}
+
+export const DateTimePicker: React.FC<DateTimePickerProps> = ({
+    selected, onChange, label, placeholder, showTime = true, error
+}) => (
+    <div className="cp-input-wrap">
+        {label && <label className="cp-label">{label}</label>}
+        <DatePicker
+            selected={selected}
+            onChange={onChange}
+            showTimeSelect={showTime}
+            dateFormat={showTime ? "Pp" : "P"}
+            placeholderText={placeholder}
+            className={`cp-input cp-datepicker-input ${error ? 'error' : ''}`}
+            autoComplete="off"
+        />
+        {error && <span className="cp-error">⚠ {error}</span>}
+    </div>
+);
+
+// ── Carousel ──────────────────────────────────────────────────────────────────
+interface CarouselProps {
+    items: {
+        url: string;
+        type?: 'IMAGE' | 'VIDEO';
+        alt?: string;
+    }[];
+    aspectRatio?: string;
+}
+
+export const Carousel: React.FC<CarouselProps> = ({ items, aspectRatio = '16 / 9' }) => {
+    if (!items || items.length === 0) return null;
+
+    if (items.length === 1) {
+        const item = items[0];
+        return (
+            <div style={{ width: '100%', aspectRatio, overflow: 'hidden', background: '#000', position: 'relative' }}>
+                {item.type === 'VIDEO' ? (
+                    <video src={item.url} controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                    <img src={item.url} alt={item.alt || ''} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <div className="cp-carousel" style={{ aspectRatio }}>
+            <Swiper
+                modules={[Navigation, Pagination, EffectFade, Autoplay]}
+                navigation
+                pagination={{ clickable: true }}
+                effect="fade"
+                autoplay={{ delay: 5000, disableOnInteraction: false }}
+                loop={true}
+                className="mySwiper"
+            >
+                {items.map((item, idx) => (
+                    <SwiperSlide key={idx}>
+                        <div style={{ width: '100%', height: '100%', background: '#000' }}>
+                            {item.type === 'VIDEO' ? (
+                                <video src={item.url} controls style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            ) : (
+                                <img src={item.url} alt={item.alt || ''} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            )}
+                        </div>
+                    </SwiperSlide>
+                ))}
+            </Swiper>
+        </div>
+    );
+};

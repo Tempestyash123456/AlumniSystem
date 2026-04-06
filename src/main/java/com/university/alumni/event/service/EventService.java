@@ -58,8 +58,7 @@ public class EventService {
     @Transactional
     public EventResponse createEvent(UUID authorId,
                                      CreateEventRequest req,
-                                     MultipartFile media,
-                                     MultipartFile document) {
+                                     List<MultipartFile> mediaFiles) {
         User author = userRepository.findById(authorId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + authorId));
 
@@ -72,18 +71,17 @@ public class EventService {
                 .author(author)
                 .build();
 
-        if (media != null && !media.isEmpty()) {
-            String mediaUrl  = fileStorageService.storeEventMedia(media);
-            String mediaType = media.getContentType() != null
-                    && media.getContentType().startsWith("video") ? "VIDEO" : "IMAGE";
-            event.setMediaUrl(mediaUrl);
-            event.setMediaType(mediaType);
+        java.util.List<Event.EventMedia> mediaList = new java.util.ArrayList<>();
+        if (mediaFiles != null && !mediaFiles.isEmpty()) {
+            for (MultipartFile file : mediaFiles) {
+                if (file != null && !file.isEmpty()) {
+                    String url = fileStorageService.storeEventMedia(file);
+                    String type = file.getContentType() != null && file.getContentType().startsWith("video") ? "VIDEO" : "IMAGE";
+                    mediaList.add(new Event.EventMedia(url, type));
+                }
+            }
         }
-
-        if (document != null && !document.isEmpty()) {
-            event.setDocumentUrl(fileStorageService.storeEventDocument(document));
-            event.setDocumentName(document.getOriginalFilename());
-        }
+        event.setMedia(mediaList);
 
         EventResponse saved = toResponse(eventRepository.save(event));
         auditLogService.record("CREATED_EVENT", author.getFirstName(), author.getLastName(), event.getName());
@@ -93,8 +91,7 @@ public class EventService {
     @Transactional
     public EventResponse updateEvent(UUID eventId,
                                      UpdateEventRequest req,
-                                     MultipartFile media,
-                                     MultipartFile document) {
+                                     List<MultipartFile> mediaFiles) {
         Event event = findOrThrow(eventId);
 
         if (req.name()        != null && !req.name().isBlank())        event.setName(req.name());
@@ -104,22 +101,17 @@ public class EventService {
         if (req.description() != null)                                  event.setDescription(req.description());
 
         if (Boolean.TRUE.equals(req.removeMedia())) {
-            event.setMediaUrl(null);
-            event.setMediaType(null);
-        } else if (media != null && !media.isEmpty()) {
-            String mediaUrl  = fileStorageService.storeEventMedia(media);
-            String mediaType = media.getContentType() != null
-                    && media.getContentType().startsWith("video") ? "VIDEO" : "IMAGE";
-            event.setMediaUrl(mediaUrl);
-            event.setMediaType(mediaType);
-        }
-
-        if (Boolean.TRUE.equals(req.removeDocument())) {
-            event.setDocumentUrl(null);
-            event.setDocumentName(null);
-        } else if (document != null && !document.isEmpty()) {
-            event.setDocumentUrl(fileStorageService.storeEventDocument(document));
-            event.setDocumentName(document.getOriginalFilename());
+            event.setMedia(new java.util.ArrayList<>());
+        } else if (mediaFiles != null && !mediaFiles.isEmpty()) {
+            java.util.List<Event.EventMedia> newList = new java.util.ArrayList<>();
+            for (MultipartFile file : mediaFiles) {
+                if (file != null && !file.isEmpty()) {
+                    String url = fileStorageService.storeEventMedia(file);
+                    String type = file.getContentType() != null && file.getContentType().startsWith("video") ? "VIDEO" : "IMAGE";
+                    newList.add(new Event.EventMedia(url, type));
+                }
+            }
+            event.setMedia(newList);
         }
 
         EventResponse saved = toResponse(eventRepository.save(event));
@@ -154,10 +146,10 @@ public class EventService {
                 e.getEndTime(),
                 e.getPlace(),
                 e.getDescription(),
-                e.getMediaUrl(),
-                e.getMediaType(),
-                e.getDocumentUrl(),
-                e.getDocumentName(),
+                e.getMedia() == null ? java.util.Collections.emptyList() :
+                        e.getMedia().stream()
+                                .map(m -> new EventMediaResponse(m.getUrl(), m.getType()))
+                                .toList(),
                 e.getAuthor().getFirstName(),
                 e.getAuthor().getLastName(),
                 e.getCreatedAt(),

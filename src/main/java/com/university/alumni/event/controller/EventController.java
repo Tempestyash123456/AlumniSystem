@@ -53,28 +53,24 @@ public class EventController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('CREATE_EVENT')")
     public ResponseEntity<ApiResponse<EventResponse>> create(
-            @RequestPart("data")                              String dataJson,
-            @RequestPart(value = "media",    required = false) MultipartFile media,
-            @RequestPart(value = "document", required = false) MultipartFile document,
+            @RequestPart("data") String dataJson,
+            @RequestPart(value = "media", required = false) List<MultipartFile> mediaFiles,
             @AuthenticationPrincipal CachedUserDetails currentUser) throws Exception {
 
-        CreateEventRequest req = objectMapper.readValue(dataJson, CreateEventRequest.class);
+        CreateEventRequest request = objectMapper.readValue(dataJson, CreateEventRequest.class);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(
-                        eventService.createEvent(currentUser.getId(), req, media, document)));
+                .body(ApiResponse.success(eventService.createEvent(currentUser.getId(), request, mediaFiles)));
     }
 
-    @PutMapping(value = "/{eventId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('EDIT_EVENT')")
     public ResponseEntity<ApiResponse<EventResponse>> update(
-            @PathVariable UUID eventId,
-            @RequestPart("data")                              String dataJson,
-            @RequestPart(value = "media",    required = false) MultipartFile media,
-            @RequestPart(value = "document", required = false) MultipartFile document) throws Exception {
+            @PathVariable UUID id,
+            @RequestPart("data") String dataJson,
+            @RequestPart(value = "media", required = false) List<MultipartFile> mediaFiles) throws Exception {
 
-        UpdateEventRequest req = objectMapper.readValue(dataJson, UpdateEventRequest.class);
-        return ResponseEntity.ok(ApiResponse.success(
-                eventService.updateEvent(eventId, req, media, document)));
+        UpdateEventRequest request = objectMapper.readValue(dataJson, UpdateEventRequest.class);
+        return ResponseEntity.ok(ApiResponse.success(eventService.updateEvent(id, request, mediaFiles)));
     }
 
     @DeleteMapping("/{eventId}")

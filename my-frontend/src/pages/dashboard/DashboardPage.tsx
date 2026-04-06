@@ -7,6 +7,8 @@ import { Spinner, Button } from '../../components/ui';
 import { PermissionGuard } from '../../components/auth/PermissionGuard';
 import type { ProfileResponse, AdminUserDto, PostDto, EventDto } from '../../types';
 
+const BASE_URL = '';
+
 // ── Audit log type ────────────────────────────────────────────────────────────
 interface AuditEntry {
     id: string;
@@ -236,15 +238,15 @@ export const DashboardPage: React.FC = () => {
                                 </div>
                                 {recentPost ? (
                                     <div style={{ display: 'flex', gap: 20 }}>
-                                        {recentPost.imageUrl && (
+                                        {recentPost.imageUrls && recentPost.imageUrls.length > 0 && (
                                             <div style={{ width: 120, height: 120, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-                                                <img src={recentPost.imageUrl} alt={recentPost.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                <img src={`${BASE_URL}${recentPost.imageUrls[0]}`} alt={recentPost.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                             </div>
                                         )}
                                         <div style={{ flex: 1 }}>
                                             <h3 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-base)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{recentPost.title}</h3>
                                             <p style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                                {recentPost.description}
+                                                {recentPost.description.replace(/[#*`>\-[]()!]/g, '').trim()}
                                             </p>
                                             <Button variant="ghost" size="sm" onClick={() => navigate('/posts')} style={{ marginTop: 12, padding: 0 }}>READ MORE →</Button>
                                         </div>

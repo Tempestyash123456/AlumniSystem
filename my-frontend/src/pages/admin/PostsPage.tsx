@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
+// @ts-ignore
 import { postsApi } from '../../lib/api';
 import type { PostDto } from '../../types';
-import { Button, Alert, Input, Spinner, Confirm, Modal } from '../../components/ui';
-import { useAuthStore } from '../../store/authStore';
+import { Button, Alert, Input, Spinner, Confirm, Modal, Carousel } from '../../components/ui';
 import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
 const BASE_URL = '';
@@ -26,6 +26,77 @@ const renderMarkdown = (md: string): string => {
     return `<p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">${html}</p>`;
 };
 
+// ── Media Upload Zone (Images Only for Posts) ─────────────────────────────────
+const ImageUploadZone: React.FC<{
+    current?: string[];
+    onFiles: (files: File[]) => void;
+    pendingFiles: File[];
+    onRemoveCurrent: (idx: number) => void;
+    onRemovePending: (idx: number) => void;
+}> = ({ current, onFiles, pendingFiles, onRemoveCurrent, onRemovePending }) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [drag, setDrag] = useState(false);
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault(); setDrag(false);
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+        if (files.length > 0) onFiles([...pendingFiles, ...files]);
+    };
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <label className="cp-label">Post Images</label>
+            <div
+                onClick={() => inputRef.current?.click()}
+                onDragOver={e => { e.preventDefault(); setDrag(true); }}
+                onDragLeave={() => setDrag(false)}
+                onDrop={handleDrop}
+                style={{
+                    border: `2px dashed ${drag ? 'var(--neon-cyan)' : 'var(--border-subtle)'}`,
+                    borderRadius: 6, cursor: 'pointer',
+                    background: drag ? 'rgba(0,245,255,0.04)' : 'var(--bg-dark)',
+                    minHeight: 100,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: drag ? '0 0 20px rgba(0,245,255,0.2)' : 'none',
+                    transition: 'all 0.2s',
+                    padding: 20
+                }}
+            >
+                <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 32, marginBottom: 8, opacity: 0.3 }}>◈</div>
+                    <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
+                        Drop images here · click to browse
+                    </div>
+                </div>
+            </div>
+            <input
+                ref={inputRef}
+                type="file"
+                multiple
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={e => onFiles([...pendingFiles, ...Array.from(e.target.files || [])])}
+            />
+
+            {/* Previews */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: 10 }}>
+                {current?.map((url, idx) => (
+                    <div key={`curr-${idx}`} style={{ position: 'relative', aspectRatio: '1', borderRadius: 4, overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+                        <img src={`${BASE_URL}${url}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button onClick={() => onRemoveCurrent(idx)} style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(255,45,120,0.8)', border: 'none', color: '#fff', borderRadius: '50%', width: 18, height: 18, cursor: 'pointer', fontSize: 12 }}>×</button>
+                    </div>
+                ))}
+                {pendingFiles.map((f, idx) => (
+                    <div key={`pending-${idx}`} style={{ position: 'relative', aspectRatio: '1', borderRadius: 4, overflow: 'hidden', border: '1px solid var(--neon-cyan)' }}>
+                        <img src={URL.createObjectURL(f)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button onClick={() => onRemovePending(idx)} style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(255,45,120,0.8)', border: 'none', color: '#fff', borderRadius: '50%', width: 18, height: 18, cursor: 'pointer', fontSize: 12 }}>×</button>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 // ── Post Card ─────────────────────────────────────────────────────────────────
 const PostCard: React.FC<{
     post: PostDto;
@@ -33,19 +104,23 @@ const PostCard: React.FC<{
     onDelete: () => void;
     onView: () => void;
 }> = ({ post, onEdit, onDelete, onView }) => {
-    const {} = useAuthStore();
     const preview = post.description.replace(/[#*`>\-\[\]]/g, '').slice(0, 180);
     return (
         <div className="cp-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            {post.imageUrl && (
+            {post.imageUrls && post.imageUrls.length > 0 && (
                 <div style={{ height: 180, overflow: 'hidden', position: 'relative' }}>
                     <img
-                        src={`${BASE_URL}${post.imageUrl}`}
+                        src={`${BASE_URL}${post.imageUrls[0]}`}
                         alt={post.title}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 50%, var(--bg-card))' }} />
+                    {post.imageUrls.length > 1 && (
+                        <div style={{ position: 'absolute', bottom: 10, right: 10, background: 'rgba(0,0,0,0.6)', padding: '2px 6px', borderRadius: 4, fontSize: 10, color: 'var(--neon-cyan)', fontFamily: 'Share Tech Mono' }}>
+                            +{post.imageUrls.length - 1} IMAGES
+                        </div>
+                    )}
                 </div>
             )}
             <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -162,73 +237,19 @@ const MarkdownEditor: React.FC<{ value: string; onChange: (v: string) => void; l
     );
 };
 
-// ── Image Upload Zone ─────────────────────────────────────────────────────────
-const ImageUploadZone: React.FC<{ current?: string | null; onFile: (f: File | null) => void; pendingFile?: File | null; onRemove?: () => void }> = ({ current, onFile, pendingFile, onRemove }) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const [dragging, setDragging] = useState(false);
-
-    const previewUrl = pendingFile ? URL.createObjectURL(pendingFile)
-        : current ? `${BASE_URL}${current}` : null;
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault(); setDragging(false);
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) onFile(file);
-    };
-
-    return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label className="cp-label">Post Image (optional)</label>
-            <div
-                onClick={() => inputRef.current?.click()}
-                onDragOver={e => { e.preventDefault(); setDragging(true); }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={handleDrop}
-                style={{
-                    border: `2px dashed ${dragging ? 'var(--neon-cyan)' : 'var(--border-subtle)'}`,
-                    borderRadius: 6, cursor: 'pointer', transition: 'all 0.2s', overflow: 'hidden',
-                    background: dragging ? 'rgba(0,245,255,0.04)' : 'var(--bg-dark)',
-                    minHeight: previewUrl ? 'auto' : 100,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: dragging ? '0 0 20px rgba(0,245,255,0.2)' : 'none',
-                }}
-            >
-                {previewUrl ? (
-                    <div style={{ position: 'relative', width: '100%' }}>
-                        <img src={previewUrl} alt="Preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />
-                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}
-                             onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-                             onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
-                        >
-                            <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--neon-cyan)', fontWeight: 700 }}>CLICK TO REPLACE</span>
-                        </div>
-                    </div>
-                ) : (
-                    <div style={{ textAlign: 'center', padding: 20 }}>
-                        <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.4 }}>⬡</div>
-                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>Drop image here or click to browse</div>
-                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-disabled)', marginTop: 4 }}>JPG / PNG / WEBP · max 5MB</div>
-                    </div>
-                )}
-            </div>
-            {(pendingFile || current) && (
-                <button type="button" onClick={() => onRemove ? onRemove() : onFile(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--neon-pink)', fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', textAlign: 'left' }}>
-                    ✕ Remove image
-                </button>
-            )}
-            <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => onFile(e.target.files?.[0] || null)} />
-        </div>
-    );
-};
-
 // ── Post View Modal ───────────────────────────────────────────────────────────
 const PostViewModal: React.FC<{ post: PostDto | null; onClose: () => void }> = ({ post, onClose }) => {
     if (!post) return null;
+    const carouselItems = post.imageUrls?.map(url => ({
+        url: `${BASE_URL}${url}`,
+        type: 'IMAGE' as const
+    })) || [];
+
     return (
         <Modal open={!!post} title={post.title} onClose={onClose} width={700}>
-            {post.imageUrl && (
-                <div style={{ margin: '-24px -24px 24px', height: 240, overflow: 'hidden' }}>
-                    <img src={`${BASE_URL}${post.imageUrl}`} alt={post.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {carouselItems.length > 0 && (
+                <div style={{ margin: '-24px -24px 24px', background: '#000' }}>
+                    <Carousel items={carouselItems} />
                 </div>
             )}
             <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', marginBottom: 16, display: 'flex', gap: 12 }}>
@@ -242,7 +263,6 @@ const PostViewModal: React.FC<{ post: PostDto | null; onClose: () => void }> = (
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export const PostsPage: React.FC = () => {
-    const {} = useAuthStore();
     const [posts, setPosts]               = useState<PostDto[]>([]);
     const [loading, setLoading]           = useState(true);
     const [saving, setSaving]             = useState(false);
@@ -253,10 +273,11 @@ export const PostsPage: React.FC = () => {
     const [viewPost, setViewPost]         = useState<PostDto | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<PostDto | null>(null);
     const [editTarget, setEditTarget]     = useState<PostDto | null>(null);
+
     const [title, setTitle]               = useState('');
     const [body, setBody]                 = useState('');
-    const [imageFile, setImageFile]       = useState<File | null>(null);
-    const [removeImage, setRemoveImage]   = useState(false);
+    const [imageFiles, setImageFiles]     = useState<File[]>([]);
+    const [removeImages, setRemoveImages] = useState(false);
 
     const load = async () => {
         setLoading(true);
@@ -269,12 +290,12 @@ export const PostsPage: React.FC = () => {
     useEffect(() => { load(); }, []);
 
     const openCreate = () => {
-        setEditTarget(null); setTitle(''); setBody(''); setImageFile(null); setRemoveImage(false);
+        setEditTarget(null); setTitle(''); setBody(''); setImageFiles([]); setRemoveImages(false);
         setEditorOpen(true);
     };
 
     const openEdit = (post: PostDto) => {
-        setEditTarget(post); setTitle(post.title); setBody(post.description); setImageFile(null); setRemoveImage(false);
+        setEditTarget(post); setTitle(post.title); setBody(post.description); setImageFiles([]); setRemoveImages(false);
         setEditorOpen(true);
     };
 
@@ -283,9 +304,9 @@ export const PostsPage: React.FC = () => {
         setSaving(true); setError('');
         let res;
         if (editTarget) {
-            res = await postsApi.update(editTarget.id, title, body, imageFile, removeImage);
+            res = await postsApi.update(editTarget.id, title, body, imageFiles, removeImages);
         } else {
-            res = await postsApi.create(title, body, imageFile);
+            res = await postsApi.create(title, body, imageFiles);
         }
         if (res.data) {
             if (editTarget) {
@@ -321,7 +342,6 @@ export const PostsPage: React.FC = () => {
     );
 
     return (
-        // height + minHeight: 0 fills the Layout flex column
         <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 24, height: '100%', minHeight: 0 }}>
 
             {/* ── Header ── */}
@@ -395,12 +415,15 @@ export const PostsPage: React.FC = () => {
                     {error && <Alert type="error" onClose={() => setError('')}>{error}</Alert>}
                     <Input label="Title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Post title..." />
                     <MarkdownEditor label="Content (Markdown)" value={body} onChange={setBody} />
+                    
                     <ImageUploadZone
-                        current={removeImage ? null : editTarget?.imageUrl}
-                        pendingFile={imageFile}
-                        onFile={f => { setImageFile(f); if (f) setRemoveImage(false); }}
-                        onRemove={() => { setImageFile(null); setRemoveImage(true); }}
+                        current={removeImages ? [] : editTarget?.imageUrls}
+                        pendingFiles={imageFiles}
+                        onFiles={setImageFiles}
+                        onRemoveCurrent={() => setRemoveImages(true)}
+                        onRemovePending={idx => setImageFiles(prev => prev.filter((_, i) => i !== idx))}
                     />
+
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, paddingTop: 8, borderTop: '1px solid var(--border-subtle)' }}>
                         <Button variant="ghost" onClick={() => setEditorOpen(false)}>Cancel</Button>
                         <Button loading={saving} onClick={handleSave}>

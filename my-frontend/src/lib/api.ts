@@ -135,16 +135,16 @@ export const adminApi = {
 export const postsApi = {
     getAll: () => apiFetch<PostDto[]>('/posts'),
     getOne: (postId: string) => apiFetch<PostDto>(`/posts/${postId}`),
-    create: (title: string, description: string, image?: File | null) => {
+    create: (title: string, description: string, images?: File[] | null) => {
         const form = new FormData();
         form.append('data', JSON.stringify({ title, description }));
-        if (image) form.append('image', image);
+        if (images) images.forEach(img => form.append('image', img));
         return apiFetch<PostDto>('/posts', { method: 'POST', body: form });
     },
-    update: (postId: string, title: string, description: string, image?: File | null, removeImage?: boolean) => {
+    update: (postId: string, title: string, description: string, images?: File[] | null, removeImage?: boolean) => {
         const form = new FormData();
         form.append('data', JSON.stringify({ title, description, removeImage }));
-        if (image) form.append('image', image);
+        if (images) images.forEach(img => form.append('image', img));
         return apiFetch<PostDto>(`/posts/${postId}`, { method: 'PUT', body: form });
     },
     delete: (postId: string) => apiFetch<void>(`/posts/${postId}`, { method: 'DELETE' }),
@@ -157,26 +157,22 @@ export const eventsApi = {
 
     create: (
         data: { name: string; startTime: string; endTime?: string | null; place: string; description?: string | null },
-        media?: File | null,
-        document?: File | null
+        media?: File[] | null
     ) => {
         const form = new FormData();
         form.append('data', JSON.stringify(data));
-        if (media)    form.append('media',    media);
-        if (document) form.append('document', document);
+        if (media) media.forEach(m => form.append('media', m));
         return apiFetch<EventDto>('/events', { method: 'POST', body: form });
     },
 
     update: (
         id: string,
-        data: { name?: string; startTime?: string; endTime?: string | null; place?: string; description?: string | null; removeMedia?: boolean; removeDocument?: boolean },
-        media?: File | null,
-        document?: File | null
+        data: { name?: string; startTime?: string; endTime?: string | null; place?: string; description?: string | null; removeMedia?: boolean },
+        media?: File[] | null
     ) => {
         const form = new FormData();
         form.append('data', JSON.stringify(data));
-        if (media)    form.append('media',    media);
-        if (document) form.append('document', document);
+        if (media) media.forEach(m => form.append('media', m));
         return apiFetch<EventDto>(`/events/${id}`, { method: 'PUT', body: form });
     },
 

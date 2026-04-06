@@ -38,19 +38,23 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse createPost(UUID authorId, CreatePostRequest request, MultipartFile image) {
+    public PostResponse createPost(UUID authorId, CreatePostRequest request, List<MultipartFile> images) {
         User author = userRepository.findById(authorId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + authorId));
 
-        String imageUrl = null;
-        if (image != null && !image.isEmpty()) {
-            imageUrl = fileStorageService.storePostImage(image);
+        java.util.List<String> imageUrls = new java.util.ArrayList<>();
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile image : images) {
+                if (image != null && !image.isEmpty()) {
+                    imageUrls.add(fileStorageService.storePostImage(image));
+                }
+            }
         }
 
         Post post = Post.builder()
                 .title(request.title())
                 .description(request.description())
-                .imageUrl(imageUrl)
+                .imageUrls(imageUrls)
                 .author(author)
                 .build();
 
@@ -60,16 +64,24 @@ public class PostService {
     }
 
     @Transactional
-    public PostResponse updatePost(UUID postId, UpdatePostRequest request, MultipartFile image) {
+    public PostResponse updatePost(UUID postId, UpdatePostRequest request, List<MultipartFile> images) {
         Post post = findOrThrow(postId);
 
         if (request.title()       != null && !request.title().isBlank())       post.setTitle(request.title());
         if (request.description() != null && !request.description().isBlank()) post.setDescription(request.description());
 
         if (Boolean.TRUE.equals(request.removeImage())) {
-            post.setImageUrl(null);
-        } else if (image != null && !image.isEmpty()) {
-            post.setImageUrl(fileStorageService.storePostImage(image));
+            post.setImageUrls(new java.util.ArrayList<>());
+        } else if (images != null && !images.isEmpty()) {
+            java.util.List<String> newUrls = new java.util.ArrayList<>();
+            for (MultipartFile image : images) {
+                if (image != null && !image.isEmpty()) {
+                    newUrls.add(fileStorageService.storePostImage(image));
+                }
+            }
+            // For now, let's just replace the entire list if new images are provided.
+            // Or we could append. User said "upload multiple images", so replacing seems safer for "update".
+            post.setImageUrls(newUrls);
         }
 
         PostResponse saved = toResponse(postRepository.save(post));
@@ -102,7 +114,7 @@ public class PostService {
                 post.getId(),
                 post.getTitle(),
                 post.getDescription(),
-                post.getImageUrl(),
+                post.getImageUrls(),
                 author.getFirstName(),
                 author.getLastName(),
                 author.getProfilePhotoUrl(),

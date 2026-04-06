@@ -14,7 +14,7 @@ public final class PostDtos {
             UUID    id,
             String  title,
             String  description,
-            String  imageUrl,
+            java.util.List<String> imageUrls,
             String  authorFirstName,
             String  authorLastName,
             String  authorProfilePhotoUrl,
