@@ -419,7 +419,6 @@ export const ProfilePage: React.FC = () => {
                                                 setForm(prev => ({ ...prev, country: e.name, state: '', city: '' }));
                                             }}
                                             placeHolder="Select Country"
-                                            inputClassName="cp-country-state-city-input"
                                             containerClassName="cp-country-state-city-container"
                                             defaultValue={selectedCountry}
                                         />
@@ -435,7 +434,6 @@ export const ProfilePage: React.FC = () => {
                                                 setForm(prev => ({ ...prev, state: e.name, city: '' }));
                                             }}
                                             placeHolder="Select State"
-                                            inputClassName="cp-country-state-city-input"
                                             containerClassName="cp-country-state-city-container"
                                             defaultValue={selectedState}
                                         />
@@ -450,7 +448,6 @@ export const ProfilePage: React.FC = () => {
                                                 setForm(prev => ({ ...prev, city: e.name }));
                                             }}
                                             placeHolder="Select City"
-                                            inputClassName="cp-country-state-city-input"
                                             containerClassName="cp-country-state-city-container"
                                             defaultValue={selectedCity}
                                         />
@@ -513,46 +510,103 @@ export const ProfilePage: React.FC = () => {
                     box-shadow: 0 0 5px var(--neon-cyan);
                 }
 
+                /* Location Dropdown Refinement */
                 .cp-country-state-city-container {
-                    background: var(--bg-input) !important;
+                    background: var(--bg-dark) !important;
                     border: 1px solid var(--border-subtle) !important;
-                    border-radius: 4px !important;
+                    border-radius: var(--radius-sm) !important;
                     color: var(--text-primary) !important;
-                    font-family: 'Share Tech Mono', monospace !important;
+                    font-family: var(--font-body) !important;
                     height: 52px !important;
                     display: flex !important;
                     align-items: center !important;
-                }
-                
-                .cp-country-state-city-container:focus-within {
-                    border-color: var(--neon-cyan) !important;
-                    box-shadow: 0 0 10px rgba(0, 245, 255, 0.2) !important;
+                    transition: all var(--transition-base) !important;
                 }
 
-                .cp-country-state-city-input {
+                .cp-country-state-city-container:focus-within {
+                    border-color: var(--neon-cyan) !important;
+                    box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.1), 0 0 20px rgba(0, 245, 255, 0.1) !important;
+                }
+
+                .theme-light .cp-country-state-city-container:focus-within {
+                    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1), 0 4px 10px rgba(211, 47, 47, 0.1) !important;
+                }
+
+                /* Library Class Overrides */
+                .stdropdown-container {
                     background: transparent !important;
                     border: none !important;
+                    width: 100% !important;
+                    font-family: inherit !important;
+                }
+
+                .stdropdown-input {
+                    padding: 0 18px !important;
+                    height: 100% !important;
                     color: var(--text-primary) !important;
-                    font-family: sans-serif !important;
-                    font-size: 14px !important;
+                }
+
+                .stdropdown-input input {
+                    background: transparent !important;
+                    color: var(--text-primary) !important;
+                    font-family: var(--font-body) !important;
+                    font-size: var(--font-size-base) !important;
+                    border: none !important;
+                    outline: none !important;
                     width: 100% !important;
                 }
 
-                .st-container, .ct-container, .std-container {
-                   background: var(--bg-input) !important;
-                   border: 1px solid var(--border-subtle) !important;
-                   color: var(--text-primary) !important;
+                .stdropdown-input svg {
+                    fill: var(--neon-cyan) !important;
                 }
 
-                /* Override library internal styles */
-                .st-input, .ct-input, .std-input {
-                   background: transparent !important;
-                   color: var(--text-primary) !important;
+                .stdropdown-menu {
+                    background: var(--bg-panel) !important;
+                    border: 1px solid var(--border-subtle) !important;
+                    border-radius: var(--radius-md) !important;
+                    box-shadow: var(--shadow-panel) !important;
+                    margin-top: 8px !important;
+                    padding: 8px !important;
+                    z-index: 1000 !important;
                 }
 
-                .st-option:hover, .ct-option:hover, .std-option:hover {
+                .stdropdown-item {
+                    padding: 10px 14px !important;
+                    border-radius: var(--radius-sm) !important;
+                    color: var(--text-secondary) !important;
+                    font-family: var(--font-body) !important;
+                    font-size: var(--font-size-sm) !important;
+                    transition: all var(--transition-fast) !important;
+                }
+
+                .stdropdown-item:hover {
                     background: var(--bg-hover) !important;
                     color: var(--neon-cyan) !important;
+                }
+
+                .stdropdown-item.selected {
+                    background: rgba(0, 245, 255, 0.1) !important;
+                    color: var(--neon-cyan) !important;
+                    font-weight: 600 !important;
+                }
+
+                .theme-light .stdropdown-item.selected {
+                    background: rgba(211, 47, 47, 0.1) !important;
+                }
+
+                .stsearch-box {
+                    padding: 0 0 8px 0 !important;
+                    border-bottom: 1px solid var(--border-subtle) !important;
+                    margin-bottom: 8px !important;
+                }
+
+                .stsearch-box input {
+                    background: var(--bg-dark) !important;
+                    border: 1px solid var(--border-subtle) !important;
+                    color: var(--text-primary) !important;
+                    border-radius: var(--radius-sm) !important;
+                    padding: 8px 12px !important;
+                    font-family: var(--font-body) !important;
                 }
             `}</style>
         </div>
