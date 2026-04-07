@@ -119,6 +119,8 @@ export interface AlumniDto {
     country?: string;
     state?: string;
     city?: string;
+    currentJobTitle?: string;
+    currentCompany?: string;
 }
 
 export interface PeerGroupDto {

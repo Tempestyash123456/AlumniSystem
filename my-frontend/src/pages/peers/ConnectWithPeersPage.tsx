@@ -174,6 +174,16 @@ export const ConnectWithPeersPage: React.FC = () => {
                             />
                             <div className="peer-info">
                                 <div className="peer-name">{peer.firstName} {peer.lastName}</div>
+                                {(() => {
+                                    const title = peer.currentJobTitle;
+                                    const company = peer.currentCompany;
+                                    const isUnemployed = (title && title.toLowerCase() === 'unemployed') || (company && company.toLowerCase() === 'unemployed');
+                                    
+                                    if (isUnemployed) return <div className="peer-work-info">Unemployed</div>;
+                                    if (title && company) return <div className="peer-work-info">{title} at {company}</div>;
+                                    if (title || company) return <div className="peer-work-info">{title || company}</div>;
+                                    return null;
+                                })()}
                                 <div className="peer-email">{peer.email}</div>
                             </div>
                         </div>

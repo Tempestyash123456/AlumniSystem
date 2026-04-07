@@ -14,5 +14,7 @@ public record AlumniDto(
         String program,
         String country,
         String state,
-        String city
+        String city,
+        String currentJobTitle,
+        String currentCompany
 ) {}

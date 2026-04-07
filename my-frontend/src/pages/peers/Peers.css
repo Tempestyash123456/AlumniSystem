@@ -1,7 +1,7 @@
 .peers-container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0;
 }
 
 .peers-breadcrumb {
@@ -30,25 +30,25 @@
 
 .peers-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
 }
 
 .peer-group-card {
     background: var(--bg-panel);
     border: 1px solid var(--border-subtle);
     border-radius: 12px;
-    padding: 32px 24px;
-    text-align: center;
+    padding: 24px;
+    text-align: left;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    min-height: 160px;
+    min-height: 120px;
 }
 
 .peer-group-card::before {
@@ -94,10 +94,10 @@
     background: var(--bg-panel);
     border: 1px solid var(--border-subtle);
     border-radius: 16px;
-    padding: 24px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     gap: 16px;
     transition: all 0.3s ease;
 }
@@ -121,7 +121,7 @@
 }
 
 .peer-info {
-    text-align: center;
+    text-align: left;
 }
 
 .peer-name {
@@ -129,7 +129,20 @@
     font-size: 22px;
     font-weight: 700;
     color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.peer-work-info {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--neon-cyan);
     margin-bottom: 4px;
+    letter-spacing: 0.02em;
+}
+
+.theme-dark .peer-work-info {
+    text-shadow: 0 0 10px rgba(0, 245, 255, 0.4);
 }
 
 .peer-email {

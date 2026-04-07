@@ -84,7 +84,9 @@ public class AlumniService {
                 profile != null ? profile.getProgram() : null,
                 profile != null ? profile.getCountry() : null,
                 profile != null ? profile.getState() : null,
-                profile != null ? profile.getCity() : null
+                profile != null ? profile.getCity() : null,
+                profile != null ? profile.getCurrentJobTitle() : null,
+                profile != null ? profile.getCurrentCompany() : null
         );
     }
 }
