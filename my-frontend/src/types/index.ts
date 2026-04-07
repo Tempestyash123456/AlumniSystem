@@ -114,6 +114,16 @@ export interface AlumniDto {
     profilePhotoUrl?: string;
     admissionYear?: number;
     graduationYear?: number;
+    phone?: string;
+    program?: string;
+    country?: string;
+    state?: string;
+    city?: string;
+}
+
+export interface PeerGroupDto {
+    name: string;
+    count: number;
 }
 
 // ── Admin ─────────────────────────────────────────────────────────────────────

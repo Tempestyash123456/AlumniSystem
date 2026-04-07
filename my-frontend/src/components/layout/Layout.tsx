@@ -110,6 +110,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                                 <NavItem path="/posts" icon="◇" label="Posts" exact />
                                 <NavItem path="/events" icon="◎" label="Events" exact />
                                 <NavItem path="/membership" icon="🪪" label="Membership" exact />
+                                <NavItem path="/connect-with-peers" icon="👥" label="Connect with peers" exact />
                                 <NavItem path="/bug-report" icon="🐞" label="Bug Report" exact />
                             </>
                         )}

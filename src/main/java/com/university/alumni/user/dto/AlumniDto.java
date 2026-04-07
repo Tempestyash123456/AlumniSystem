@@ -9,5 +9,10 @@ public record AlumniDto(
         String email,
         String profilePhotoUrl,
         Integer admissionYear,
-        Integer graduationYear
+        Integer graduationYear,
+        String phone,
+        String program,
+        String country,
+        String state,
+        String city
 ) {}

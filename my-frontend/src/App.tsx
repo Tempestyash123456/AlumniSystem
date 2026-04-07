@@ -22,6 +22,7 @@ import { LandingPage } from './pages/landing/LandingPage.tsx';
 import { MembershipPage } from './pages/membership/MembershipPage.tsx';
 import { CompleteRegistrationPage } from './pages/auth/CompleteRegistrationPage.tsx';
 import { BugReportPage } from './pages/support/BugReportPage.tsx';
+import { ConnectWithPeersPage } from './pages/peers/ConnectWithPeersPage.tsx';
 
 // ── Guards ──────────────────────────────────────────────────────────────────
 const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -133,6 +134,7 @@ const App: React.FC = () => {
                 <Route path="/posts"        element={<RequirePermission permission="VIEW_POST"><Layout><PostsFeedPage /></Layout></RequirePermission>} />
                 <Route path="/events"       element={<RequirePermission permission="VIEW_EVENT"><Layout><AlumniEventsPage /></Layout></RequirePermission>} />
                 <Route path="/membership"   element={<RequirePermission><Layout><MembershipPage /></Layout></RequirePermission>} />
+                <Route path="/connect-with-peers" element={<RequireAuth><Layout><ConnectWithPeersPage /></Layout></RequireAuth>} />
                 <Route path="/bug-report"   element={<RequireAuth><Layout><BugReportPage /></Layout></RequireAuth>} />
 
                 {/* Alumni directory */}

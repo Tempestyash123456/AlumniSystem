@@ -1,7 +1,7 @@
 import type {
     ApiResponse, AuthResponse, UserInfo, ProfileResponse,
     UpdateProfileRequest, AdminUserListResponse, AdminUserDto, AlumniDto, PostDto, EventDto,
-    PermissionDto, SupportDeveloperResponse
+    PermissionDto, SupportDeveloperResponse, PeerGroupDto
 } from '../types';
 
 const BASE_URL = '/api/v1';
@@ -128,6 +128,12 @@ export const supportApi = {
 
 export const alumniApi = {
     getAll: () => apiFetch<AlumniDto[]>('/alumni'),
+    getPeerPrograms: () => apiFetch<PeerGroupDto[]>('/alumni/peers/programs'),
+    getPeerYears: (program: string) => apiFetch<PeerGroupDto[]>(`/alumni/peers/years?program=${encodeURIComponent(program)}`),
+    getPeerCountries: (program: string, year: number) => apiFetch<PeerGroupDto[]>(`/alumni/peers/countries?program=${encodeURIComponent(program)}&year=${year}`),
+    getPeerStates: (program: string, year: number, country: string) => apiFetch<PeerGroupDto[]>(`/alumni/peers/states?program=${encodeURIComponent(program)}&year=${year}&country=${encodeURIComponent(country)}`),
+    getPeerCities: (program: string, year: number, country: string, state: string) => apiFetch<PeerGroupDto[]>(`/alumni/peers/cities?program=${encodeURIComponent(program)}&year=${year}&country=${encodeURIComponent(country)}&state=${encodeURIComponent(state)}`),
+    getPeers: (program: string, year: number, country: string, state: string, city: string) => apiFetch<AlumniDto[]>(`/alumni/peers/list?program=${encodeURIComponent(program)}&year=${year}&country=${encodeURIComponent(country)}&state=${encodeURIComponent(state)}&city=${encodeURIComponent(city)}`),
 };
 
 export const adminApi = {
