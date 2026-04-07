@@ -121,6 +121,7 @@ export interface AlumniDto {
     city?: string;
     currentJobTitle?: string;
     currentCompany?: string;
+    linkedinUrl?: string;
 }
 
 export interface PeerGroupDto {
