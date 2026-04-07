@@ -4,4 +4,4 @@
 -- ============================================================
 
 ALTER TABLE alumni_profiles
-ADD COLUMN bug_report_photo_url VARCHAR(500);
+ADD COLUMN IF NOT EXISTS bug_report_photo_url VARCHAR(500);
