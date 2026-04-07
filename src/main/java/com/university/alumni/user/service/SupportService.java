@@ -4,6 +4,7 @@ import com.university.alumni.auth.service.EmailService;
 import com.university.alumni.user.dto.BugReportRequest;
 import com.university.alumni.user.dto.SupportDeveloperResponse;
 import com.university.alumni.user.entity.AlumniProfile;
+import com.university.alumni.user.entity.User;
 import com.university.alumni.user.repository.AlumniProfileRepository;
 import com.university.alumni.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
