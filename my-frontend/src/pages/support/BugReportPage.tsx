@@ -6,7 +6,6 @@ import {
     Input,
     Textarea,
     Button,
-    Checkbox,
     Badge,
     Spinner,
     Modal
@@ -24,7 +23,7 @@ interface DevMember {
 export const BugReportPage: React.FC = () => {
     const { user } = useAuthStore();
     const { addToast } = useToastStore();
-    
+
     const [loading, setLoading] = useState(false);
     const [sending, setSending] = useState(false);
     const [devs, setDevs] = useState<DevMember[]>([
@@ -65,8 +64,8 @@ export const BugReportPage: React.FC = () => {
                     name: d.name,
                     email: d.email,
                     role: d.role,
-                    linkedin: d.linkedinUrl || (d.email === "pandeyaditi0307@gmail.com" 
-                        ? "https://www.linkedin.com/in/aditipandey568/" 
+                    linkedin: d.linkedinUrl || (d.email === "pandeyaditi0307@gmail.com"
+                        ? "https://www.linkedin.com/in/aditipandey568/"
                         : "https://www.linkedin.com/in/yash-dwivedi-793983249/"),
                     github: d.githubUrl || (d.email === "pandeyaditi0307@gmail.com"
                         ? "https://github.com/AditiPandey568"
@@ -85,15 +84,6 @@ export const BugReportPage: React.FC = () => {
     useEffect(() => {
         fetchDevDetails();
     }, []);
-
-    const handleRecipientToggle = (name: string) => {
-        setForm(prev => ({
-            ...prev,
-            recipients: prev.recipients.includes(name)
-                ? prev.recipients.filter(r => r !== name)
-                : [...prev.recipients, name]
-        }));
-    };
 
     const handleSubmitBug = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -126,7 +116,7 @@ export const BugReportPage: React.FC = () => {
             const res = await profileApi.uploadBugReportPhoto(file);
             if (res.success && res.data) {
                 addToast("Photo updated for Bug Report page!", "success");
-                setDevs(prev => prev.map(d => 
+                setDevs(prev => prev.map(d =>
                     d.email === user?.email ? { ...d, bugReportPhotoUrl: res.data?.bugReportPhotoUrl } : d
                 ));
             } else {
@@ -151,9 +141,9 @@ export const BugReportPage: React.FC = () => {
     return (
         <div style={{ animation: 'fade-in 0.5s ease-out' }}>
             <div style={{ marginBottom: '40px' }}>
-                <h1 style={{ 
-                    fontFamily: 'Orbitron, sans-serif', 
-                    fontSize: '32px', 
+                <h1 style={{
+                    fontFamily: 'Orbitron, sans-serif',
+                    fontSize: '32px',
                     color: 'var(--text-primary)',
                     letterSpacing: '0.1em',
                     marginBottom: '8px'
@@ -161,7 +151,7 @@ export const BugReportPage: React.FC = () => {
                     BUG REPORT <span style={{ color: 'var(--neon-pink)' }}>🐞</span>
                 </h1>
                 <p style={{ color: 'var(--text-muted)', fontFamily: 'Rajdhani, sans-serif' }}>
-                    Encountered an issue? Report it to our dev team directly.
+                    Encountered an issue? Report it to the dev team directly.
                 </p>
             </div>
 
@@ -190,10 +180,10 @@ export const BugReportPage: React.FC = () => {
                             justifyContent: 'center'
                         }}>
                             {dev.bugReportPhotoUrl ? (
-                                <img 
-                                    src={getImageUrl(dev.bugReportPhotoUrl)} 
-                                    alt={dev.name} 
-                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                <img
+                                    src={getImageUrl(dev.bugReportPhotoUrl)}
+                                    alt={dev.name}
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                             ) : (
                                 <span style={{ fontSize: '40px', color: 'var(--text-disabled)' }}>👤</span>
@@ -206,18 +196,18 @@ export const BugReportPage: React.FC = () => {
                         <Badge variant={dev.role.includes('Frontend') ? 'cyan' : 'purple'}>
                             {dev.role}
                         </Badge>
-                        
+
                         <div style={{ margin: '20px 0', display: 'flex', gap: '15px' }}>
                             <a href={dev.linkedin} target="_blank" rel="noreferrer" className="cp-nav-item" style={{ padding: '8px' }}>🔗 LinkedIn</a>
                             <a href={dev.github} target="_blank" rel="noreferrer" className="cp-nav-item" style={{ padding: '8px' }}>🐙 GitHub</a>
                         </div>
-                        
+
                         <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--neon-cyan)', fontSize: '14px' }}>
                             {dev.email}
                         </p>
 
                         {isAuthorizedToEdit && user?.email === dev.email && (
-                            <button 
+                            <button
                                 onClick={() => setUploadingFor(dev.email)}
                                 style={{
                                     marginTop: '15px',
@@ -251,23 +241,7 @@ export const BugReportPage: React.FC = () => {
                 </h2>
 
                 <form onSubmit={handleSubmitBug} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ background: 'rgba(0,245,255,0.03)', padding: '20px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
-                        <p style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '14px', marginBottom: '15px', color: 'var(--text-secondary)' }}>
-                            To whom should this bug be reported?
-                        </p>
-                        <div style={{ display: 'flex', gap: '40px' }}>
-                            {devs.map(d => (
-                                <Checkbox 
-                                    key={d.email}
-                                    label={d.name}
-                                    checked={form.recipients.includes(d.name)}
-                                    onChange={() => handleRecipientToggle(d.name)}
-                                />
-                            ))}
-                        </div>
-                    </div>
-
-                    <Input 
+                    <Input
                         label="Title for the bug"
                         placeholder="Brief summary of the issue..."
                         value={form.title}
@@ -275,7 +249,7 @@ export const BugReportPage: React.FC = () => {
                         required
                     />
 
-                    <Textarea 
+                    <Textarea
                         label="Information about the bug"
                         placeholder="Please provide steps to reproduce, expected vs actual behavior..."
                         value={form.information}
@@ -284,9 +258,9 @@ export const BugReportPage: React.FC = () => {
                     />
 
                     <div style={{ marginTop: '10px' }}>
-                        <Button 
-                            type="submit" 
-                            loading={sending} 
+                        <Button
+                            type="submit"
+                            loading={sending}
                             style={{ width: '100%', height: '50px', fontSize: '16px', letterSpacing: '0.1em' }}
                         >
                             SEND BUG REPORT ✉
@@ -295,20 +269,20 @@ export const BugReportPage: React.FC = () => {
                 </form>
             </div>
 
-            <Modal 
-                open={!!uploadingFor} 
-                onClose={() => setUploadingFor(null)} 
+            <Modal
+                open={!!uploadingFor}
+                onClose={() => setUploadingFor(null)}
                 title="Update Dedicated Dev Photo"
             >
                 <div style={{ textAlign: 'center' }}>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>
                         Choose a photo to be displayed on this Bug Report page.
                     </p>
-                    <input 
-                        type="file" 
-                        accept="image/*" 
-                        id="bug-photo-upload" 
-                        style={{ display: 'none' }} 
+                    <input
+                        type="file"
+                        accept="image/*"
+                        id="bug-photo-upload"
+                        style={{ display: 'none' }}
                         onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) handlePhotoUpload(file);

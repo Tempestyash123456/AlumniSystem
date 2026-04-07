@@ -4,6 +4,14 @@ import { useAuthStore } from '../../store/authStore.ts';
 import type { ProfileResponse, UpdateProfileRequest } from '../../types';
 import { Input, Textarea, Select, Button, Alert, ProgressBar, SkillsInput, Spinner } from '../../components/ui';
 import { PROGRAM_OPTIONS, DISCIPLINE_OPTIONS, INDUSTRY_OPTIONS } from '../../lib/constants';
+import {
+    CitySelect,
+    CountrySelect,
+    StateSelect,
+    GetCountries,
+    GetState,
+} from "react-country-state-city";
+import "react-country-state-city/dist/react-country-state-city.css";
 
 const BASE_URL = '';
 
@@ -166,9 +174,13 @@ export const ProfilePage: React.FC = () => {
     const [activeSection, setActiveSection] = useState<Section>('personal');
     const [form, setForm] = useState<UpdateProfileRequest>({});
 
+    const [countryid, setCountryid] = useState<number>(0);
+    const [stateid, setstateid] = useState<number>(0);
+    const [selectedCountry, setSelectedCountry] = useState<any>(null);
+    const [selectedState, setSelectedState] = useState<any>(null);
+    const [selectedCity, setSelectedCity] = useState<any>(null);
+
     const loadProfile = useCallback(async () => {
-        // Initial state is already true, only set if we are specifically reloading
-        // Using functional update to avoid dependency on 'loading' state
         setLoading(prev => prev || true);
         const res = await profileApi.getMyProfile();
         if (res.data) {
@@ -199,6 +211,24 @@ export const ProfilePage: React.FC = () => {
                 openToMentor: res.data.openToMentor,
                 openToHire: res.data.openToHire,
             });
+
+            // Try to find IDs for initial country/state/city selection
+            if (res.data.country) {
+                const countries = await GetCountries();
+                const matchedCountry = countries.find((c: any) => c.name === res.data?.country);
+                if (matchedCountry) {
+                    setCountryid(matchedCountry.id);
+                    setSelectedCountry(matchedCountry);
+                    if (res.data.state) {
+                        const states = await GetState(matchedCountry.id);
+                        const matchedState = states.find((s: any) => s.name === res.data?.state);
+                        if (matchedState) {
+                            setstateid(matchedState.id);
+                            setSelectedState(matchedState);
+                        }
+                    }
+                }
+            }
         }
         setLoading(false);
     }, []);
@@ -378,9 +408,53 @@ export const ProfilePage: React.FC = () => {
                                 <Input label="Phone" value={form.phone ?? ''} onChange={setStr('phone')} />
                                 <Textarea label="Bio" value={form.bio ?? ''} onChange={setStr('bio')} />
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
-                                    <Input label="City" value={form.city ?? ''} onChange={setStr('city')} />
-                                    <Input label="State" value={form.state ?? ''} onChange={setStr('state')} />
-                                    <Input label="Country" value={form.country ?? ''} onChange={setStr('country')} />
+                                    <div className="cp-input-wrap">
+                                        <label className="cp-label">Country</label>
+                                        <CountrySelect
+                                            onChange={(e: any) => {
+                                                setCountryid(e.id);
+                                                setSelectedCountry(e);
+                                                setSelectedState(null);
+                                                setSelectedCity(null);
+                                                setForm(prev => ({ ...prev, country: e.name, state: '', city: '' }));
+                                            }}
+                                            placeHolder="Select Country"
+                                            inputClassName="cp-country-state-city-input"
+                                            containerClassName="cp-country-state-city-container"
+                                            defaultValue={selectedCountry}
+                                        />
+                                    </div>
+                                    <div className="cp-input-wrap">
+                                        <label className="cp-label">State</label>
+                                        <StateSelect
+                                            countryid={countryid}
+                                            onChange={(e: any) => {
+                                                setstateid(e.id);
+                                                setSelectedState(e);
+                                                setSelectedCity(null);
+                                                setForm(prev => ({ ...prev, state: e.name, city: '' }));
+                                            }}
+                                            placeHolder="Select State"
+                                            inputClassName="cp-country-state-city-input"
+                                            containerClassName="cp-country-state-city-container"
+                                            defaultValue={selectedState}
+                                        />
+                                    </div>
+                                    <div className="cp-input-wrap">
+                                        <label className="cp-label">City</label>
+                                        <CitySelect
+                                            countryid={countryid}
+                                            stateid={stateid}
+                                            onChange={(e: any) => {
+                                                setSelectedCity(e);
+                                                setForm(prev => ({ ...prev, city: e.name }));
+                                            }}
+                                            placeHolder="Select City"
+                                            inputClassName="cp-country-state-city-input"
+                                            containerClassName="cp-country-state-city-container"
+                                            defaultValue={selectedCity}
+                                        />
+                                    </div>
                                 </div>
                                 <Input label="Date of Birth" type="date" value={form.dateOfBirth ?? ''} onChange={setStr('dateOfBirth')} />
                             </div>
@@ -437,6 +511,48 @@ export const ProfilePage: React.FC = () => {
                     background: var(--neon-cyan);
                     border-radius: 4px;
                     box-shadow: 0 0 5px var(--neon-cyan);
+                }
+
+                .cp-country-state-city-container {
+                    background: var(--bg-input) !important;
+                    border: 1px solid var(--border-subtle) !important;
+                    border-radius: 4px !important;
+                    color: var(--text-primary) !important;
+                    font-family: 'Share Tech Mono', monospace !important;
+                    height: 52px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                }
+                
+                .cp-country-state-city-container:focus-within {
+                    border-color: var(--neon-cyan) !important;
+                    box-shadow: 0 0 10px rgba(0, 245, 255, 0.2) !important;
+                }
+
+                .cp-country-state-city-input {
+                    background: transparent !important;
+                    border: none !important;
+                    color: var(--text-primary) !important;
+                    font-family: sans-serif !important;
+                    font-size: 14px !important;
+                    width: 100% !important;
+                }
+
+                .st-container, .ct-container, .std-container {
+                   background: var(--bg-input) !important;
+                   border: 1px solid var(--border-subtle) !important;
+                   color: var(--text-primary) !important;
+                }
+
+                /* Override library internal styles */
+                .st-input, .ct-input, .std-input {
+                   background: transparent !important;
+                   color: var(--text-primary) !important;
+                }
+
+                .st-option:hover, .ct-option:hover, .std-option:hover {
+                    background: var(--bg-hover) !important;
+                    color: var(--neon-cyan) !important;
                 }
             `}</style>
         </div>
