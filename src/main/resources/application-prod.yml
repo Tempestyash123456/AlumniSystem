@@ -25,6 +25,8 @@ spring:
   data:
     redis:
       url: ${REDIS_URL}
+      ssl:
+        enabled: true
 
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
