@@ -1,7 +1,7 @@
 import type {
     ApiResponse, AuthResponse, UserInfo, ProfileResponse,
     UpdateProfileRequest, AdminUserListResponse, AdminUserDto, AlumniDto, PostDto, EventDto,
-    PermissionDto
+    PermissionDto, SupportDeveloperResponse
 } from '../types';
 
 const BASE_URL = '/api/v1';
@@ -123,6 +123,7 @@ export const profileApi = {
 export const supportApi = {
     reportBug: (data: { title: string; information: string; recipients: string[] }) =>
         apiFetch<void>('/support/bug-report', { method: 'POST', body: JSON.stringify(data) }),
+    getDevelopers: () => apiFetch<SupportDeveloperResponse[]>('/support/developers'),
 };
 
 export const alumniApi = {

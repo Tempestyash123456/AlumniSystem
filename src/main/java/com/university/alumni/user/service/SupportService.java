@@ -2,12 +2,17 @@ package com.university.alumni.user.service;
 
 import com.university.alumni.auth.service.EmailService;
 import com.university.alumni.user.dto.BugReportRequest;
-import com.university.alumni.user.entity.User;
+import com.university.alumni.user.dto.SupportDeveloperResponse;
+import com.university.alumni.user.entity.AlumniProfile;
+import com.university.alumni.user.repository.AlumniProfileRepository;
+import com.university.alumni.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -15,11 +20,16 @@ import java.util.List;
 public class SupportService {
 
     private final EmailService emailService;
+    private final UserRepository userRepository;
+    private final AlumniProfileRepository profileRepository;
 
     private static final String ADITI_EMAIL = "pandeyaditi0307@gmail.com";
     private static final String YASH_EMAIL = "yashdubey262@gmail.com";
 
-    public void sendBugReport(BugReportRequest request, User sender) {
+    public void sendBugReport(BugReportRequest request, java.util.UUID senderId) {
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new RuntimeException("Sender not found"));
+
         String subject = "BUG REPORT: " + request.title();
         String body = String.format(
             "New Bug Report from: %s %s (%s)\n\n" +
@@ -39,6 +49,35 @@ public class SupportService {
             emailService.sendEmail(YASH_EMAIL, subject, body);
         }
 
-        log.info("Bug report '{}' sent to recipients: {}", request.title(), recipients);
+        log.info("Bug report '{}' sent from user '{}' to recipients: {}", 
+            request.title(), sender.getEmail(), recipients);
+    }
+
+    /**
+     * Fetches public profile data for the support team developers.
+     */
+    public List<SupportDeveloperResponse> getSupportDevelopers() {
+        List<SupportDeveloperResponse> devs = new ArrayList<>();
+        
+        addDev(devs, ADITI_EMAIL, "UI/UX & Frontend");
+        addDev(devs, YASH_EMAIL, "Backend & Security");
+        
+        return devs;
+    }
+
+    private void addDev(List<SupportDeveloperResponse> list, String email, String role) {
+        userRepository.findByEmailAndDeletedAtIsNull(email).ifPresent(user -> {
+            Optional<AlumniProfile> profile = profileRepository.findByUserId(user.getId());
+            
+            list.add(SupportDeveloperResponse.builder()
+                    .userId(user.getId())
+                    .name(user.getFullName())
+                    .email(user.getEmail())
+                    .role(role)
+                    .linkedinUrl(profile.map(AlumniProfile::getLinkedinUrl).orElse(null))
+                    .githubUrl(profile.map(AlumniProfile::getGithubUrl).orElse(null))
+                    .bugReportPhotoUrl(profile.map(AlumniProfile::getBugReportPhotoUrl).orElse(null))
+                    .build());
+        });
     }
 }

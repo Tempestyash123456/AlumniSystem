@@ -182,3 +182,14 @@ export interface EventDto {
     createdAt: string;
     updatedAt: string;
 }
+
+// ── Support ──────────────────────────────────────────────────────────────────
+export interface SupportDeveloperResponse {
+    userId: string;
+    name: string;
+    email: string;
+    role: string;
+    linkedinUrl?: string;
+    githubUrl?: string;
+    bugReportPhotoUrl?: string;
+}

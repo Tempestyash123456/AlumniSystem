@@ -58,18 +58,23 @@ export const BugReportPage: React.FC = () => {
     const fetchDevDetails = async () => {
         setLoading(true);
         try {
-            // In a real app, you might fetch specific user profiles.
-            // For now, we'll try to get the current user's bug report photo if they are one of the devs.
-            if (isAuthorizedToEdit) {
-                const res = await profileApi.getMyProfile();
-                if (res.success && res.data) {
-                    setDevs(prev => prev.map(d => 
-                        d.email === user?.email ? { ...d, bugReportPhotoUrl: res.data?.bugReportPhotoUrl } : d
-                    ));
-                }
+            const res = await supportApi.getDevelopers();
+            if (res.success && res.data) {
+                // Map API response to our local state
+                const mappedDevs = res.data.map(d => ({
+                    name: d.name,
+                    email: d.email,
+                    role: d.role,
+                    linkedin: d.linkedinUrl || (d.email === "pandeyaditi0307@gmail.com" 
+                        ? "https://www.linkedin.com/in/aditipandey568/" 
+                        : "https://www.linkedin.com/in/yash-dwivedi-793983249/"),
+                    github: d.githubUrl || (d.email === "pandeyaditi0307@gmail.com"
+                        ? "https://github.com/AditiPandey568"
+                        : "https://github.com/Tempestyash123456"),
+                    bugReportPhotoUrl: d.bugReportPhotoUrl
+                }));
+                setDevs(mappedDevs);
             }
-            // Ideally we'd fetch the other dev's profile too, but we need their IDs.
-            // For this implementation, we'll assume the URL is persisted.
         } catch (error) {
             console.error("Failed to fetch dev details", error);
         } finally {
