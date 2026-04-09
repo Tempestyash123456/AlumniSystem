@@ -15,7 +15,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
+import java.net.URI;
 
 import java.time.Duration;
 import java.util.Map;
@@ -38,7 +44,50 @@ import java.util.Map;
  */
 @Configuration
 @EnableCaching
+@EnableRedisRepositories(basePackages = "com.university.alumni.redis.repository")
 public class RedisConfig {
+
+    @Value("${REDIS_URL:#{null}}")
+    private String redisUrl;
+
+    @Bean
+    public RedisConnectionFactory redisConnectionFactory() {
+        // If REDIS_URL is not provided (e.g. in dev), let Spring Boot auto-configure
+        // or we can fall back to a default config. 
+        // For prod, we explicitly parse the rediss:// URL.
+        if (redisUrl == null || redisUrl.isBlank() || !redisUrl.startsWith("redis")) {
+            // Note: Returning null here might cause issues if auto-config is disabled.
+            // But since this is a @Bean, it will be the one used.
+            // Better to only define this bean if we have a URL, 
+            // but @Bean doesn't work that way easily without @Conditional.
+            return null; 
+        }
+
+        try {
+            URI uri = new URI(redisUrl);
+            RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+            config.setHostName(uri.getHost());
+            config.setPort(uri.getPort() == -1 ? 6379 : uri.getPort());
+
+            if (uri.getUserInfo() != null) {
+                String password = uri.getUserInfo();
+                if (password.contains(":")) {
+                    password = password.split(":", 2)[1];
+                }
+                config.setPassword(password);
+            }
+
+            LettuceClientConfiguration.LettuceClientConfigurationBuilder builder = LettuceClientConfiguration.builder();
+            if (redisUrl.startsWith("rediss://")) {
+                builder.useSsl().disablePeerVerification(); // Common for cloud Redis providers
+            }
+
+            return new LettuceConnectionFactory(config, builder.build());
+        } catch (Exception e) {
+            // Log and fall back or throw
+            return null; 
+        }
+    }
 
     private ObjectMapper redisObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();

@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync                        // Enables @Async for non-blocking email/notifications
 @EnableScheduling                   // Enables @Scheduled for reminders/jobs
 @ConfigurationPropertiesScan        // Auto-registers all @ConfigurationProperties classes
+@org.springframework.data.jpa.repository.config.EnableJpaRepositories(basePackages = "com.university.alumni")
 public class AlumniPortalApplication {
 
 	public static void main(String[] args) {
