@@ -47,8 +47,18 @@ import java.util.Map;
 @Slf4j
 public class RedisConfig implements CachingConfigurer {
 
+    @org.springframework.beans.factory.annotation.Value("${REDIS_URL:#{null}}")
+    private String redisUrl;
 
-
+    @jakarta.annotation.PostConstruct
+    public void logRedisConnection() {
+        if (redisUrl != null && !redisUrl.isBlank()) {
+            String masked = redisUrl.replaceAll(":.*@", ":****@");
+            log.info("Redis: Production configuration detected. Targeting URL: {}", masked);
+        } else {
+            log.info("Redis: No REDIS_URL found. Using default host/port config.");
+        }
+    }
     private ObjectMapper redisObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());

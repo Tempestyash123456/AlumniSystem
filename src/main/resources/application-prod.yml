@@ -25,6 +25,9 @@ spring:
       url: ${REDIS_URL}
       ssl:
         enabled: true
+      # Timeouts for production safety
+      connect-timeout: 5000ms
+      timeout: 5000ms
 
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
