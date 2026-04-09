@@ -21,6 +21,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceClientConfigurat
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
+import lombok.extern.slf4j.Slf4j;
 import java.net.URI;
 
 import java.time.Duration;
@@ -44,7 +45,7 @@ import java.util.Map;
  */
 @Configuration
 @EnableCaching
-@EnableRedisRepositories(basePackages = "com.university.alumni.redis.repository")
+@Slf4j
 public class RedisConfig {
 
     @Value("${REDIS_URL:#{null}}")
@@ -52,18 +53,15 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        // If REDIS_URL is not provided (e.g. in dev), let Spring Boot auto-configure
-        // or we can fall back to a default config. 
-        // For prod, we explicitly parse the rediss:// URL.
         if (redisUrl == null || redisUrl.isBlank() || !redisUrl.startsWith("redis")) {
-            // Note: Returning null here might cause issues if auto-config is disabled.
-            // But since this is a @Bean, it will be the one used.
-            // Better to only define this bean if we have a URL, 
-            // but @Bean doesn't work that way easily without @Conditional.
+            log.info("Redis: Using default auto-configuration (no REDIS_URL found)");
             return null; 
         }
 
         try {
+            log.info("Redis: Initializing connection factory from REDIS_URL: {}", 
+                     redisUrl.replaceAll(":.*@", ":****@")); // Mask password
+            
             URI uri = new URI(redisUrl);
             RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
             config.setHostName(uri.getHost());
@@ -79,12 +77,13 @@ public class RedisConfig {
 
             LettuceClientConfiguration.LettuceClientConfigurationBuilder builder = LettuceClientConfiguration.builder();
             if (redisUrl.startsWith("rediss://")) {
-                builder.useSsl().disablePeerVerification(); // Common for cloud Redis providers
+                log.info("Redis: SSL enabled (rediss:// scheme)");
+                builder.useSsl().disablePeerVerification(); 
             }
 
             return new LettuceConnectionFactory(config, builder.build());
         } catch (Exception e) {
-            // Log and fall back or throw
+            log.error("Redis: Failed to parse REDIS_URL: {}", e.getMessage());
             return null; 
         }
     }
