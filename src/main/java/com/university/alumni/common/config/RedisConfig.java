@@ -58,6 +58,9 @@ public class RedisConfig implements CachingConfigurer {
     public RedisConnectionFactory redisConnectionFactory() {
         if (redisUrl == null || redisUrl.isBlank() || !redisUrl.startsWith("redis")) {
             log.info("Redis: Using default auto-configuration (no REDIS_URL found)");
+            // Note: Returning null here might cause issues if other beans expect a RedisConnectionFactory.
+            // Spring Boot's auto-config will usually kick in if no bean is found, 
+            // but since this method is marked @Bean, it registers 'null'.
             return null; 
         }
 
@@ -71,23 +74,30 @@ public class RedisConfig implements CachingConfigurer {
             config.setPort(uri.getPort() == -1 ? 6379 : uri.getPort());
 
             if (uri.getUserInfo() != null) {
-                String password = uri.getUserInfo();
-                if (password.contains(":")) {
-                    password = password.split(":", 2)[1];
+                String userInfo = uri.getUserInfo();
+                if (userInfo.contains(":")) {
+                    config.setPassword(userInfo.split(":", 2)[1]);
+                } else {
+                    config.setPassword(userInfo);
                 }
-                config.setPassword(password);
             }
 
-            LettuceClientConfiguration.LettuceClientConfigurationBuilder builder = LettuceClientConfiguration.builder();
+            // Configure Lettuce with better timeout and SSL settings
+            LettuceClientConfiguration.LettuceClientConfigurationBuilder builder = LettuceClientConfiguration.builder()
+                .commandTimeout(Duration.ofSeconds(5))
+                .shutdownTimeout(Duration.ofMillis(100));
+
             if (redisUrl.startsWith("rediss://")) {
                 log.info("Redis: SSL enabled (rediss:// scheme)");
                 builder.useSsl().disablePeerVerification(); 
             }
 
-            return new LettuceConnectionFactory(config, builder.build());
+            LettuceConnectionFactory factory = new LettuceConnectionFactory(config, builder.build());
+            factory.afterPropertiesSet(); // Ensure connectivity is initialized
+            return factory;
         } catch (Exception e) {
-            log.error("Redis: Failed to parse REDIS_URL: {}", e.getMessage());
-            return null; 
+            log.error("Redis: Failed to initialize RedisConnectionFactory: {}", e.getMessage());
+            throw new IllegalStateException("Failed to connect to Redis", e);
         }
     }
 
