@@ -18,14 +18,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
-import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.lang.Nullable;
 import lombok.extern.slf4j.Slf4j;
-import java.net.URI;
 
 import java.time.Duration;
 import java.util.Map;
@@ -52,56 +47,7 @@ import java.util.Map;
 @Slf4j
 public class RedisConfig implements CachingConfigurer {
 
-    @Value("${REDIS_URL:#{null}}")
-    private String redisUrl;
 
-    @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
-        if (redisUrl == null || redisUrl.isBlank() || !redisUrl.startsWith("redis")) {
-            log.info("Redis: Using default auto-configuration (no REDIS_URL found)");
-            // Note: Returning null here might cause issues if other beans expect a
-            // RedisConnectionFactory.
-            // Spring Boot's auto-config will usually kick in if no bean is found,
-            // but since this method is marked @Bean, it registers 'null'.
-            return null;
-        }
-
-        try {
-            log.info("Redis: Initializing connection factory from REDIS_URL: {}",
-                    redisUrl.replaceAll(":.*@", ":****@")); // Mask password
-
-            URI uri = new URI(redisUrl);
-            RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-            config.setHostName(uri.getHost());
-            config.setPort(uri.getPort() == -1 ? 6379 : uri.getPort());
-
-            if (uri.getUserInfo() != null) {
-                String userInfo = uri.getUserInfo();
-                if (userInfo.contains(":")) {
-                    config.setPassword(userInfo.split(":", 2)[1]);
-                } else {
-                    config.setPassword(userInfo);
-                }
-            }
-
-            // Configure Lettuce with better timeout and SSL settings
-            LettuceClientConfiguration.LettuceClientConfigurationBuilder builder = LettuceClientConfiguration.builder()
-                    .commandTimeout(Duration.ofSeconds(10))
-                    .shutdownTimeout(Duration.ofMillis(100));
-
-            if (redisUrl.startsWith("rediss://")) {
-                log.info("Redis: SSL enabled (rediss:// scheme)");
-                builder.useSsl();
-            }
-
-            LettuceConnectionFactory factory = new LettuceConnectionFactory(config, builder.build());
-            // Ensure connectivity is initialized
-            return factory;
-        } catch (Exception e) {
-            log.error("Redis: Failed to initialize RedisConnectionFactory: {}", e.getMessage());
-            throw new IllegalStateException("Failed to connect to Redis", e);
-        }
-    }
 
     private ObjectMapper redisObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();

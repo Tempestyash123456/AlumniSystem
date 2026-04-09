@@ -118,7 +118,7 @@ public class PostService {
                 post.getId(),
                 post.getTitle(),
                 post.getDescription(),
-                post.getImageUrls(),
+                post.getImageUrls() == null ? java.util.Collections.emptyList() : new java.util.ArrayList<>(post.getImageUrls()),
                 author.getFirstName(),
                 author.getLastName(),
                 author.getProfilePhotoUrl(),
