@@ -37,14 +37,15 @@ import java.util.Map;
  * Having both causes a duplicate CacheManager bean conflict.
  *
  * ObjectMapper setup:
- *  - JavaTimeModule          → Instant, LocalDate fields on entities
- *  - SecurityJackson2Modules → Spring Security types (not strictly needed now
- *                              since CachedUserDetails stores roles as strings,
- *                              but keeps the serializer correct for future use)
- *  - DefaultTyping NON_FINAL with As.PROPERTY → embeds "@class":"com.example.Foo"
- *    as a JSON field rather than a WRAPPER_ARRAY ["com.example.Foo", {...}].
- *    PROPERTY format is required — WRAPPER_ARRAY breaks deserialization of types
- *    that have only single-argument constructors (like SimpleGrantedAuthority).
+ * - JavaTimeModule → Instant, LocalDate fields on entities
+ * - SecurityJackson2Modules → Spring Security types (not strictly needed now
+ * since CachedUserDetails stores roles as strings,
+ * but keeps the serializer correct for future use)
+ * - DefaultTyping NON_FINAL with As.PROPERTY → embeds
+ * "@class":"com.example.Foo"
+ * as a JSON field rather than a WRAPPER_ARRAY ["com.example.Foo", {...}].
+ * PROPERTY format is required — WRAPPER_ARRAY breaks deserialization of types
+ * that have only single-argument constructors (like SimpleGrantedAuthority).
  */
 @Configuration
 @EnableCaching
@@ -58,16 +59,17 @@ public class RedisConfig implements CachingConfigurer {
     public RedisConnectionFactory redisConnectionFactory() {
         if (redisUrl == null || redisUrl.isBlank() || !redisUrl.startsWith("redis")) {
             log.info("Redis: Using default auto-configuration (no REDIS_URL found)");
-            // Note: Returning null here might cause issues if other beans expect a RedisConnectionFactory.
-            // Spring Boot's auto-config will usually kick in if no bean is found, 
+            // Note: Returning null here might cause issues if other beans expect a
+            // RedisConnectionFactory.
+            // Spring Boot's auto-config will usually kick in if no bean is found,
             // but since this method is marked @Bean, it registers 'null'.
-            return null; 
+            return null;
         }
 
         try {
-            log.info("Redis: Initializing connection factory from REDIS_URL: {}", 
-                     redisUrl.replaceAll(":.*@", ":****@")); // Mask password
-            
+            log.info("Redis: Initializing connection factory from REDIS_URL: {}",
+                    redisUrl.replaceAll(":.*@", ":****@")); // Mask password
+
             URI uri = new URI(redisUrl);
             RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
             config.setHostName(uri.getHost());
@@ -84,16 +86,16 @@ public class RedisConfig implements CachingConfigurer {
 
             // Configure Lettuce with better timeout and SSL settings
             LettuceClientConfiguration.LettuceClientConfigurationBuilder builder = LettuceClientConfiguration.builder()
-                .commandTimeout(Duration.ofSeconds(5))
-                .shutdownTimeout(Duration.ofMillis(100));
+                    .commandTimeout(Duration.ofSeconds(10))
+                    .shutdownTimeout(Duration.ofMillis(100));
 
             if (redisUrl.startsWith("rediss://")) {
                 log.info("Redis: SSL enabled (rediss:// scheme)");
-                builder.useSsl().disablePeerVerification(); 
+                builder.useSsl();
             }
 
             LettuceConnectionFactory factory = new LettuceConnectionFactory(config, builder.build());
-            factory.afterPropertiesSet(); // Ensure connectivity is initialized
+            // Ensure connectivity is initialized
             return factory;
         } catch (Exception e) {
             log.error("Redis: Failed to initialize RedisConnectionFactory: {}", e.getMessage());
@@ -111,7 +113,7 @@ public class RedisConfig implements CachingConfigurer {
                         .allowIfBaseType(Object.class)
                         .build(),
                 ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY);   // ← PROPERTY not WRAPPER_ARRAY
+                JsonTypeInfo.As.PROPERTY); // ← PROPERTY not WRAPPER_ARRAY
         return mapper;
     }
 
@@ -123,8 +125,7 @@ public class RedisConfig implements CachingConfigurer {
         template.setConnectionFactory(connectionFactory);
 
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
-        GenericJackson2JsonRedisSerializer jsonSerializer =
-                new GenericJackson2JsonRedisSerializer(redisObjectMapper());
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper());
 
         template.setKeySerializer(stringSerializer);
         template.setHashKeySerializer(stringSerializer);
@@ -137,8 +138,7 @@ public class RedisConfig implements CachingConfigurer {
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
 
-        GenericJackson2JsonRedisSerializer jsonSerializer =
-                new GenericJackson2JsonRedisSerializer(redisObjectMapper());
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper());
 
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration
                 .defaultCacheConfig()
@@ -152,10 +152,9 @@ public class RedisConfig implements CachingConfigurer {
 
         Map<String, RedisCacheConfiguration> cacheConfigs = Map.of(
                 CacheNames.ALUMNI_PROFILES, defaultConfig.entryTtl(Duration.ofMinutes(15)),
-                CacheNames.EVENTS,          defaultConfig.entryTtl(Duration.ofMinutes(5)),
-                CacheNames.USER_DETAILS,    defaultConfig.entryTtl(Duration.ofMinutes(30)),
-                CacheNames.STATS,           defaultConfig.entryTtl(Duration.ofHours(1))
-        );
+                CacheNames.EVENTS, defaultConfig.entryTtl(Duration.ofMinutes(5)),
+                CacheNames.USER_DETAILS, defaultConfig.entryTtl(Duration.ofMinutes(30)),
+                CacheNames.STATS, defaultConfig.entryTtl(Duration.ofHours(1)));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(defaultConfig)
@@ -168,35 +167,38 @@ public class RedisConfig implements CachingConfigurer {
         return new CacheErrorHandler() {
             @Override
             public void handleCacheGetError(RuntimeException exception, Cache cache, Object key) {
-                log.warn("Redis: GET error for key [{}] in cache [{}]: {}", 
-                         key, cache.getName(), exception.getMessage());
+                log.warn("Redis: GET error for key [{}] in cache [{}]: {}",
+                        key, cache.getName(), exception.getMessage());
             }
 
             @Override
-            public void handleCachePutError(RuntimeException exception, Cache cache, Object key, @Nullable Object value) {
-                log.warn("Redis: PUT error for key [{}] in cache [{}]: {}", 
-                         key, cache.getName(), exception.getMessage());
+            public void handleCachePutError(RuntimeException exception, Cache cache, Object key,
+                    @Nullable Object value) {
+                log.warn("Redis: PUT error for key [{}] in cache [{}]: {}",
+                        key, cache.getName(), exception.getMessage());
             }
 
             @Override
             public void handleCacheEvictError(RuntimeException exception, Cache cache, Object key) {
-                log.warn("Redis: EVICT error for key [{}] in cache [{}]: {}", 
-                         key, cache.getName(), exception.getMessage());
+                log.warn("Redis: EVICT error for key [{}] in cache [{}]: {}",
+                        key, cache.getName(), exception.getMessage());
             }
 
             @Override
             public void handleCacheClearError(RuntimeException exception, Cache cache) {
-                log.warn("Redis: CLEAR error for cache [{}]: {}", 
-                         cache.getName(), exception.getMessage());
+                log.warn("Redis: CLEAR error for cache [{}]: {}",
+                        cache.getName(), exception.getMessage());
             }
         };
     }
 
     public static final class CacheNames {
         public static final String ALUMNI_PROFILES = "alumni_profiles";
-        public static final String EVENTS          = "events";
-        public static final String USER_DETAILS    = "user_details";
-        public static final String STATS           = "stats";
-        private CacheNames() {}
+        public static final String EVENTS = "events";
+        public static final String USER_DETAILS = "user_details";
+        public static final String STATS = "stats";
+
+        private CacheNames() {
+        }
     }
 }
