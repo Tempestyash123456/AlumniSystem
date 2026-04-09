@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching                      // Enables @Cacheable, @CacheEvict
 @EnableAsync                        // Enables @Async for non-blocking email/notifications
 @EnableScheduling                   // Enables @Scheduled for reminders/jobs
+@ConfigurationPropertiesScan        // Auto-registers all @ConfigurationProperties classes
 public class AlumniPortalApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AlumniPortalApplication.class, args);
