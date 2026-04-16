@@ -8,6 +8,9 @@ import { getImageUrl } from '../../lib/api';
 import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+/** Returns the most recent / current job from a jobs array, or undefined. */
+const getCurrentJob = (jobs?: import('../../types').JobExperience[]) =>
+    jobs?.find(j => !j.endYear) ?? jobs?.[jobs.length - 1];
 const avatarColor = (id: string) => {
     const colors = [
         ['#00f5ff', '#0099aa'],
@@ -107,11 +110,11 @@ const UserCard: React.FC<{
 
                 {profile && (
                     <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        {profile.currentJobTitle && (
+                        {(() => { const job = getCurrentJob(profile.jobs); return job?.jobTitle && (
                             <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {profile.currentJobTitle}
+                                {job.jobTitle}
                             </div>
-                        )}
+                        ); })()}
                         {profile.program && (
                             <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                                 {profile.program}
@@ -215,9 +218,9 @@ const UserRow: React.FC<{
             </td>
             <td>
                 <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
-                    {profile?.currentJobTitle
-                        ? `${profile.currentJobTitle}${profile.currentCompany ? ` @ ${profile.currentCompany}` : ''}`
-                        : '—'}
+                    {(() => { const job = getCurrentJob(profile?.jobs); return job?.jobTitle
+                        ? `${job.jobTitle}${job.company ? ` @ ${job.company}` : ''}`
+                        : '—'; })()}
                 </div>
             </td>
             <td style={{ textAlign: 'right' }}>
@@ -643,11 +646,11 @@ export const AlumniProfileViewPage: React.FC = () => {
                             <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
                                 {profile.firstName} {profile.lastName}
                             </h1>
-                            {profile.currentJobTitle && (
+                            {(() => { const job = getCurrentJob(profile.jobs); return job?.jobTitle && (
                                 <div style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '16px', color: 'var(--text-secondary)', marginBottom: 10 }}>
-                                    {profile.currentJobTitle}{profile.currentCompany && ` @ ${profile.currentCompany}`}
+                                    {job.jobTitle}{job.company && ` @ ${job.company}`}
                                 </div>
-                            )}
+                            ); })()}
                             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                                 {profile.openToMentor   && <Badge variant="cyan">Open to Mentor</Badge>}
                                 {profile.openToHire     && <Badge variant="green">Open to Hire</Badge>}
@@ -679,8 +682,8 @@ export const AlumniProfileViewPage: React.FC = () => {
                             { label: 'Graduation Year', value: profile.graduationYear },
                             { label: 'Program',        value: profile.program },
                             { label: 'Discipline',     value: profile.discipline },
-                            { label: 'Industry',       value: profile.industry },
-                            { label: 'Experience',     value: profile.experienceYears != null ? `${profile.experienceYears} yrs` : null },
+                            { label: 'Industry',       value: getCurrentJob(profile.jobs)?.industry },
+                            { label: 'Experience',     value: profile.jobs?.length ? `${profile.jobs.reduce((s, j) => s + (j.experienceMonths ?? 0), 0)} months` : null },
                             { label: 'Student / Employee ID', value: profile.studentId },
                         ].filter(f => f.value).map(({ label, value }, idx) => (
                             <div key={label} className={`reveal-hidden reveal-visible`} style={{ transitionDelay: `${0.3 + idx * 0.05}s` }}>
