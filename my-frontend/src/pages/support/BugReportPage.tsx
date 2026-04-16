@@ -198,13 +198,8 @@ export const BugReportPage: React.FC = () => {
                         </Badge>
 
                         <div style={{ margin: '20px 0', display: 'flex', gap: '15px' }}>
-                            <a href={dev.linkedin} target="_blank" rel="noreferrer" className="cp-nav-item" style={{ padding: '8px' }}>🔗 LinkedIn</a>
                             <a href={dev.github} target="_blank" rel="noreferrer" className="cp-nav-item" style={{ padding: '8px' }}>🐙 GitHub</a>
                         </div>
-
-                        <p style={{ fontFamily: 'Share Tech Mono, monospace', color: 'var(--neon-cyan)', fontSize: '14px' }}>
-                            {dev.email}
-                        </p>
 
                         {isAuthorizedToEdit && user?.email === dev.email && (
                             <button
