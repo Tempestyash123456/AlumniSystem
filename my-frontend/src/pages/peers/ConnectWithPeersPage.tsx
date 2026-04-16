@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { alumniApi } from '../../lib/api';
-import type { AlumniDto, PeerGroupDto } from '../../types';
+import type { AlumniDto } from '../../types';
+import { Spinner } from '../../components/ui';
 import './Peers.css';
 
-// Custom LinkedIn Icon for consistency
+// Custom LinkedIn Icon
 const LinkedinIcon = ({ size = 20 }: { size?: number }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
@@ -18,209 +19,227 @@ const LinkedinIcon = ({ size = 20 }: { size?: number }) => (
     </svg>
 );
 
-type Step = 'program' | 'year' | 'country' | 'state' | 'city' | 'peers';
+// ── Filter Sidebar Component ──────────────────────────────────────────────────
+interface Filters {
+    program: string;
+    year: string;
+    country: string;
+    state: string;
+    city: string;
+}
 
+const FilterSidebar: React.FC<{
+    filters: Filters;
+    onChange: (key: keyof Filters, value: string) => void;
+    onClear: () => void;
+    options: { [key in keyof Filters]: string[] };
+    isOpen: boolean;
+}> = ({ filters, onChange, onClear, options, isOpen }) => (
+    <div className={`peers-sidebar ${isOpen ? 'open' : ''}`}>
+        <div className="peers-sidebar-title">Filters</div>
+        
+        {(['program', 'year', 'country', 'state', 'city'] as const).map((key) => (
+            <div className="filter-group" key={key}>
+                <label className="filter-label">{key.replace('program', 'Program').replace('year', 'Graduation Year')}</label>
+                <select 
+                    className="filter-select"
+                    value={filters[key]}
+                    onChange={(e) => onChange(key, e.target.value)}
+                >
+                    <option value="">All {key.charAt(0).toUpperCase() + key.slice(1)}s</option>
+                    {options[key].map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                </select>
+            </div>
+        ))}
+
+        <button className="filter-clear-btn" onClick={onClear}>
+            ✕ CLEAR FILTERS
+        </button>
+    </div>
+);
+
+// ── Peer Card View ────────────────────────────────────────────────────────────
+const PeerCard: React.FC<{ peer: AlumniDto }> = ({ peer }) => {
+    return (
+        <div className="peer-card">
+            <img 
+                src={peer.profilePhotoUrl || 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'} 
+                alt={`${peer.firstName} ${peer.lastName}`} 
+                className="peer-avatar"
+                onError={(e) => { (e.target as HTMLImageElement).src = 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'; }}
+            />
+            <div className="peer-info">
+                <div className="peer-name">{peer.firstName} {peer.lastName}</div>
+                <div className="peer-work-info">
+                    {(() => {
+                        const title = peer.currentJobTitle;
+                        const company = peer.currentCompany;
+                        if (title && company) return `${title} @ ${company}`;
+                        if (title || company) return title || company;
+                        return <span style={{ opacity: 0.4 }}>Professional details hidden</span>;
+                    })()}
+                </div>
+                <div className="peer-footer">
+                    <a href={`mailto:${peer.email}`} className="peer-email">
+                        {peer.email}
+                    </a>
+                    {peer.linkedinUrl && (
+                        <a 
+                            href={peer.linkedinUrl.startsWith('http') ? peer.linkedinUrl : `https://${peer.linkedinUrl}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="peer-linkedin-link"
+                        >
+                            <LinkedinIcon size={18} />
+                        </a>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ── Main Page Component ───────────────────────────────────────────────────────
 export const ConnectWithPeersPage: React.FC = () => {
-    const [step, setStep] = useState<Step>('program');
-    const [loading, setLoading] = useState(false);
+    const [allPeers, setAllPeers]         = useState<AlumniDto[]>([]);
+    const [filteredPeers, setFilteredPeers] = useState<AlumniDto[]>([]);
+    const [loading, setLoading]           = useState(true);
+    const [sidebarOpen, setSidebarOpen]   = useState(false);
     
-    const [filters, setFilters] = useState({
+    const [filters, setFilters] = useState<Filters>({
         program: '',
-        year: 0,
+        year: '',
         country: '',
         state: '',
         city: ''
     });
 
-    const [groups, setGroups] = useState<PeerGroupDto[]>([]);
-    const [peers, setPeers] = useState<AlumniDto[]>([]);
+    const [debouncedFilters, setDebouncedFilters] = useState<Filters>(filters);
 
+    // Fetch all peers on mount
     useEffect(() => {
-        fetchCurrentLevel();
-    }, [step, filters]);
-
-    const fetchCurrentLevel = async () => {
-        setLoading(true);
-        try {
-            let res;
-            switch (step) {
-                case 'program':
-                    res = await alumniApi.getPeerPrograms();
-                    if (res.success) setGroups(res.data || []);
-                    break;
-                case 'year':
-                    res = await alumniApi.getPeerYears(filters.program);
-                    if (res.success) setGroups(res.data || []);
-                    break;
-                case 'country':
-                    res = await alumniApi.getPeerCountries(filters.program, filters.year);
-                    if (res.success) setGroups(res.data || []);
-                    break;
-                case 'state':
-                    res = await alumniApi.getPeerStates(filters.program, filters.year, filters.country);
-                    if (res.success) setGroups(res.data || []);
-                    break;
-                case 'city':
-                    res = await alumniApi.getPeerCities(filters.program, filters.year, filters.country, filters.state);
-                    if (res.success) setGroups(res.data || []);
-                    break;
-                case 'peers':
-                    res = await alumniApi.getPeers(filters.program, filters.year, filters.country, filters.state, filters.city);
-                    if (res.success) setPeers(res.data || []);
-                    break;
+        const fetchPeers = async () => {
+            try {
+                const res = await alumniApi.getAll();
+                if (res.success && res.data) {
+                    setAllPeers(res.data);
+                    setFilteredPeers(res.data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch peers:', err);
+            } finally {
+                setLoading(false);
             }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
+        };
+        fetchPeers();
+    }, []);
+
+    // Debounce filter changes
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedFilters(filters);
+        }, 300);
+        return () => clearTimeout(handler);
+    }, [filters]);
+
+    // Apply filtering whenever debounced filters or data changes
+    useEffect(() => {
+        let result = [...allPeers];
+
+        if (debouncedFilters.program) {
+            result = result.filter(p => p.program === debouncedFilters.program);
         }
-    };
-
-    const handleGroupClick = (name: string) => {
-        switch (step) {
-            case 'program':
-                setFilters(f => ({ ...f, program: name }));
-                setStep('year');
-                break;
-            case 'year':
-                setFilters(f => ({ ...f, year: parseInt(name) }));
-                setStep('country');
-                break;
-            case 'country':
-                setFilters(f => ({ ...f, country: name }));
-                setStep('state');
-                break;
-            case 'state':
-                setFilters(f => ({ ...f, state: name }));
-                setStep('city');
-                break;
-            case 'city':
-                setFilters(f => ({ ...f, city: name }));
-                setStep('peers');
-                break;
+        if (debouncedFilters.year) {
+            result = result.filter(p => String(p.graduationYear) === debouncedFilters.year);
         }
+        if (debouncedFilters.country) {
+            result = result.filter(p => p.country === debouncedFilters.country);
+        }
+        if (debouncedFilters.state) {
+            result = result.filter(p => p.state === debouncedFilters.state);
+        }
+        if (debouncedFilters.city) {
+            result = result.filter(p => p.city === debouncedFilters.city);
+        }
+
+        setFilteredPeers(result);
+    }, [debouncedFilters, allPeers]);
+
+    // Compute unique options for dropdowns dynamically
+    const filterOptions = useMemo(() => {
+        return {
+            program: Array.from(new Set(allPeers.map(p => p.program).filter(Boolean))).sort() as string[],
+            year:    Array.from(new Set(allPeers.map(p => p.graduationYear).filter(Boolean).map(String))).sort((a,b) => b.localeCompare(a)) as string[],
+            country: Array.from(new Set(allPeers.map(p => p.country).filter(Boolean))).sort() as string[],
+            state:   Array.from(new Set(allPeers.map(p => p.state).filter(Boolean))).sort() as string[],
+            city:    Array.from(new Set(allPeers.map(p => p.city).filter(Boolean))).sort() as string[],
+        };
+    }, [allPeers]);
+
+    const handleFilterChange = (key: keyof Filters, value: string) => {
+        setFilters(prev => ({ ...prev, [key]: value }));
     };
 
-    const goBackTo = (targetStep: Step) => {
-        setStep(targetStep);
-        if (targetStep === 'program') setFilters({ program: '', year: 0, country: '', state: '', city: '' });
-        else if (targetStep === 'year') setFilters(f => ({ ...f, year: 0, country: '', state: '', city: '' }));
-        else if (targetStep === 'country') setFilters(f => ({ ...f, country: '', state: '', city: '' }));
-        else if (targetStep === 'state') setFilters(f => ({ ...f, state: '', city: '' }));
-        else if (targetStep === 'city') setFilters(f => ({ ...f, city: '' }));
+    const clearFilters = () => {
+        setFilters({ program: '', year: '', country: '', state: '', city: '' });
     };
-
-    const renderHeader = () => {
-        const steps: { key: Step; label: string; value?: string | number }[] = [
-            { key: 'program', label: 'Programs', value: filters.program },
-            { key: 'year', label: 'Graduation Year', value: filters.year || undefined },
-            { key: 'country', label: 'Country', value: filters.country },
-            { key: 'state', label: 'State', value: filters.state },
-            { key: 'city', label: 'City', value: filters.city },
-            { key: 'peers', label: 'Peers' }
-        ];
-
-        return (
-            <div className="peers-breadcrumb">
-                <span onClick={() => goBackTo('program')} className={step === 'program' ? 'active' : ''}>Connect</span>
-                {steps.map((s, idx) => {
-                    const isVisible = steps.slice(0, idx).every(prev => prev.value);
-                    if (!isVisible && s.key !== 'program') return null;
-                    if (s.key === 'peers' && step !== 'peers') return null;
-                    
-                    return (
-                        <React.Fragment key={s.key}>
-                            <span> / </span>
-                            <span 
-                                onClick={() => goBackTo(s.key)}
-                                className={step === s.key ? 'active' : ''}
-                            >
-                                {s.value || s.label}
-                            </span>
-                        </React.Fragment>
-                    );
-                })}
-            </div>
-        );
-    };
-
-    if (loading) return <div className="loading-state">Loading connection data...</div>;
 
     return (
-        <div className="peers-container">
-            <h1 style={{ fontFamily: 'Orbitron, sans-serif', letterSpacing: '0.1em', marginBottom: '8px' }}>
-                CONNECT WITH PEERS
-            </h1>
-            <p style={{ color: 'var(--text-muted)', marginBottom: '32px' }}>
-                Find alumni from your program, year, or location.
-            </p>
-
-            {renderHeader()}
-
-            {step !== 'peers' ? (
-                <div className="peers-grid">
-                    {groups.map((g, i) => (
-                        <div 
-                            key={`${g.name}-${i}`} 
-                            className="peer-group-card"
-                            onClick={() => handleGroupClick(g.name)}
-                        >
-                            <div className="peer-group-title">
-                                {step === 'year' ? `Class of ${g.name}` : g.name}
-                            </div>
-                            <div className="peer-group-count">
-                                {g.count} Member{g.count !== 1 ? 's' : ''}
-                            </div>
-                        </div>
-                    ))}
-                    {groups.length === 0 && (
-                        <div className="empty-state">No matching peer groups found.</div>
-                    )}
+        <div className="peers-container animate-fade-in">
+            <header>
+                <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 6 }}>
+                    NETWORK_CORE › PEER_CONNECT
                 </div>
-            ) : (
-                <div className="peers-grid">
-                    {peers.map((peer) => (
-                        <div key={peer.id} className="peer-card">
-                            <img 
-                                src={peer.profilePhotoUrl || '/default-avatar.png'} 
-                                alt={`${peer.firstName} ${peer.lastName}`} 
-                                className="peer-avatar"
-                                onError={(e) => { (e.target as HTMLImageElement).src = '/default-avatar.png'; }}
-                            />
-                            <div className="peer-info">
-                                <div className="peer-name">{peer.firstName} {peer.lastName}</div>
-                                {(() => {
-                                    const title = peer.currentJobTitle;
-                                    const company = peer.currentCompany;
-                                    const isUnemployed = (title && title.toLowerCase() === 'unemployed') || (company && company.toLowerCase() === 'unemployed');
-                                    
-                                    if (isUnemployed) return <div className="peer-work-info">Unemployed</div>;
-                                    if (title && company) return <div className="peer-work-info">{title} at {company}</div>;
-                                    if (title || company) return <div className="peer-work-info">{title || company}</div>;
-                                    return null;
-                                })()}
-                                <div className="peer-footer">
-                                    <div className="peer-email">{peer.email}</div>
-                                    {peer.linkedinUrl && (
-                                        <a 
-                                            href={peer.linkedinUrl.startsWith('http') ? peer.linkedinUrl : `https://${peer.linkedinUrl}`} 
-                                            target="_blank" 
-                                            rel="noopener noreferrer" 
-                                            className="peer-linkedin-link"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            <LinkedinIcon size={18} />
-                                        </a>
-                                    )}
+                <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '28px', fontWeight: 800, letterSpacing: '0.05em' }}>
+                    CONNECT WITH PEERS
+                </h1>
+                <p style={{ color: 'var(--text-muted)', marginTop: 8, maxWidth: '600px' }}>
+                    Collaborate, mentor, and grow within your alumni network. Use the filters to find peers by program, year, or location.
+                </p>
+            </header>
+
+            <button 
+                className="mobile-filter-toggle"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+                {sidebarOpen ? '✕ HIDE FILTERS' : '☰ SHOW FILTERS'}
+            </button>
+
+            <div className="peers-layout">
+                <main className="peers-main">
+                    {loading ? (
+                        <div className="loading-container">
+                            <Spinner size={40} />
+                            <span>SYNCHRONIZING NETWORK DATA...</span>
+                        </div>
+                    ) : (
+                        <div className="peers-grid">
+                            {filteredPeers.map((peer) => (
+                                <PeerCard key={peer.id} peer={peer} />
+                            ))}
+                            {filteredPeers.length === 0 && (
+                                <div className="empty-state">
+                                    <div style={{ fontSize: '40px', marginBottom: '16px', opacity: 0.3 }}>◈</div>
+                                    <p>No peers match your current filter criteria.</p>
+                                    <button onClick={clearFilters} className="cp-btn cp-btn-ghost cp-btn-sm" style={{ marginTop: '16px' }}>
+                                        Reset Filters
+                                    </button>
                                 </div>
-                            </div>
+                            )}
                         </div>
-                    ))}
-                    {peers.length === 0 && (
-                        <div className="empty-state">No peers found in this city.</div>
                     )}
-                </div>
-            )}
+                </main>
+
+                <FilterSidebar 
+                    filters={filters}
+                    onChange={handleFilterChange}
+                    onClear={clearFilters}
+                    options={filterOptions}
+                    isOpen={sidebarOpen}
+                />
+            </div>
         </div>
     );
 };
