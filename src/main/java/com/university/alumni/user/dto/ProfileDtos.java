@@ -12,6 +12,18 @@ public final class ProfileDtos {
 
     private ProfileDtos() {}
 
+    public record JobExperienceDto(
+            UUID    id,
+            String  jobTitle,
+            String  company,
+            String  industry,
+            Integer startMonth,
+            Integer startYear,
+            Integer endMonth,
+            Integer endYear,
+            Integer experienceMonths
+    ) {}
+
     // ── Full profile response (own profile or admin view) ─────────────────────
     public record ProfileResponse(
             UUID   userId,
@@ -29,10 +41,7 @@ public final class ProfileDtos {
             String  program,
 
             // Professional
-            String  currentJobTitle,
-            String  currentCompany,
-            String  industry,
-            Integer experienceYears,
+            List<JobExperienceDto> jobs,
             String  linkedinUrl,
             String  githubUrl,
             String  portfolioUrl,
@@ -69,10 +78,7 @@ public final class ProfileDtos {
             @Size(max = 150) String program,
 
             // Professional
-            @Size(max = 150) String currentJobTitle,
-            @Size(max = 150) String currentCompany,
-            @Size(max = 100) String industry,
-            @Min(0) @Max(60) Integer experienceYears,
+            List<JobExperienceDto> jobs,
             @Size(max = 500) String linkedinUrl,
             @Size(max = 500) String githubUrl,
             @Size(max = 500) String portfolioUrl,

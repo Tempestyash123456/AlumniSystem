@@ -40,6 +40,18 @@ export interface MessageResponse {
     message: string;
 }
 
+export interface JobExperience {
+    id?: string;
+    jobTitle: string;
+    company: string;
+    industry?: string;
+    startMonth: number;
+    startYear: number;
+    endMonth?: number | null;
+    endYear?: number | null;
+    experienceMonths?: number;
+}
+
 // ── Profile ───────────────────────────────────────────────────────────────────
 export interface ProfileResponse {
     userId: string;
@@ -55,10 +67,7 @@ export interface ProfileResponse {
     discipline?: string;
     program?: string;
 
-    currentJobTitle?: string;
-    currentCompany?: string;
-    industry?: string;
-    experienceYears?: number;
+    jobs: JobExperience[];
     linkedinUrl?: string;
     githubUrl?: string;
     portfolioUrl?: string;
@@ -86,10 +95,7 @@ export interface UpdateProfileRequest {
     graduationYear?: number | null;
     discipline?: string | null;
     program?: string | null;
-    currentJobTitle?: string | null;
-    currentCompany?: string | null;
-    industry?: string | null;
-    experienceYears?: number | null;
+    jobs?: JobExperience[] | null;
     linkedinUrl?: string | null;
     githubUrl?: string | null;
     portfolioUrl?: string | null;

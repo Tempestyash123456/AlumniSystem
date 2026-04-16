@@ -3,7 +3,8 @@ import { profileApi } from '../../lib/api.ts';
 import { useAuthStore } from '../../store/authStore.ts';
 import type { ProfileResponse, UpdateProfileRequest } from '../../types';
 import { Input, Textarea, Select, Button, Alert, ProgressBar, SkillsInput, Spinner } from '../../components/ui';
-import { PROGRAM_OPTIONS, DISCIPLINE_OPTIONS, INDUSTRY_OPTIONS } from '../../lib/constants';
+import { PROGRAM_OPTIONS, DISCIPLINE_OPTIONS, INDUSTRY_OPTIONS, YEAR_OPTIONS, MONTH_OPTIONS } from '../../lib/constants';
+import { JobExperience } from '../../types';
 import {
     CitySelect,
     CountrySelect,
@@ -180,6 +181,19 @@ export const ProfilePage: React.FC = () => {
     const [selectedState, setSelectedState] = useState<any>(null);
     const [selectedCity, setSelectedCity] = useState<any>(null);
 
+    const calculateExperience = (j: JobExperience) => {
+        if (!j.startMonth || !j.startYear) return 0;
+        const start = new Date(j.startYear, j.startMonth - 1);
+        const end = (j.endYear && j.endMonth)
+            ? new Date(j.endYear, j.endMonth - 1)
+            : new Date();
+
+        const diffYears = end.getFullYear() - start.getFullYear();
+        const diffMonths = end.getMonth() - start.getMonth();
+        const total = diffYears * 12 + diffMonths;
+        return Math.max(0, total);
+    };
+
     const loadProfile = useCallback(async () => {
         setLoading(prev => prev || true);
         const res = await profileApi.getMyProfile();
@@ -207,6 +221,7 @@ export const ProfilePage: React.FC = () => {
                 githubUrl: res.data.githubUrl ?? '',
                 portfolioUrl: res.data.portfolioUrl ?? '',
                 skills: res.data.skills ?? [],
+                jobs: res.data.jobs ?? [],
                 profilePublic: res.data.profilePublic,
                 openToMentor: res.data.openToMentor,
                 openToHire: res.data.openToHire,
@@ -245,6 +260,33 @@ export const ProfilePage: React.FC = () => {
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
             setForm(prev => ({ ...prev, [field]: e.target.value ? Number(e.target.value) : undefined }));
 
+    const updateJob = (index: number, updates: Partial<JobExperience>) => {
+        setForm(prev => {
+            const jobs = [...(prev.jobs || [])];
+            jobs[index] = { ...jobs[index], ...updates };
+            // Auto-calculate months
+            jobs[index].experienceMonths = calculateExperience(jobs[index]);
+            return { ...prev, jobs };
+        });
+    };
+
+    const addJob = () => {
+        setForm(prev => ({
+            ...prev,
+            jobs: [
+                ...(prev.jobs || []),
+                { jobTitle: '', company: '', industry: '', startMonth: 1, startYear: new Date().getFullYear(), experienceMonths: 0 }
+            ]
+        }));
+    };
+
+    const removeJob = (index: number) => {
+        setForm(prev => ({
+            ...prev,
+            jobs: (prev.jobs || []).filter((_, i) => i !== index)
+        }));
+    };
+
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -253,7 +295,10 @@ export const ProfilePage: React.FC = () => {
         setSuccess('');
 
         const clean: UpdateProfileRequest = Object.fromEntries(
-            Object.entries(form).map(([k, v]) => [k, v === '' ? null : v])
+            Object.entries(form).map(([k, v]) => {
+                if (Array.isArray(v)) return [k, v];
+                return [k, v === '' ? null : v];
+            })
         ) as UpdateProfileRequest;
 
         const res = await profileApi.updateMyProfile(clean);
@@ -461,8 +506,8 @@ export const ProfilePage: React.FC = () => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
                                     <Input label="Student / Employee ID" value={form.studentId ?? ''} onChange={setStr('studentId')} />
-                                    <Input label="Admission Year" type="number" placeholder="YYYY" value={form.admissionYear ?? ''} onChange={setNum('admissionYear')} />
-                                    <Input label="Graduation Year" type="number" placeholder="YYYY" value={form.graduationYear ?? ''} onChange={setNum('graduationYear')} />
+                                    <Select label="Admission Year" value={form.admissionYear ?? ''} onChange={setNum('admissionYear')} options={YEAR_OPTIONS} placeholder="Select Year" />
+                                    <Select label="Graduation Year" value={form.graduationYear ?? ''} onChange={setNum('graduationYear')} options={YEAR_OPTIONS} placeholder="Select Year" />
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                                     <Select label="Discipline" value={form.discipline ?? ''} onChange={setStr('discipline')} options={DISCIPLINE_OPTIONS} placeholder="Select Discipline" />
@@ -472,15 +517,60 @@ export const ProfilePage: React.FC = () => {
                         )}
 
                         {activeSection === 'professional' && (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                                    <Input label="Job Title" value={form.currentJobTitle ?? ''} placeholder="Unemployed" onChange={setStr('currentJobTitle')} />
-                                    <Input label="Company" value={form.currentCompany ?? ''} placeholder="Unemployed" onChange={setStr('currentCompany')} />
-                                </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                                    <Select label="Industry" value={form.industry ?? ''} onChange={setStr('industry')} options={INDUSTRY_OPTIONS} />
-                                    <Input label="Experience Years" type="number" value={form.experienceYears ?? ''} onChange={setNum('experienceYears')} />
-                                </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                                {(form.jobs || []).map((job, idx) => (
+                                    <div key={idx} className="cp-panel" style={{ padding: '24px', position: 'relative', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--border-subtle)', borderRadius: '8px' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
+                                            <div style={{ fontFamily: 'Orbitron, monospace', fontSize: '12px', color: 'var(--neon-cyan)' }}>
+                                                JOB_EXPERIENCE #{idx + 1}
+                                            </div>
+                                            <Button variant="ghost" size="sm" onClick={() => removeJob(idx)} style={{ color: 'var(--neon-pink)' }}>REMOVE</Button>
+                                        </div>
+
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                                <Input label="Job Title" value={job.jobTitle} onChange={e => updateJob(idx, { jobTitle: e.target.value })} placeholder="e.g. Senior Software Engineer" />
+                                                <Input label="Company" value={job.company} onChange={e => updateJob(idx, { company: e.target.value })} placeholder="e.g. Google" />
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                                                <Select label="Industry" value={job.industry ?? ''} onChange={e => updateJob(idx, { industry: e.target.value })} options={INDUSTRY_OPTIONS} placeholder="Select Industry" />
+                                                <div className="cp-input-wrap">
+                                                    <label className="cp-label">Experience</label>
+                                                    <div className="cp-input" style={{ display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.2)' }}>
+                                                        <span style={{ color: 'var(--neon-cyan)', fontWeight: 'bold', fontSize: '16px' }}>
+                                                            {job.experienceMonths || 0}
+                                                        </span>
+                                                        <span style={{ marginLeft: 8, fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'Rajdhani' }}>MONTHS TOTAL</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 20 }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                                    <label className="cp-label">START DATE</label>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10 }}>
+                                                        <Select value={job.startMonth} onChange={e => updateJob(idx, { startMonth: Number(e.target.value) })} options={MONTH_OPTIONS} />
+                                                        <Select value={job.startYear} onChange={e => updateJob(idx, { startYear: Number(e.target.value) })} options={YEAR_OPTIONS} />
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                                    <label className="cp-label">END DATE (Leave empty if Current)</label>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10 }}>
+                                                        <Select value={job.endMonth ?? ''} onChange={e => updateJob(idx, { endMonth: e.target.value ? Number(e.target.value) : null })} options={MONTH_OPTIONS} placeholder="Till Date" />
+                                                        <Select value={job.endYear ?? ''} onChange={e => updateJob(idx, { endYear: e.target.value ? Number(e.target.value) : null })} options={YEAR_OPTIONS} placeholder="Till Date" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+
+                                <Button variant="outline" onClick={addJob} style={{ borderStyle: 'dashed', height: '60px' }}>
+                                    + ADD NEW JOB EXPERIENCE
+                                </Button>
+
+                                <div style={{ height: '1px', background: 'var(--border-subtle)', margin: '10px 0' }} />
+                                
                                 <Input label="LinkedIn URL" value={form.linkedinUrl ?? ''} onChange={setStr('linkedinUrl')} />
                                 <Input label="GitHub URL" value={form.githubUrl ?? ''} onChange={setStr('githubUrl')} />
                                 <Input label="Portfolio URL" value={form.portfolioUrl ?? ''} onChange={setStr('portfolioUrl')} />

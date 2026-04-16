@@ -43,17 +43,9 @@ public class AlumniProfile extends BaseEntity {
     private String program;
 
     // ── Professional ─────────────────────────────────────────────────────────
-    @Column(name = "current_job_title")
-    private String currentJobTitle;
-
-    @Column(name = "current_company")
-    private String currentCompany;
-
-    @Column(name = "industry")
-    private String industry;
-
-    @Column(name = "experience_years")
-    private Integer experienceYears;
+    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<JobExperience> jobs = new java.util.ArrayList<>();
 
     @Column(name = "linkedin_url")
     private String linkedinUrl;
@@ -113,8 +105,7 @@ public class AlumniProfile extends BaseEntity {
     public void recomputeScore() {
         int score = 0;
         if (bio              != null && !bio.isBlank())              score += 15;
-        if (currentJobTitle  != null && !currentJobTitle.isBlank())  score += 10;
-        if (currentCompany   != null && !currentCompany.isBlank())   score += 10;
+        if (jobs             != null && !jobs.isEmpty())             score += 20;
         if (graduationYear   != null)                                 score += 5;
         if (admissionYear    != null)                                 score += 5;
         if (discipline       != null && !discipline.isBlank())       score += 10;

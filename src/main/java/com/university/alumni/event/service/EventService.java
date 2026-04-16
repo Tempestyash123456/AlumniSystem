@@ -76,7 +76,8 @@ public class EventService {
             for (MultipartFile file : mediaFiles) {
                 if (file != null && !file.isEmpty()) {
                     String url = fileStorageService.storeEventMedia(file);
-                    String type = file.getContentType() != null && file.getContentType().startsWith("video") ? "VIDEO" : "IMAGE";
+                    String contentType = file.getContentType();
+                    String type = contentType != null && contentType.startsWith("video") ? "VIDEO" : "IMAGE";
                     mediaList.add(new Event.EventMedia(url, type));
                 }
             }
@@ -114,7 +115,8 @@ public class EventService {
             for (MultipartFile file : mediaFiles) {
                 if (file != null && !file.isEmpty()) {
                     String url = fileStorageService.storeEventMedia(file);
-                    String type = file.getContentType() != null && file.getContentType().startsWith("video") ? "VIDEO" : "IMAGE";
+                    String contentType = file.getContentType();
+                    String type = contentType != null && contentType.startsWith("video") ? "VIDEO" : "IMAGE";
                     finalMedia.add(new Event.EventMedia(url, type));
                 }
             }

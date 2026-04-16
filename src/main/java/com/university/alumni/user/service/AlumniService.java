@@ -2,6 +2,7 @@ package com.university.alumni.user.service;
 
 import com.university.alumni.user.dto.AlumniDto;
 import com.university.alumni.user.dto.PeerGroupDto;
+import com.university.alumni.user.entity.JobExperience;
 import com.university.alumni.user.entity.AlumniProfile;
 import com.university.alumni.user.entity.User;
 import com.university.alumni.user.repository.AlumniProfileRepository;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,6 +74,24 @@ public class AlumniService {
     }
 
     private AlumniDto mapToDto(User user, AlumniProfile profile) {
+        String jobTitle = null;
+        String company = null;
+
+        if (profile != null && profile.getJobs() != null && !profile.getJobs().isEmpty()) {
+            JobExperience latest = profile.getJobs().stream()
+                    .sorted(Comparator.comparing(JobExperience::getEndYear, Comparator.nullsFirst(Comparator.reverseOrder()))
+                            .thenComparing(JobExperience::getEndMonth, Comparator.nullsFirst(Comparator.reverseOrder()))
+                            .thenComparing(JobExperience::getStartYear, Comparator.reverseOrder())
+                            .thenComparing(JobExperience::getStartMonth, Comparator.reverseOrder()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (latest != null) {
+                jobTitle = latest.getJobTitle();
+                company = latest.getCompany();
+            }
+        }
+
         return new AlumniDto(
                 user.getId(),
                 user.getFirstName(),
@@ -85,8 +105,8 @@ public class AlumniService {
                 profile != null ? profile.getCountry() : null,
                 profile != null ? profile.getState() : null,
                 profile != null ? profile.getCity() : null,
-                profile != null ? profile.getCurrentJobTitle() : null,
-                profile != null ? profile.getCurrentCompany() : null,
+                jobTitle,
+                company,
                 profile != null ? profile.getLinkedinUrl() : null
         );
     }

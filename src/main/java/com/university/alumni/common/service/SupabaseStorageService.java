@@ -67,10 +67,15 @@ public class SupabaseStorageService {
 
             byte[] bytes = file.getBytes();
 
+            String contentType = file.getContentType();
+            if (contentType == null) {
+                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+            }
+
             webClient.post()
                     .uri("/storage/v1/object/{bucket}/{path}", bucket, path)
                     .header("Authorization", "Bearer " + supabaseKey)
-                    .contentType(MediaType.parseMediaType(file.getContentType()))
+                    .contentType(MediaType.parseMediaType(contentType))
                     .bodyValue(bytes)
                     .retrieve()
                     .onStatus(status -> status.isError(), response -> {
