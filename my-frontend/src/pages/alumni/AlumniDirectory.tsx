@@ -11,6 +11,22 @@ import { PermissionGuard } from '../../components/auth/PermissionGuard';
 /** Returns the most recent / current job from a jobs array, or undefined. */
 const getCurrentJob = (jobs?: import('../../types').JobExperience[]) =>
     jobs?.find(j => !j.endYear) ?? jobs?.[jobs.length - 1];
+
+const formatDuration = (months: number) => {
+    if (months < 1) return 'Less than a month';
+    const years = Math.floor(months / 12);
+    const m = months % 12;
+    let res = '';
+    if (years > 0) res += `${years} yr${years > 1 ? 's' : ''} `;
+    if (m > 0) res += `${m} mo${m > 1 ? 's' : ''}`;
+    return res.trim();
+};
+
+const getMonthName = (m?: number | null) => {
+    if (!m) return '';
+    const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return names[m - 1] || '';
+};
 const avatarColor = (id: string) => {
     const colors = [
         ['#00f5ff', '#0099aa'],
@@ -110,11 +126,14 @@ const UserCard: React.FC<{
 
                 {profile && (
                     <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                        {(() => { const job = getCurrentJob(profile.jobs); return job?.jobTitle && (
-                            <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {job.jobTitle}
-                            </div>
-                        ); })()}
+                        {(() => { 
+                            const jobTitle = user.currentJobTitle || (profile ? getCurrentJob(profile.jobs)?.jobTitle : null);
+                            return jobTitle && (
+                                <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 700, fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                    {jobTitle}
+                                </div>
+                            ); 
+                        })()}
                         {profile.program && (
                             <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
                                 {profile.program}
@@ -218,9 +237,13 @@ const UserRow: React.FC<{
             </td>
             <td>
                 <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
-                    {(() => { const job = getCurrentJob(profile?.jobs); return job?.jobTitle
-                        ? `${job.jobTitle}${job.company ? ` @ ${job.company}` : ''}`
-                        : '—'; })()}
+                    {(() => { 
+                        const title = user.currentJobTitle || (profile ? getCurrentJob(profile.jobs)?.jobTitle : null);
+                        const company = user.currentCompany || (profile ? getCurrentJob(profile.jobs)?.company : null);
+                        return title
+                            ? `${title}${company ? ` @ ${company}` : ''}`
+                            : '—'; 
+                    })()}
                 </div>
             </td>
             <td style={{ textAlign: 'right' }}>
@@ -646,11 +669,15 @@ export const AlumniProfileViewPage: React.FC = () => {
                             <h1 style={{ fontFamily: 'Orbitron, monospace', fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 6 }}>
                                 {profile.firstName} {profile.lastName}
                             </h1>
-                            {(() => { const job = getCurrentJob(profile.jobs); return job?.jobTitle && (
-                                <div style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '16px', color: 'var(--text-secondary)', marginBottom: 10 }}>
-                                    {job.jobTitle}{job.company && ` @ ${job.company}`}
-                                </div>
-                            ); })()}
+                            {(() => { 
+                                const title = profile.jobs && profile.jobs.length > 0 ? getCurrentJob(profile.jobs)?.jobTitle : null;
+                                const company = profile.jobs && profile.jobs.length > 0 ? getCurrentJob(profile.jobs)?.company : null;
+                                return title && (
+                                    <div style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: '16px', color: 'var(--text-secondary)', marginBottom: 10 }}>
+                                        {title}{company && ` @ ${company}`}
+                                    </div>
+                                ); 
+                            })()}
                             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                                 {profile.openToMentor   && <Badge variant="cyan">Open to Mentor</Badge>}
                                 {profile.openToHire     && <Badge variant="green">Open to Hire</Badge>}
@@ -682,8 +709,6 @@ export const AlumniProfileViewPage: React.FC = () => {
                             { label: 'Graduation Year', value: profile.graduationYear },
                             { label: 'Program',        value: profile.program },
                             { label: 'Discipline',     value: profile.discipline },
-                            { label: 'Industry',       value: getCurrentJob(profile.jobs)?.industry },
-                            { label: 'Experience',     value: profile.jobs?.length ? `${profile.jobs.reduce((s, j) => s + (j.experienceMonths ?? 0), 0)} months` : null },
                             { label: 'Student / Employee ID', value: profile.studentId },
                         ].filter(f => f.value).map(({ label, value }, idx) => (
                             <div key={label} className={`reveal-hidden reveal-visible`} style={{ transitionDelay: `${0.3 + idx * 0.05}s` }}>
@@ -696,6 +721,48 @@ export const AlumniProfileViewPage: React.FC = () => {
                             </div>
                         ))}
                     </Reveal>
+
+                    {profile.jobs && profile.jobs.length > 0 && (
+                        <Reveal delay={0.3} style={{ marginBottom: 32 }}>
+                            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)', letterSpacing: '0.15em', marginBottom: 20 }}>
+                                PROFESSIONAL EXPERIENCE
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 24, paddingLeft: 8, borderLeft: '1px solid var(--border-subtle)' }}>
+                                {[...profile.jobs].sort((a, b) => {
+                                    const aYear = a.endYear || 9999;
+                                    const bYear = b.endYear || 9999;
+                                    if (aYear !== bYear) return bYear - aYear;
+                                    const aMonth = a.endMonth || 13;
+                                    const bMonth = b.endMonth || 13;
+                                    return bMonth - aMonth;
+                                }).map((job, i) => (
+                                    <div key={i} style={{ position: 'relative' }}>
+                                        <div style={{ 
+                                            position: 'absolute', left: -12, top: 6, width: 7, height: 7, 
+                                            borderRadius: '50%', background: i === 0 ? 'var(--neon-cyan)' : 'var(--text-muted)',
+                                            boxShadow: i === 0 ? '0 0 8px var(--neon-cyan)' : 'none'
+                                        }} />
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
+                                            <div style={{ fontFamily: 'Rajdhani, sans-serif', fontWeight: 600, fontSize: '16px', color: 'var(--text-primary)' }}>
+                                                {job.jobTitle}
+                                            </div>
+                                            <div style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: '11px', color: 'var(--neon-cyan)' }}>
+                                                {getMonthName(job.startMonth)} {job.startYear} — {job.endYear ? `${getMonthName(job.endMonth)} ${job.endYear}` : 'Present'}
+                                            </div>
+                                        </div>
+                                        <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: '14px', color: 'var(--text-secondary)', marginTop: 2 }}>
+                                            {job.company} {job.industry && <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>• {job.industry}</span>}
+                                        </div>
+                                        {job.experienceMonths && (
+                                            <div style={{ fontFamily: 'Outfit, sans-serif', fontSize: '11px', color: 'var(--text-muted)', marginTop: 4 }}>
+                                                Duration: {formatDuration(job.experienceMonths)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </Reveal>
+                    )}
 
                     {profile.skills && profile.skills.length > 0 && (
                         <Reveal delay={0.4} style={{ marginBottom: 24 }}>
