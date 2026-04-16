@@ -4,7 +4,7 @@ import { useAuthStore } from '../../store/authStore.ts';
 import type { ProfileResponse, UpdateProfileRequest } from '../../types';
 import { Input, Textarea, Select, Button, Alert, ProgressBar, SkillsInput, Spinner } from '../../components/ui';
 import { PROGRAM_OPTIONS, DISCIPLINE_OPTIONS, INDUSTRY_OPTIONS, YEAR_OPTIONS, MONTH_OPTIONS } from '../../lib/constants';
-import { JobExperience } from '../../types';
+import type { JobExperience } from '../../types';
 import {
     CitySelect,
     CountrySelect,
@@ -213,10 +213,6 @@ export const ProfilePage: React.FC = () => {
                 graduationYear: res.data.graduationYear ?? undefined,
                 discipline: res.data.discipline ?? '',
                 program: res.data.program ?? '',
-                currentJobTitle: res.data.currentJobTitle ?? '',
-                currentCompany: res.data.currentCompany ?? '',
-                industry: res.data.industry ?? '',
-                experienceYears: res.data.experienceYears ?? undefined,
                 linkedinUrl: res.data.linkedinUrl ?? '',
                 githubUrl: res.data.githubUrl ?? '',
                 portfolioUrl: res.data.portfolioUrl ?? '',
