@@ -315,7 +315,9 @@ export const ManageUserStatusPage: React.FC = () => {
                                                                 referrerPolicy="no-referrer"
                                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                                 onError={(e) => {
-                                                                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`;
+                                                                    const t = e.target as HTMLImageElement;
+                                                                    t.onerror = null;
+                                                                    t.src = `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=random`;
                                                                 }}
                                                             />
                                                         ) : (

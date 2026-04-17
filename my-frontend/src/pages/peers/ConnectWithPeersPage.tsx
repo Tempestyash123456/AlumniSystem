@@ -162,7 +162,11 @@ const PeerTable: React.FC<PeerTableProps> = ({
                                 src={peer.profilePhotoUrl || 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'}
                                 alt={peer.firstName}
                                 className="peer-table-avatar"
-                                onError={(e) => { (e.target as HTMLImageElement).src = 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'; }}
+                                onError={(e) => { 
+                                    const img = e.target as HTMLImageElement;
+                                    img.onerror = null; 
+                                    img.src = 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'; 
+                                }}
                             />
                         </td>
                         <td>
