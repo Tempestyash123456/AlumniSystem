@@ -6,7 +6,7 @@ import './Peers.css';
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
 );
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -63,9 +63,9 @@ const FilterSidebar: React.FC<{
         <div className={`peers-sidebar ${isOpen ? 'open' : ''}`}>
             <div className="sidebar-search-area">
                 <div className="sidebar-search-box">
-                    <input 
-                        type="search" 
-                        placeholder="Enter Keyword.." 
+                    <input
+                        type="search"
+                        placeholder="Enter email.."
                         className="sidebar-search-input"
                         value={filters.search}
                         onChange={(e) => onChange('search', e.target.value)}
@@ -78,7 +78,7 @@ const FilterSidebar: React.FC<{
 
             <div className="sidebar-filters-area">
                 {(['program', 'year', 'country', 'state', 'city'] as const).map((key) => (
-                    <SidebarFilterSection 
+                    <SidebarFilterSection
                         key={key}
                         label={key.replace('program', 'Program').replace('year', 'Graduation Year').charAt(0).toUpperCase() + key.slice(1).replace('program', 'rogram').replace('year', 'ear')}
                         active={expanded[key]}
@@ -86,15 +86,15 @@ const FilterSidebar: React.FC<{
                     >
                         {options[key].map(opt => (
                             <label key={opt} className="filter-option">
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={filters[key] === opt}
                                     onChange={() => onChange(key, filters[key] === opt ? '' : opt)}
                                 />
                                 {opt}
                             </label>
                         ))}
-                        {options[key].length === 0 && <span style={{fontSize: 12, opacity: 0.5}}>No options available</span>}
+                        {options[key].length === 0 && <span style={{ fontSize: 12, opacity: 0.5 }}>No options available</span>}
                     </SidebarFilterSection>
                 ))}
             </div>
@@ -113,18 +113,12 @@ interface PeerTableProps {
     peers: AlumniDto[];
     loading: boolean;
     onClear: () => void;
-    selectedIds: Set<string>;
-    onSelectAll: (checked: boolean) => void;
-    onSelectRow: (id: string) => void;
 }
 
-const PeerTable: React.FC<PeerTableProps> = ({ 
-    peers, 
-    loading, 
-    onClear, 
-    selectedIds, 
-    onSelectAll, 
-    onSelectRow 
+const PeerTable: React.FC<PeerTableProps> = ({
+    peers,
+    loading,
+    onClear
 }) => {
     if (loading) {
         return (
@@ -132,17 +126,14 @@ const PeerTable: React.FC<PeerTableProps> = ({
                 <table className="peer-table">
                     <thead>
                         <tr>
-                            <th style={{ width: 40 }}><input type="checkbox" disabled /></th>
+                            <th style={{ width: 80 }}>PHOTO</th>
                             <th>NAME</th>
-                            <th>PROGRAM</th>
-                            <th>GRAD YEAR</th>
-                            <th>LOCATION</th>
-                            <th>EMAIL</th>
+                            <th>LINKEDIN ID</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td colSpan={6} className="loading-row">
+                            <td colSpan={3} className="loading-row">
                                 <Spinner size={30} />
                                 <p style={{ marginTop: 12 }}>Synchronizing Directory...</p>
                             </td>
@@ -153,101 +144,68 @@ const PeerTable: React.FC<PeerTableProps> = ({
         );
     }
 
-    const allSelected = peers.length > 0 && selectedIds.size === peers.length;
-
     return (
         <div className="peer-table-container">
             <table className="peer-table">
-                <thead>
-                    <tr>
-                        <th style={{ width: 40 }}>
-                            <input 
-                                type="checkbox" 
-                                className="row-checkbox" 
-                                checked={allSelected}
-                                onChange={(e) => onSelectAll(e.target.checked)}
+            <thead>
+                <tr>
+                    <th style={{ width: 80 }}>PHOTO</th>
+                    <th>NAME</th>
+                    <th>LINKEDIN ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {peers.map((peer) => (
+                    <tr key={peer.id} className="animate-fade-in">
+                        <td>
+                            <img
+                                src={peer.profilePhotoUrl || 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'}
+                                alt={peer.firstName}
+                                className="peer-table-avatar"
+                                onError={(e) => { (e.target as HTMLImageElement).src = 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'; }}
                             />
-                        </th>
-                        <th>NAME</th>
-                        <th>PROGRAM</th>
-                        <th>GRAD YEAR</th>
-                        <th>LOCATION</th>
-                        <th>EMAIL</th>
-                        <th style={{ textAlign: 'right' }}>ACTIONS</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {peers.map((peer) => (
-                        <tr key={peer.id} className={`animate-fade-in ${selectedIds.has(peer.id) ? 'row-selected' : ''}`}>
-                            <td>
-                                <input 
-                                    type="checkbox" 
-                                    className="row-checkbox" 
-                                    checked={selectedIds.has(peer.id)}
-                                    onChange={() => onSelectRow(peer.id)}
-                                />
-                            </td>
-                            <td className="peer-profile-cell">
-                                <img 
-                                    src={peer.profilePhotoUrl || 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'} 
-                                    alt={peer.firstName}
-                                    className="peer-table-avatar"
-                                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'; }}
-                                />
-                                <div>
-                                    <div className="peer-table-name">{peer.firstName} {peer.lastName}</div>
-                                    <div className="peer-table-role">
-                                        {peer.currentJobTitle || 'Professional details hidden'}
-                                    </div>
-                                </div>
-                            </td>
-                            <td><span className="table-tag">{peer.program || 'N/A'}</span></td>
-                            <td>{peer.graduationYear || 'N/A'}</td>
-                            <td>
-                                <div className="location-cell">
-                                    <span className="city">{peer.city || 'N/A'}</span>
-                                    <span className="state-country">{[peer.state, peer.country].filter(Boolean).join(', ')}</span>
-                                </div>
-                            </td>
-                            <td>
-                                <a href={`mailto:${peer.email}`} className="peer-table-email">
-                                    {peer.email}
+                        </td>
+                        <td>
+                            <div className="peer-table-name">{peer.firstName} {peer.lastName}</div>
+                            <div className="peer-table-role">
+                                {peer.currentJobTitle || 'Professional details hidden'}
+                            </div>
+                        </td>
+                        <td>
+                            {peer.linkedinUrl ? (
+                                <a href={peer.linkedinUrl} target="_blank" rel="noopener noreferrer" className="peer-table-linkedin">
+                                    {peer.linkedinUrl.split('/').pop() || 'LinkedIn'}
                                 </a>
-                            </td>
-                            <td style={{ textAlign: 'right' }}>
-                                <div className="table-actions">
-                                    <button className="icon-btn" title="View Profile">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                    {peers.length === 0 && (
-                        <tr>
-                            <td colSpan={7} className="empty-row">
-                                <div style={{ fontSize: '32px', marginBottom: '16px', opacity: 0.2 }}>🔍</div>
-                                <p>No profiles match your filters.</p>
-                                <button onClick={onClear} className="cp-btn cp-btn-ghost cp-btn-sm" style={{ marginTop: '16px' }}>
-                                    Reset All
-                                </button>
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        </div>
+                            ) : (
+                                <span style={{ opacity: 0.3 }}>N/A</span>
+                            )}
+                        </td>
+                    </tr>
+                ))}
+                {peers.length === 0 && (
+                    <tr>
+                        <td colSpan={3} className="empty-row">
+                            <div style={{ fontSize: '32px', marginBottom: '16px', opacity: 0.2 }}>🔍</div>
+                            <p>No profiles match your filters.</p>
+                            <button onClick={onClear} className="cp-btn cp-btn-ghost cp-btn-sm" style={{ marginTop: '16px' }}>
+                                Reset All
+                            </button>
+                        </td>
+                    </tr>
+                )}
+            </tbody>
+        </table>
+        </div >
     );
 };
 
 // ── Main Page Component ───────────────────────────────────────────────────────
 export const ConnectWithPeersPage: React.FC = () => {
-    const [allPeers, setAllPeers]         = useState<AlumniDto[]>([]);
+    const [allPeers, setAllPeers] = useState<AlumniDto[]>([]);
     const [filteredPeers, setFilteredPeers] = useState<AlumniDto[]>([]);
-    const [loading, setLoading]           = useState(true);
-    const [sidebarOpen, setSidebarOpen]   = useState(false);
-    const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set());
-    
+    const [loading, setLoading] = useState(true);
+    const sidebarOpen = false; // Toggle removed by user request
+
     const [filters, setFilters] = useState<Filters>({
         program: '',
         year: '',
@@ -291,9 +249,9 @@ export const ConnectWithPeersPage: React.FC = () => {
 
         if (debouncedFilters.search) {
             const s = debouncedFilters.search.toLowerCase();
-            result = result.filter(p => 
-                p.firstName.toLowerCase().includes(s) || 
-                p.lastName.toLowerCase().includes(s) || 
+            result = result.filter(p =>
+                p.firstName.toLowerCase().includes(s) ||
+                p.lastName.toLowerCase().includes(s) ||
                 p.email.toLowerCase().includes(s) ||
                 (p.currentJobTitle || '').toLowerCase().includes(s) ||
                 (p.currentCompany || '').toLowerCase().includes(s)
@@ -323,10 +281,10 @@ export const ConnectWithPeersPage: React.FC = () => {
     const filterOptions = useMemo(() => {
         return {
             program: Array.from(new Set(allPeers.map(p => p.program).filter(Boolean))).sort() as string[],
-            year:    Array.from(new Set(allPeers.map(p => p.graduationYear).filter(Boolean).map(String))).sort((a,b) => b.localeCompare(a)) as string[],
+            year: Array.from(new Set(allPeers.map(p => p.graduationYear).filter(Boolean).map(String))).sort((a, b) => b.localeCompare(a)) as string[],
             country: Array.from(new Set(allPeers.map(p => p.country).filter(Boolean))).sort() as string[],
-            state:   Array.from(new Set(allPeers.map(p => p.state).filter(Boolean))).sort() as string[],
-            city:    Array.from(new Set(allPeers.map(p => p.city).filter(Boolean))).sort() as string[],
+            state: Array.from(new Set(allPeers.map(p => p.state).filter(Boolean))).sort() as string[],
+            city: Array.from(new Set(allPeers.map(p => p.city).filter(Boolean))).sort() as string[],
         };
     }, [allPeers]);
 
@@ -336,23 +294,6 @@ export const ConnectWithPeersPage: React.FC = () => {
 
     const clearFilters = () => {
         setFilters({ program: '', year: '', country: '', state: '', city: '', search: '' });
-    };
-
-    const handleSelectAll = (checked: boolean) => {
-        if (checked) {
-            setSelectedIds(new Set(filteredPeers.map(p => p.id)));
-        } else {
-            setSelectedIds(new Set());
-        }
-    };
-
-    const handleSelectRow = (id: string) => {
-        setSelectedIds(prev => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id);
-            else next.add(id);
-            return next;
-        });
     };
 
     return (
@@ -371,43 +312,27 @@ export const ConnectWithPeersPage: React.FC = () => {
                 </div>
             </header>
 
-            <button 
-                className="mobile-filter-toggle"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-                {sidebarOpen ? '✕ HIDE FILTERS' : '☰ SHOW FILTERS'}
-            </button>
-
             <div className="peers-layout">
-                <FilterSidebar 
+                <FilterSidebar
                     filters={filters}
                     onChange={handleFilterChange}
                     onClear={clearFilters}
                     options={filterOptions}
                     isOpen={sidebarOpen}
                 />
-                
+
                 <main className="peers-main">
                     <div className="table-controls">
                         <div className="result-count">
                             <span className="count-num">{filteredPeers.length}</span>
                             <span className="count-label">Peers Found</span>
                         </div>
-                        {selectedIds.size > 0 && (
-                            <div className="bulk-actions animate-fade-in">
-                                <span>{selectedIds.size} selected</span>
-                                <button className="cp-btn cp-btn-primary cp-btn-sm">Bulk Message</button>
-                            </div>
-                        )}
                     </div>
-                    
-                    <PeerTable 
-                        peers={filteredPeers} 
-                        loading={loading} 
+
+                    <PeerTable
+                        peers={filteredPeers}
+                        loading={loading}
                         onClear={clearFilters}
-                        selectedIds={selectedIds}
-                        onSelectAll={handleSelectAll}
-                        onSelectRow={handleSelectRow}
                     />
                 </main>
             </div>

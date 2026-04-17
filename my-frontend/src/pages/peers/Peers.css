@@ -417,6 +417,18 @@
     color: var(--text-secondary);
 }
 
+.peer-table-linkedin {
+    color: #0a66c2; /* LinkedIn Blue */
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.peer-table-linkedin:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
 .peer-table-role {
     font-size: 13px;
     color: var(--text-muted);
