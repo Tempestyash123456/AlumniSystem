@@ -65,7 +65,7 @@ const FilterSidebar: React.FC<{
                 <div className="sidebar-search-box">
                     <input
                         type="search"
-                        placeholder="Enter email.."
+                        placeholder="Search peers by name, company, or role..."
                         className="sidebar-search-input"
                         value={filters.search}
                         onChange={(e) => onChange('search', e.target.value)}
@@ -80,7 +80,11 @@ const FilterSidebar: React.FC<{
                 {(['program', 'year', 'country', 'state', 'city'] as const).map((key) => (
                     <SidebarFilterSection
                         key={key}
-                        label={key.replace('program', 'Program').replace('year', 'Graduation Year').charAt(0).toUpperCase() + key.slice(1).replace('program', 'rogram').replace('year', 'ear')}
+                        label={
+                            key === 'program' ? 'Program' :
+                            key === 'year' ? 'Graduation Year' :
+                            key.charAt(0).toUpperCase() + key.slice(1)
+                        }
                         active={expanded[key]}
                         onClick={() => toggleSection(key)}
                     >

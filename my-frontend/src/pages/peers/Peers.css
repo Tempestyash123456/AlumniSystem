@@ -201,24 +201,26 @@
 }
 
 .filter-content {
-    padding: 4px 16px 16px 46px;
+    padding: 8px 16px 16px 46px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .filter-option {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
     font-size: 13px;
-    color: var(--text-muted);
-    transition: color 0.1s;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    font-family: 'Outfit', sans-serif;
 }
 
 .filter-option:hover {
-    color: var(--text-secondary);
+    color: var(--neon-cyan);
+    transform: translateX(4px);
 }
 
 .filter-option input[type="checkbox"] {
