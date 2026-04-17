@@ -108,98 +108,77 @@ const FilterSidebar: React.FC<{
     );
 };
 
-// ── Peer Table Component ──────────────────────────────────────────────────────
-interface PeerTableProps {
+// ── Peer Card Component ──────────────────────────────────────────────────────
+const PeerCard: React.FC<{ peer: AlumniDto }> = ({ peer }) => {
+    return (
+        <div className="peer-card-new animate-fade-in">
+            <div className="peer-card-header">
+                <img 
+                    src={peer.profilePhotoUrl || 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'} 
+                    alt={peer.firstName}
+                    className="peer-card-avatar"
+                    onError={(e) => { 
+                        const img = e.target as HTMLImageElement;
+                        img.onerror = null; 
+                        img.src = 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'; 
+                    }}
+                />
+                <div className="peer-card-info">
+                    <h3 className="peer-card-name">{peer.firstName} {peer.lastName}</h3>
+                    {peer.currentJobTitle && (
+                        <p className="peer-card-role">{peer.currentJobTitle}</p>
+                    )}
+                </div>
+            </div>
+            
+            <div className="peer-card-actions">
+                {peer.linkedinUrl ? (
+                    <a href={peer.linkedinUrl} target="_blank" rel="noopener noreferrer" className="card-linkedin-link">
+                        LinkedIn Profile
+                    </a>
+                ) : (
+                    <span className="card-linkedin-none">LinkedIn Not Available</span>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// ── Peer Grid Component ──────────────────────────────────────────────────────
+interface PeerGridProps {
     peers: AlumniDto[];
     loading: boolean;
     onClear: () => void;
 }
 
-const PeerTable: React.FC<PeerTableProps> = ({
-    peers,
-    loading,
-    onClear
-}) => {
+const PeerCardGrid: React.FC<PeerGridProps> = ({ peers, loading, onClear }) => {
     if (loading) {
         return (
-            <div className="peer-table-container">
-                <table className="peer-table">
-                    <thead>
-                        <tr>
-                            <th style={{ width: 80 }}>PHOTO</th>
-                            <th>NAME</th>
-                            <th>LINKEDIN ID</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colSpan={3} className="loading-row">
-                                <Spinner size={30} />
-                                <p style={{ marginTop: 12 }}>Synchronizing Directory...</p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div className="peer-loading-container">
+                <Spinner size={40} />
+                <p>Synchronizing Directory...</p>
+            </div>
+        );
+    }
+
+    if (peers.length === 0) {
+        return (
+            <div className="peer-empty-container">
+                <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.2 }}>🔍</div>
+                <p>No profiles match your filters.</p>
+                <button onClick={onClear} className="cp-btn cp-btn-ghost cp-btn-sm" style={{ marginTop: '16px' }}>
+                    Reset All
+                </button>
             </div>
         );
     }
 
     return (
-        <div className="peer-table-container">
-            <table className="peer-table">
-            <thead>
-                <tr>
-                    <th style={{ width: 80 }}>PHOTO</th>
-                    <th>NAME</th>
-                    <th>LINKEDIN ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                {peers.map((peer) => (
-                    <tr key={peer.id} className="animate-fade-in">
-                        <td>
-                            <img
-                                src={peer.profilePhotoUrl || 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'}
-                                alt={peer.firstName}
-                                className="peer-table-avatar"
-                                onError={(e) => { 
-                                    const img = e.target as HTMLImageElement;
-                                    img.onerror = null; 
-                                    img.src = 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'; 
-                                }}
-                            />
-                        </td>
-                        <td>
-                            <div className="peer-table-name">{peer.firstName} {peer.lastName}</div>
-                            <div className="peer-table-role">
-                                {peer.currentJobTitle || 'Professional details hidden'}
-                            </div>
-                        </td>
-                        <td>
-                            {peer.linkedinUrl ? (
-                                <a href={peer.linkedinUrl} target="_blank" rel="noopener noreferrer" className="peer-table-linkedin">
-                                    {peer.linkedinUrl.split('/').pop() || 'LinkedIn'}
-                                </a>
-                            ) : (
-                                <span style={{ opacity: 0.3 }}>N/A</span>
-                            )}
-                        </td>
-                    </tr>
-                ))}
-                {peers.length === 0 && (
-                    <tr>
-                        <td colSpan={3} className="empty-row">
-                            <div style={{ fontSize: '32px', marginBottom: '16px', opacity: 0.2 }}>🔍</div>
-                            <p>No profiles match your filters.</p>
-                            <button onClick={onClear} className="cp-btn cp-btn-ghost cp-btn-sm" style={{ marginTop: '16px' }}>
-                                Reset All
-                            </button>
-                        </td>
-                    </tr>
-                )}
-            </tbody>
-        </table>
-        </div >
+        <div className="peer-card-grid">
+            {peers.map(peer => (
+                <PeerCard key={peer.id} peer={peer} />
+            ))}
+        </div>
     );
 };
 
@@ -333,9 +312,9 @@ export const ConnectWithPeersPage: React.FC = () => {
                         </div>
                     </div>
 
-                    <PeerTable
-                        peers={filteredPeers}
-                        loading={loading}
+                    <PeerCardGrid 
+                        peers={filteredPeers} 
+                        loading={loading} 
                         onClear={clearFilters}
                     />
                 </main>

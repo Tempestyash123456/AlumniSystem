@@ -1,7 +1,7 @@
 .peers-container {
     padding: 30px;
-    max-width: 1600px;
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -429,28 +429,137 @@
     text-decoration: underline;
 }
 
-.peer-table-role {
+/* Grid Layout */
+.peer-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
+    width: 100%;
+}
+
+.peer-card-new {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.peer-card-new:hover {
+    transform: translateY(-4px);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 10px 30px -10px rgba(0, 245, 255, 0.15);
+}
+
+.peer-card-new::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--neon-cyan);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.peer-card-new:hover::before {
+    opacity: 1;
+}
+
+.peer-card-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.peer-card-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px; /* Square with rounded corners for administrative look */
+    object-fit: cover;
+    background: var(--bg-dark);
+    border: 1.5px solid var(--border-subtle);
+}
+
+.peer-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.peer-card-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.peer-card-role {
+    font-family: 'Outfit', sans-serif;
     font-size: 13px;
+    color: var(--neon-cyan);
+    margin: 4px 0 0 0;
+    letter-spacing: 0.02em;
+}
+
+.peer-card-actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-linkedin-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background: #0a66c2;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+}
+
+.card-linkedin-link:hover {
+    background: #004182;
+    transform: scale(1.02);
+}
+
+.card-linkedin-none {
+    font-size: 11px;
     color: var(--text-muted);
-}
-
-/* Custom Checkbox for Table Rows */
-.row-checkbox {
-    width: 18px;
-    height: 18px;
-    accent-color: var(--neon-cyan);
-    cursor: pointer;
-}
-
-/* Empty/Loading states */
-.loading-row {
-    padding: 60px !important;
+    font-family: 'Share Tech Mono', monospace;
     text-align: center;
 }
 
-.empty-row {
-    padding: 80px !important;
+/* Loading/Empty containers */
+.peer-loading-container,
+.peer-empty-container {
+    padding: 100px;
     text-align: center;
+    color: var(--text-muted);
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.peer-loading-container p {
+    margin-top: 20px;
+    font-size: 14px;
 }
 
 /* Mobile Adjustments */
