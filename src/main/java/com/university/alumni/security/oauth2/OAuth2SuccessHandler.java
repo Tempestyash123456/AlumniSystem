@@ -94,11 +94,13 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         auditLogService.record("LOGGED_IN", user.getFirstName(), user.getLastName(), "Google OAuth");
 
         String accessToken = jwtService.generateAccessToken(user);
+        
+        // SECURE FIX: Pass token via temporary cookie instead of URL query param
+        // We set httpOnly=false so the frontend can read it once and move it to secure storage
+        com.university.alumni.security.util.CookieUtils.addCookie(request, response, "oauth2_token", accessToken, 60, false);
 
         String frontendUrl = appProperties.getFrontendUrl();
-
         String targetUrl = UriComponentsBuilder.fromUriString(frontendUrl + "/oauth2/callback")
-                .queryParam("token", accessToken)
                 .build().toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);

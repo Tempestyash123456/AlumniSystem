@@ -75,15 +75,16 @@ services:
       - backend
     restart: unless-stopped
 
-  # ── Optional GUIs ─────────────────────────────────────────────────────────
+  # ── Optional GUIs (DEV ONLY — DO NOT DEPLOY TO PROD) ─────────────────────────
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: alumni_pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: yashdubey262@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_PASSWORD: admin # Change in production
     ports:
-      - "5050:80"
+      # Bind to localhost to prevent external exposure
+      - "127.0.0.1:5050:80"
     depends_on:
       postgres:
         condition: service_healthy
@@ -95,7 +96,8 @@ services:
     environment:
       REDIS_HOSTS: local:redis:6379
     ports:
-      - "8081:8081"
+      # Bind to localhost to prevent external exposure
+      - "127.0.0.1:8081:8081"
     depends_on:
       redis:
         condition: service_healthy

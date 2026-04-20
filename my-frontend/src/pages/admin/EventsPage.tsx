@@ -35,6 +35,8 @@ const STATUS_STYLES: Record<EventStatus, { bg: string; text: string; border: str
     PAST: { bg: 'rgba(255,184,0,0.12)', text: 'var(--neon-amber)', border: 'rgba(255,184,0,0.3)' }
 };
 
+import DOMPurify from 'dompurify';
+
 // ── Markdown Renderer ─────────────────────────────────────────────────────────
 const renderMarkdown = (md: string): string => {
     const html = md
@@ -44,7 +46,11 @@ const renderMarkdown = (md: string): string => {
         .replace(/`([^`]+)`/g, '<code style="background:rgba(0,245,255,0.08);border:1px solid rgba(0,245,255,0.2);padding:2px 6px;border-radius:3px;font-family:Outfit,sans-serif;font-size:var(--font-size-sm);color:var(--neon-cyan)">$1</code>')
         .replace(/\n\n/g, '</p><p style="margin:8px 0;color:var(--text-secondary);line-height:1.7;font-family:Outfit,sans-serif;font-size:var(--font-size-base)">')
         .replace(/\n/g, '<br>');
-    return `<p style="margin:8px 0;color:var(--text-secondary);line-height:1.7;font-family:Outfit,sans-serif;font-size:var(--font-size-base)">${html}</p>`;
+    
+    return DOMPurify.sanitize(`<p style="margin:8px 0;color:var(--text-secondary);line-height:1.7;font-family:Outfit,sans-serif;font-size:var(--font-size-base)">${html}</p>`, {
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'code', 'blockquote', 'li', 'ul', 'ol', 'h1', 'h2', 'h3', 'a', 'hr', 'span', 'div', 'img'],
+        ALLOWED_ATTR: ['style', 'href', 'target', 'rel', 'src', 'alt']
+    });
 };
 
 // ── Media Upload Zone ─────────────────────────────────────────────────────────

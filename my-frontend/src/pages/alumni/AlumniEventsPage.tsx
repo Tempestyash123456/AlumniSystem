@@ -36,13 +36,26 @@ const STATUS_STYLES: Record<EventStatus, { bg: string; text: string; border: str
 // ── Markdown Renderer ─────────────────────────────────────────────────────────
 const renderMarkdown = (md: string): string => {
     const html = md
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/^### (.+)$/gm, '<h3 style="font-family:Orbitron,monospace;font-size:14px;color:var(--neon-purple);letter-spacing:.08em;margin:18px 0 8px">$1</h3>')
+        .replace(/^## (.+)$/gm,  '<h2 style="font-family:Orbitron,monospace;font-size:16px;color:var(--neon-cyan);letter-spacing:.08em;margin:20px 0 10px">$1</h2>')
+        .replace(/^# (.+)$/gm,   '<h1 style="font-family:Orbitron,monospace;font-size:20px;color:var(--neon-cyan);letter-spacing:.08em;margin:24px 0 12px">$1</h1>')
         .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--text-primary)">$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em style="color:var(--neon-amber)">$1</em>')
+        .replace(/\*(.+?)\*/g,     '<em style="color:var(--neon-amber)">$1</em>')
         .replace(/`([^`]+)`/g, '<code style="background:rgba(0,245,255,0.08);border:1px solid rgba(0,245,255,0.2);padding:2px 6px;border-radius:3px;font-family:Share Tech Mono,monospace;font-size:12px;color:var(--neon-cyan)">$1</code>')
-        .replace(/\n\n/g, '</p><p style="margin:8px 0;color:var(--text-secondary);line-height:1.7;font-family:Rajdhani,sans-serif;font-size:15px">')
+        .replace(/^&gt; (.+)$/gm, '<blockquote style="border-left:3px solid var(--neon-pink);margin:12px 0;padding:8px 16px;background:rgba(255,45,120,0.05);color:var(--text-secondary);font-style:italic">$1</blockquote>')
+        .replace(/^[*-] (.+)$/gm, '<li style="margin:4px 0;padding-left:8px;color:var(--text-secondary)">$1</li>')
+        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noreferrer" style="color:var(--neon-cyan);text-decoration:underline">$1</a>')
+        .replace(/^---$/gm, '<hr style="border:none;height:1px;background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent);margin:20px 0">')
+        .replace(/\n\n/g, '</p><p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">')
         .replace(/\n/g, '<br>');
-    return `<p style="margin:8px 0;color:var(--text-secondary);line-height:1.7;font-family:Rajdhani,sans-serif;font-size:15px">${html}</p>`;
+
+    return DOMPurify.sanitize(`<p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">${html}</p>`, {
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'code', 'blockquote', 'li', 'ul', 'ol', 'h1', 'h2', 'h3', 'a', 'hr', 'span', 'div', 'img'],
+        ALLOWED_ATTR: ['style', 'href', 'target', 'rel', 'src', 'alt']
+    });
 };
 
 // ── Event Card (Read-Only) ────────────────────────────────────────────────────

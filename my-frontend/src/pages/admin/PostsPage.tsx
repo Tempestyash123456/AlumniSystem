@@ -7,6 +7,8 @@ import { PermissionGuard } from '../../components/auth/PermissionGuard';
 
 const BASE_URL = '';
 
+import DOMPurify from 'dompurify';
+
 // ── Minimal Markdown Renderer ─────────────────────────────────────────────────
 const renderMarkdown = (md: string): string => {
     let html = md
@@ -23,7 +25,11 @@ const renderMarkdown = (md: string): string => {
         .replace(/^---$/gm, '<hr style="border:none;height:1px;background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent);margin:20px 0">')
         .replace(/\n\n/g, '</p><p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">')
         .replace(/\n/g, '<br>');
-    return `<p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">${html}</p>`;
+    
+    return DOMPurify.sanitize(`<p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">${html}</p>`, {
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'code', 'blockquote', 'li', 'ul', 'ol', 'h1', 'h2', 'h3', 'a', 'hr', 'span', 'div', 'img'],
+        ALLOWED_ATTR: ['style', 'href', 'target', 'rel', 'src', 'alt']
+    });
 };
 
 // ── Media Upload Zone (Images Only for Posts) ─────────────────────────────────

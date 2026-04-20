@@ -155,9 +155,6 @@ public final class ProfileDtos {
             // Visibility
             Boolean profilePublic,
             Boolean openToMentor,
-            Boolean openToHire,
-
-            @Size(max = 500, message = "Bug report photo URL must not exceed 500 characters")
-            String bugReportPhotoUrl
+            Boolean openToHire
     ) {}
 }

@@ -65,11 +65,11 @@ public class HttpCookieOAuth2AuthorizationRequestRepository implements Authoriza
         }
 
         CookieUtils.addCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME,
-                CookieUtils.serialize(authorizationRequest), COOKIE_EXPIRE_SECONDS);
+                CookieUtils.serialize(authorizationRequest), COOKIE_EXPIRE_SECONDS, true);
 
         String redirectUriAfterLogin = request.getParameter(REDIRECT_URI_PARAM_COOKIE_NAME);
         if (redirectUriAfterLogin != null && !redirectUriAfterLogin.isBlank()) {
-            CookieUtils.addCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, COOKIE_EXPIRE_SECONDS);
+            CookieUtils.addCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME, redirectUriAfterLogin, COOKIE_EXPIRE_SECONDS, true);
         }
         log.debug("Saved OAuth2 Authorization Request to cookie. State: {}, RedirectURI: {}", 
                 authorizationRequest.getState(), redirectUriAfterLogin);
@@ -86,7 +86,7 @@ public class HttpCookieOAuth2AuthorizationRequestRepository implements Authoriza
     }
 
     public void removeAuthorizationRequestCookies(HttpServletRequest request, HttpServletResponse response) {
-        CookieUtils.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
-        CookieUtils.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME);
+        CookieUtils.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME, true);
+        CookieUtils.deleteCookie(request, response, REDIRECT_URI_PARAM_COOKIE_NAME, true);
     }
 }

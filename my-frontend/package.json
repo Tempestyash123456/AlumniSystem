@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/dompurify": "^3.0.5",
     "@types/react-datepicker": "^7.0.0",
     "bcryptjs": "^3.0.3",
+    "dompurify": "^3.4.0",
     "html-to-image": "^1.11.13",
     "lucide-react": "^1.7.0",
     "qrcode.react": "^4.2.0",

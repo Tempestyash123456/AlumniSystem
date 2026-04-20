@@ -6,6 +6,8 @@ import { Input, Spinner, Carousel } from '../../components/ui';
 
 const BASE_URL = '';
 
+import DOMPurify from 'dompurify';
+
 // ── Markdown renderer ─────────────────────────────────────────────────────────
 const renderMarkdown = (md: string): string => {
     const html = md
@@ -22,7 +24,12 @@ const renderMarkdown = (md: string): string => {
         .replace(/^---$/gm, '<hr style="border:none;height:1px;background:linear-gradient(90deg,transparent,var(--neon-cyan),transparent);margin:20px 0">')
         .replace(/\n\n/g, '</p><p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">')
         .replace(/\n/g, '<br>');
-    return `<p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">${html}</p>`;
+    
+    // Sanitize the generated HTML to prevent XSS
+    return DOMPurify.sanitize(`<p style="margin:10px 0;color:var(--text-secondary);line-height:1.8;font-family:Rajdhani,sans-serif;font-size:15px">${html}</p>`, {
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'code', 'blockquote', 'li', 'ul', 'ol', 'h1', 'h2', 'h3', 'a', 'hr', 'span', 'div'],
+        ALLOWED_ATTR: ['style', 'href', 'target', 'rel']
+    });
 };
 
 // ── Full Post View (expanded inline) ─────────────────────────────────────────
