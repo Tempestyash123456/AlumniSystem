@@ -15,24 +15,26 @@ public final class AuthDtos {
     public record LoginRequest(
             @NotBlank(message = "Email is required")
             @Email(message = "Email format is invalid")
+            @Size(max = 254, message = "Email must not exceed 254 characters")
             String email,
 
             @NotBlank(message = "Password is required")
-            @Size(min = 8, message = "Password must be at least 8 characters")
+            @Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters")
             String password
     ) {}
 
     public record RegisterRequest(
             @NotBlank(message = "First name is required")
-            @Size(max = 100)
+            @Size(max = 100, message = "First name must not exceed 100 characters")
             String firstName,
 
             @NotBlank(message = "Last name is required")
-            @Size(max = 100)
+            @Size(max = 100, message = "Last name must not exceed 100 characters")
             String lastName,
 
             @NotBlank(message = "Email is required")
             @Email(message = "Email format is invalid")
+            @Size(max = 254, message = "Email must not exceed 254 characters")
             String email,
 
             @NotBlank(message = "Password is required")
@@ -45,9 +47,16 @@ public final class AuthDtos {
             String password,
 
             @NotBlank(message = "ID is required")
+            @Size(max = 50, message = "Student ID must not exceed 50 characters")
+            @Pattern(regexp = "^[A-Za-z0-9\\-_./]{1,50}$",
+                    message = "Student ID contains invalid characters")
             String studentId,
 
-            String phone,         // Optional
+            // Optional — accept common international phone formats
+            @Size(max = 20, message = "Phone number must not exceed 20 characters")
+            @Pattern(regexp = "^$|^[+]?[0-9 ()\\-\\.]{7,20}$",
+                    message = "Phone number format is invalid")
+            String phone,
 
             @NotBlank(message = "Role is required")
             @Pattern(regexp = "^(?i)(alumni|faculty)$", message = "Role must be either ALUMNI or FACULTY")
@@ -56,16 +65,19 @@ public final class AuthDtos {
 
     public record RefreshTokenRequest(
             @NotBlank(message = "Refresh token is required")
+            @Size(max = 1024, message = "Refresh token is malformed")
             String refreshToken
     ) {}
 
     public record ForgotPasswordRequest(
             @NotBlank @Email
+            @Size(max = 254, message = "Email must not exceed 254 characters")
             String email
     ) {}
 
     public record ResetPasswordRequest(
             @NotBlank(message = "Token is required")
+            @Size(max = 1024, message = "Reset token is malformed")
             String token,
 
             @NotBlank
@@ -79,6 +91,7 @@ public final class AuthDtos {
 
     public record VerifyEmailRequest(
             @NotBlank(message = "Verification token is required")
+            @Size(max = 1024, message = "Verification token is malformed")
             String token
     ) {}
 
@@ -111,6 +124,9 @@ public final class AuthDtos {
             String role,
 
             @NotBlank(message = "ID is required")
+            @Size(max = 50, message = "Student ID must not exceed 50 characters")
+            @Pattern(regexp = "^[A-Za-z0-9\\-_./]{1,50}$",
+                    message = "Student ID contains invalid characters")
             String studentId
     ) {}
 

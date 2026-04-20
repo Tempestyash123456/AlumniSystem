@@ -46,8 +46,11 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
+      enabled: true
+      # Single file: generous enough for event videos (100 MB) + a small buffer
+      max-file-size: 110MB
+      # Whole request: covers multi-image post uploads (10 × 5 MB) plus metadata
+      max-request-size: 115MB
 
 server:
   port: ${PORT:8080}

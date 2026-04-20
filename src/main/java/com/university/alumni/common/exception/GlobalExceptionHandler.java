@@ -3,6 +3,8 @@ package com.university.alumni.common.exception;
 import com.university.alumni.common.dto.ApiResponse;
 import com.university.alumni.common.dto.ApiResponse.ApiError;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,7 +23,7 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // ── Validation errors (@Valid) ──────────────────────────────────────────
+    // ── Validation errors (@Valid on @RequestBody) ─────────────────────────
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidation(
             MethodArgumentNotValidException ex) {
@@ -38,6 +41,43 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(ApiResponse.error(new ApiError(
                         422, "VALIDATION_FAILED", "Request validation failed", fieldErrors)));
+    }
+
+    // ── Validation errors (@Validated on @RequestParam / manual validator) ──
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleConstraintViolation(
+            ConstraintViolationException ex) {
+
+        Map<String, String> fieldErrors = ex.getConstraintViolations()
+                .stream()
+                .collect(Collectors.toMap(
+                        v -> {
+                            // Extract the leaf property name from the full path
+                            String path = v.getPropertyPath().toString();
+                            int dot = path.lastIndexOf('.');
+                            return dot >= 0 ? path.substring(dot + 1) : path;
+                        },
+                        ConstraintViolation::getMessage,
+                        (a, b) -> a
+                ));
+
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ApiResponse.error(new ApiError(
+                        422, "VALIDATION_FAILED", "Request validation failed", fieldErrors)));
+    }
+
+    // ── File / request too large ────────────────────────────────────────────
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSize(
+            MaxUploadSizeExceededException ex) {
+
+        log.warn("Upload rejected — payload too large: {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.PAYLOAD_TOO_LARGE)
+                .body(ApiResponse.error(new ApiError(
+                        413, "PAYLOAD_TOO_LARGE",
+                        "The uploaded file or request body exceeds the maximum allowed size", null)));
     }
 
     // ── Domain exceptions ───────────────────────────────────────────────────

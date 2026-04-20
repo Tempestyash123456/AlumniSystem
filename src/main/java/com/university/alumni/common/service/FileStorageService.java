@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -21,10 +22,33 @@ import java.util.UUID;
 @Service
 public class FileStorageService {
 
-    private static final List<String> ALLOWED_TYPES = List.of(
+    private static final List<String> ALLOWED_IMAGE_TYPES = List.of(
             "image/jpeg", "image/png", "image/webp", "image/gif"
     );
-    private static final long MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+    private static final long MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+
+    /**
+     * Strict allowlist: maps each permitted MIME type to the single canonical extension.
+     * This prevents double-extension attacks (e.g. "shell.php.jpg").
+     */
+    private static final Map<String, String> MIME_TO_EXT = Map.ofEntries(
+            // Images
+            Map.entry("image/jpeg",  ".jpg"),
+            Map.entry("image/png",   ".png"),
+            Map.entry("image/webp",  ".webp"),
+            Map.entry("image/gif",   ".gif"),
+            // Videos
+            Map.entry("video/mp4",       ".mp4"),
+            Map.entry("video/webm",      ".webm"),
+            Map.entry("video/ogg",       ".ogv"),
+            Map.entry("video/quicktime", ".mov"),
+            // Documents
+            Map.entry("application/pdf", ".pdf"),
+            Map.entry("application/msword", ".doc"),
+            Map.entry("application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".docx"),
+            Map.entry("application/vnd.ms-powerpoint", ".ppt"),
+            Map.entry("application/vnd.openxmlformats-officedocument.presentationml.presentation", ".pptx")
+    );
 
     @Value("${app.upload.dir:uploads}")
     private String uploadDir;
@@ -41,8 +65,8 @@ public class FileStorageService {
     // ── Profile Photos ────────────────────────────────────────────────────────
 
     public String storeProfilePhoto(MultipartFile file, UUID userId) {
-        validate(file);
-        String ext = getExtension(file.getOriginalFilename());
+        validateImage(file);
+        String ext = safeExtension(file.getContentType());
         String filename = "profile_" + userId + "_" + UUID.randomUUID() + ext;
         Path dir = Paths.get(uploadDir, "profiles");
         return store(file, dir, filename, "/uploads/profiles/");
@@ -51,20 +75,16 @@ public class FileStorageService {
     // ── Post Images ───────────────────────────────────────────────────────────
 
     public String storePostImage(MultipartFile file) {
-        validate(file);
-        String ext = getExtension(file.getOriginalFilename());
+        validateImage(file);
+        String ext = safeExtension(file.getContentType());
         String filename = "post_" + UUID.randomUUID() + ext;
         Path dir = Paths.get(uploadDir, "posts");
         return store(file, dir, filename, "/uploads/posts/");
     }
 
-    // ── ADD these two methods inside FileStorageService.java ──────────────────────
-// Place them after the existing storePostImage() method.
-
     // ── Event Media (image OR video) ──────────────────────────────────────────
 
     public String storeEventMedia(MultipartFile file) {
-        // Allow images and common video types
         List<String> allowed = List.of(
                 "image/jpeg", "image/png", "image/webp", "image/gif",
                 "video/mp4", "video/webm", "video/ogg", "video/quicktime"
@@ -73,12 +93,14 @@ public class FileStorageService {
 
         if (file == null || file.isEmpty())
             throw new IllegalArgumentException("File is empty");
-        if (!allowed.contains(file.getContentType()))
-            throw new IllegalArgumentException("File type not allowed: " + file.getContentType());
+
+        String contentType = normalizeContentType(file.getContentType());
+        if (!allowed.contains(contentType))
+            throw new IllegalArgumentException("File type not allowed: " + contentType);
         if (file.getSize() > maxSize)
             throw new IllegalArgumentException("File exceeds 100 MB limit");
 
-        String ext      = getExtension(file.getOriginalFilename());
+        String ext      = safeExtension(contentType);
         String filename = "event_media_" + UUID.randomUUID() + ext;
         Path   dir      = Paths.get(uploadDir, "events", "media");
         return store(file, dir, filename, "/uploads/events/media/");
@@ -98,12 +120,14 @@ public class FileStorageService {
 
         if (file == null || file.isEmpty())
             throw new IllegalArgumentException("File is empty");
-        if (!allowed.contains(file.getContentType()))
-            throw new IllegalArgumentException("Document type not allowed: " + file.getContentType());
+
+        String contentType = normalizeContentType(file.getContentType());
+        if (!allowed.contains(contentType))
+            throw new IllegalArgumentException("Document type not allowed: " + contentType);
         if (file.getSize() > maxSize)
             throw new IllegalArgumentException("Document exceeds 50 MB limit");
 
-        String ext      = getExtension(file.getOriginalFilename());
+        String ext      = safeExtension(contentType);
         String filename = "event_doc_" + UUID.randomUUID() + ext;
         Path   dir      = Paths.get(uploadDir, "events", "docs");
         return store(file, dir, filename, "/uploads/events/docs/");
@@ -129,20 +153,41 @@ public class FileStorageService {
         }
     }
 
-    private void validate(MultipartFile file) {
+    private void validateImage(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
-        if (!ALLOWED_TYPES.contains(file.getContentType())) {
-            throw new IllegalArgumentException("File type not allowed: " + file.getContentType());
+        String contentType = normalizeContentType(file.getContentType());
+        if (!ALLOWED_IMAGE_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException("File type not allowed: " + contentType);
         }
-        if (file.getSize() > MAX_SIZE_BYTES) {
+        if (file.getSize() > MAX_IMAGE_SIZE_BYTES) {
             throw new IllegalArgumentException("File exceeds 5 MB limit");
         }
     }
 
-    private String getExtension(String filename) {
-        if (filename == null || !filename.contains(".")) return ".jpg";
-        return filename.substring(filename.lastIndexOf('.'));
+    /**
+     * Returns the canonical extension for a MIME type from the strict allowlist.
+     * Refuses to derive an extension from the original filename, preventing
+     * double-extension attacks such as "shell.php.jpg".
+     *
+     * @throws IllegalArgumentException if the MIME type is not on the allowlist.
+     */
+    private String safeExtension(String mimeType) {
+        String ext = MIME_TO_EXT.get(normalizeContentType(mimeType));
+        if (ext == null) {
+            throw new IllegalArgumentException("Unsupported MIME type: " + mimeType);
+        }
+        return ext;
+    }
+
+    /**
+     * Strips parameters (e.g. "; charset=utf-8") from a content-type header value
+     * and lower-cases it. Returns "application/octet-stream" for null input.
+     */
+    private String normalizeContentType(String contentType) {
+        if (contentType == null) return "application/octet-stream";
+        int semi = contentType.indexOf(';');
+        return (semi >= 0 ? contentType.substring(0, semi) : contentType).trim().toLowerCase();
     }
 }

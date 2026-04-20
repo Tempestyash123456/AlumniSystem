@@ -6,6 +6,9 @@ import com.university.alumni.event.dto.EventDtos.*;
 import com.university.alumni.event.service.EventService;
 import com.university.alumni.security.model.CachedUserDetails;
 import com.university.alumni.security.util.SecurityUtils;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -32,6 +36,7 @@ public class EventController {
 
     private final EventService  eventService;
     private final ObjectMapper  objectMapper;
+    private final Validator     validator;
 
     @GetMapping
     @PreAuthorize("hasAuthority('VIEW_EVENT')")
@@ -58,6 +63,8 @@ public class EventController {
             @AuthenticationPrincipal CachedUserDetails currentUser) throws Exception {
 
         CreateEventRequest request = objectMapper.readValue(dataJson, CreateEventRequest.class);
+        validate(request);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(eventService.createEvent(currentUser.getId(), request, mediaFiles)));
     }
@@ -70,6 +77,8 @@ public class EventController {
             @RequestPart(value = "media", required = false) List<MultipartFile> mediaFiles) throws Exception {
 
         UpdateEventRequest request = objectMapper.readValue(dataJson, UpdateEventRequest.class);
+        validate(request);
+
         return ResponseEntity.ok(ApiResponse.success(eventService.updateEvent(id, request, mediaFiles)));
     }
 
@@ -78,5 +87,19 @@ public class EventController {
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID eventId) {
         eventService.deleteEvent(eventId);
         return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Manually triggers Bean Validation on the deserialized object.
+     * Required because Spring's @Valid is skipped for @RequestPart String parameters
+     * that are parsed manually via ObjectMapper.
+     */
+    private <T> void validate(T object) {
+        Set<ConstraintViolation<T>> violations = validator.validate(object);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
     }
 }
