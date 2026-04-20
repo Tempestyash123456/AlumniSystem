@@ -52,11 +52,11 @@ public class JwtService {
                               long expirationMs) {
         long now = System.currentTimeMillis();
         return Jwts.builder()
-                .setClaims(extraClaims)
-                .setSubject(subject)
-                .setId(UUID.randomUUID().toString())
-                .setIssuedAt(new Date(now))
-                .setExpiration(new Date(now + expirationMs))
+                .claims(extraClaims)
+                .subject(subject)
+                .id(UUID.randomUUID().toString())
+                .issuedAt(new Date(now))
+                .expiration(new Date(now + expirationMs))
                 .signWith(getSigningKey())
                 .compact();
     }
