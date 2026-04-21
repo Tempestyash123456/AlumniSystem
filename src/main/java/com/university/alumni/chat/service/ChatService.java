@@ -74,9 +74,7 @@ public class ChatService {
     }
 
     public List<User> getConversations(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return chatMessageRepository.findConversations(user);
+        return chatMessageRepository.findConversations(userId);
     }
 
     public List<Notification> getNotifications(UUID userId) {

@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * It tracks requests per IP address using a 1-minute sliding window.
  */
 @Slf4j
-@Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
     private final Map<String, RateLimitInfo> ipCache = new ConcurrentHashMap<>();

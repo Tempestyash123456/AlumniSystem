@@ -3,12 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 import { chatApi, profileApi } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import { Spinner, Button } from '../../components/ui';
+import { maskId, unmaskId } from '../../lib/mask';
 import type { ChatMessageDto, ConversationDto, ProfileResponse } from '../../types';
 import './ChatPage.css';
 
 export const ChatPage: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const targetUserId = searchParams.get('to');
+    const maskedTo = searchParams.get('to');
+    const targetUserId = maskedTo ? unmaskId(maskedTo) : null;
     const { user: currentUser } = useAuthStore();
 
     const [conversations, setConversations] = useState<ConversationDto[]>([]);
@@ -59,6 +61,11 @@ export const ChatPage: React.FC = () => {
     // Fetch history and profile for selected user
     useEffect(() => {
         if (!selectedUserId) return;
+
+        // CRITICAL FIX: Reset messages to show loading/transitional state
+        setMessages([]);
+        setSelectedUser(null);
+        setError(null);
 
         const fetchData = async () => {
             try {
@@ -141,7 +148,7 @@ export const ChatPage: React.FC = () => {
                                 className={`conversation-item ${selectedUserId === conv.userId ? 'active' : ''}`}
                                 onClick={() => {
                                     setSelectedUserId(conv.userId);
-                                    setSearchParams({ to: conv.userId });
+                                    setSearchParams({ to: maskId(conv.userId) });
                                 }}
                             >
                                 <img 

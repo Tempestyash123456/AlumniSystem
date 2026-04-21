@@ -18,8 +18,9 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> 
     @Query("SELECT m FROM ChatMessage m WHERE (m.sender = :u1 AND m.recipient = :u2) OR (m.sender = :u2 AND m.recipient = :u1) ORDER BY m.createdAt ASC")
     List<ChatMessage> findChatHistory(@Param("u1") User u1, @Param("u2") User u2);
 
-    @Query("SELECT DISTINCT m.recipient FROM ChatMessage m WHERE m.sender = :user " +
-           "UNION " +
-           "SELECT DISTINCT m.sender FROM ChatMessage m WHERE m.recipient = :user")
-    List<User> findConversations(@Param("user") User user);
+    @Query(value = "SELECT DISTINCT u.* FROM users u " +
+           "JOIN chat_messages m ON (u.id = m.recipient_id AND m.sender_id = :userId) " +
+           "OR (u.id = m.sender_id AND m.recipient_id = :userId) " +
+           "WHERE u.deleted_at IS NULL", nativeQuery = true)
+    List<User> findConversations(@Param("userId") UUID userId);
 }

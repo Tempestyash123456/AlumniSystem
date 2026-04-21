@@ -3,6 +3,7 @@ import { alumniApi } from '../../lib/api';
 import { useNavigate } from 'react-router-dom';
 import type { AlumniDto } from '../../types';
 import { Spinner, Button } from '../../components/ui';
+import { maskId } from '../../lib/mask';
 import './Peers.css';
 
 // ── Icons ──────────────────────────────────────────────────────────────────
@@ -147,7 +148,7 @@ const PeerCard: React.FC<{ peer: AlumniDto }> = ({ peer }) => {
             <div className="peer-card-actions">
                 <button 
                     className="card-message-btn"
-                    onClick={() => navigate(`/chat?to=${peer.id}`)}
+                    onClick={() => navigate(`/chat?to=${maskId(peer.id)}`)}
                 >
                     Message
                 </button>
@@ -227,16 +228,12 @@ export const ConnectWithPeersPage: React.FC = () => {
         fetchFilters();
     }, []);
 
-    // Fetch dependent filters
+    // Fetch dependent filters - REFACTORED TO BE SEMI-INDEPENDENT
     useEffect(() => {
         const fetchDependent = async () => {
-            if (filters.program) {
-                const yearsRes = await alumniApi.getPeerYears(filters.program);
-                if (yearsRes.success && yearsRes.data) {
-                    setOptions(prev => ({ ...prev, year: yearsRes.data!.map(d => d.name) }));
-                }
-            } else {
-                setOptions(prev => ({ ...prev, year: [], country: [], state: [], city: [] }));
+            const yearsRes = await alumniApi.getPeerYears(filters.program || '');
+            if (yearsRes.success && yearsRes.data) {
+                setOptions(prev => ({ ...prev, year: yearsRes.data!.map(d => d.name) }));
             }
         };
         fetchDependent();
@@ -244,13 +241,9 @@ export const ConnectWithPeersPage: React.FC = () => {
 
     useEffect(() => {
         const fetchCountries = async () => {
-            if (filters.program && filters.year) {
-                const res = await alumniApi.getPeerCountries(filters.program, parseInt(filters.year));
-                if (res.success && res.data) {
-                    setOptions(prev => ({ ...prev, country: res.data!.map(d => d.name) }));
-                }
-            } else {
-                setOptions(prev => ({ ...prev, country: [], state: [], city: [] }));
+            const res = await alumniApi.getPeerCountries(filters.program || '', filters.year ? parseInt(filters.year) : undefined);
+            if (res.success && res.data) {
+                setOptions(prev => ({ ...prev, country: res.data!.map(d => d.name) }));
             }
         };
         fetchCountries();
@@ -258,13 +251,13 @@ export const ConnectWithPeersPage: React.FC = () => {
 
     useEffect(() => {
         const fetchStates = async () => {
-            if (filters.program && filters.year && filters.country) {
-                const res = await alumniApi.getPeerStates(filters.program, parseInt(filters.year), filters.country);
-                if (res.success && res.data) {
-                    setOptions(prev => ({ ...prev, state: res.data!.map(d => d.name) }));
-                }
-            } else {
-                setOptions(prev => ({ ...prev, state: [], city: [] }));
+            const res = await alumniApi.getPeerStates(
+                filters.program || '', 
+                filters.year ? parseInt(filters.year) : undefined, 
+                filters.country || ''
+            );
+            if (res.success && res.data) {
+                setOptions(prev => ({ ...prev, state: res.data!.map(d => d.name) }));
             }
         };
         fetchStates();
@@ -272,13 +265,14 @@ export const ConnectWithPeersPage: React.FC = () => {
 
     useEffect(() => {
         const fetchCities = async () => {
-            if (filters.program && filters.year && filters.country && filters.state) {
-                const res = await alumniApi.getPeerCities(filters.program, parseInt(filters.year), filters.country, filters.state);
-                if (res.success && res.data) {
-                    setOptions(prev => ({ ...prev, city: res.data!.map(d => d.name) }));
-                }
-            } else {
-                setOptions(prev => ({ ...prev, city: [] }));
+            const res = await alumniApi.getPeerCities(
+                filters.program || '', 
+                filters.year ? parseInt(filters.year) : undefined, 
+                filters.country || '', 
+                filters.state || ''
+            );
+            if (res.success && res.data) {
+                setOptions(prev => ({ ...prev, city: res.data!.map(d => d.name) }));
             }
         };
         fetchCities();

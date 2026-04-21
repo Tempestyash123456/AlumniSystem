@@ -40,31 +40,31 @@ public class AlumniController {
 
     @GetMapping("/peers/years")
     public ResponseEntity<ApiResponse<List<PeerGroupDto>>> getPeerYears(
-            @RequestParam @Size(max = 150, message = "program filter is too long") String program) {
+            @RequestParam(required = false) @Size(max = 150, message = "program filter is too long") String program) {
         return ResponseEntity.ok(ApiResponse.success(alumniService.getPeerGraduationYears(program)));
     }
 
     @GetMapping("/peers/countries")
     public ResponseEntity<ApiResponse<List<PeerGroupDto>>> getPeerCountries(
-            @RequestParam @Size(max = 150, message = "program filter is too long") String program,
-            @RequestParam Integer year) {
+            @RequestParam(required = false) @Size(max = 150, message = "program filter is too long") String program,
+            @RequestParam(required = false) Integer year) {
         return ResponseEntity.ok(ApiResponse.success(alumniService.getPeerCountries(program, year)));
     }
 
     @GetMapping("/peers/states")
     public ResponseEntity<ApiResponse<List<PeerGroupDto>>> getPeerStates(
-            @RequestParam @Size(max = 150, message = "program filter is too long") String program,
-            @RequestParam Integer year,
-            @RequestParam @Size(max = 100, message = "country filter is too long") String country) {
+            @RequestParam(required = false) @Size(max = 150, message = "program filter is too long") String program,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) @Size(max = 100, message = "country filter is too long") String country) {
         return ResponseEntity.ok(ApiResponse.success(alumniService.getPeerStates(program, year, country)));
     }
 
     @GetMapping("/peers/cities")
     public ResponseEntity<ApiResponse<List<PeerGroupDto>>> getPeerCities(
-            @RequestParam @Size(max = 150, message = "program filter is too long") String program,
-            @RequestParam Integer year,
-            @RequestParam @Size(max = 100, message = "country filter is too long") String country,
-            @RequestParam @Size(max = 100, message = "state filter is too long") String state) {
+            @RequestParam(required = false) @Size(max = 150, message = "program filter is too long") String program,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) @Size(max = 100, message = "country filter is too long") String country,
+            @RequestParam(required = false) @Size(max = 100, message = "state filter is too long") String state) {
         return ResponseEntity.ok(ApiResponse.success(alumniService.getPeerCities(program, year, country, state)));
     }
 
