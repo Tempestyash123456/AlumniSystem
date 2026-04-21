@@ -1,13 +1,18 @@
 package com.university.alumni.user.service;
 
 import com.university.alumni.user.dto.AlumniDto;
+import com.university.alumni.user.dto.AlumniListResponse;
 import com.university.alumni.user.dto.PeerGroupDto;
 import com.university.alumni.user.entity.JobExperience;
 import com.university.alumni.user.entity.AlumniProfile;
 import com.university.alumni.user.entity.User;
 import com.university.alumni.user.repository.AlumniProfileRepository;
 import com.university.alumni.user.repository.UserRepository;
+import com.university.alumni.user.specification.AlumniProfileSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,6 +76,29 @@ public class AlumniService {
         return profileRepository.findPeers(program, year, country, state, city).stream()
                 .map(profile -> mapToDto(profile.getUser(), profile))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public AlumniListResponse getFilteredPeers(
+            String query,
+            String program,
+            Integer year,
+            String country,
+            String state,
+            String city,
+            Pageable pageable) {
+        
+        Specification<AlumniProfile> spec = AlumniProfileSpecification.withCriteria(
+                query, program, year, country, state, city
+        );
+
+        Page<AlumniProfile> page = profileRepository.findAll(spec, pageable);
+        
+        List<AlumniDto> dtos = page.getContent().stream()
+                .map(profile -> mapToDto(profile.getUser(), profile))
+                .collect(Collectors.toList());
+
+        return new AlumniListResponse(dtos, page.getTotalElements());
     }
 
     private AlumniDto mapToDto(User user, AlumniProfile profile) {

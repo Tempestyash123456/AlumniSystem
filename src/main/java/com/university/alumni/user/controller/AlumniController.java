@@ -2,10 +2,14 @@ package com.university.alumni.user.controller;
 
 import com.university.alumni.common.dto.ApiResponse;
 import com.university.alumni.user.dto.AlumniDto;
+import com.university.alumni.user.dto.AlumniListResponse;
 import com.university.alumni.user.dto.PeerGroupDto;
 import com.university.alumni.user.service.AlumniService;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -65,12 +69,17 @@ public class AlumniController {
     }
 
     @GetMapping("/peers/list")
-    public ResponseEntity<ApiResponse<List<AlumniDto>>> getPeers(
-            @RequestParam @Size(max = 150, message = "program filter is too long") String program,
-            @RequestParam Integer year,
-            @RequestParam @Size(max = 100, message = "country filter is too long") String country,
-            @RequestParam @Size(max = 100, message = "state filter is too long") String state,
-            @RequestParam @Size(max = 100, message = "city filter is too long") String city) {
-        return ResponseEntity.ok(ApiResponse.success(alumniService.getPeers(program, year, country, state, city)));
+    public ResponseEntity<ApiResponse<AlumniListResponse>> getPeers(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String program,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) String city,
+            @PageableDefault(size = 12, sort = {"user.firstName", "user.lastName"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        
+        return ResponseEntity.ok(ApiResponse.success(
+                alumniService.getFilteredPeers(query, program, year, country, state, city, pageable)
+        ));
     }
 }

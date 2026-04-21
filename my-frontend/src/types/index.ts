@@ -130,6 +130,11 @@ export interface AlumniDto {
     linkedinUrl?: string;
 }
 
+export interface AlumniListResponse {
+    alumni: AlumniDto[];
+    totalCount: number;
+}
+
 export interface PeerGroupDto {
     name: string;
     count: number;
@@ -211,4 +216,28 @@ export interface SupportDeveloperResponse {
     linkedinUrl?: string;
     githubUrl?: string;
     bugReportPhotoUrl?: string;
+}
+
+// ── Chat & Notifications ──────────────────────────────────────────────────────
+export interface ChatMessageDto {
+    id: string;
+    senderId: string;
+    senderName: string;
+    recipientId: string;
+    content: string;
+    createdAt: string;
+}
+
+export interface NotificationDto {
+    id: string;
+    message: string;
+    link: string;
+    read: boolean;
+    createdAt: string;
+}
+
+export interface ConversationDto {
+    userId: string;
+    userName: string;
+    profilePhotoUrl?: string;
 }

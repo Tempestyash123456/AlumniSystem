@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { eventsApi } from '../../lib/api';
 import type { EventDto } from '../../types';
 import { Button, Alert, Input, Spinner, Modal, Carousel } from '../../components/ui';
+import DOMPurify from 'dompurify';
 
 const BASE_URL = '';
 

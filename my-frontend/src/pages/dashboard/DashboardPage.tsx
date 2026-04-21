@@ -2,10 +2,10 @@ import React, { useEffect, useState, useRef } from 'react';
 // @ts-ignore
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { profileApi, adminApi, tokenStorage, postsApi, eventsApi } from '../../lib/api';
+import { profileApi, adminApi, tokenStorage, postsApi, eventsApi, chatApi } from '../../lib/api';
 import { Spinner, Button } from '../../components/ui';
 import { PermissionGuard } from '../../components/auth/PermissionGuard';
-import type { ProfileResponse, AdminUserDto, PostDto, EventDto } from '../../types';
+import type { ProfileResponse, AdminUserDto, PostDto, EventDto, NotificationDto } from '../../types';
 
 const BASE_URL = '';
 
@@ -74,6 +74,7 @@ export const DashboardPage: React.FC = () => {
     const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([]);
     const [recentPost, setRecentPost] = useState<PostDto | null>(null);
     const [recentEvent, setRecentEvent] = useState<EventDto | null>(null);
+    const [notifications, setNotifications] = useState<NotificationDto[]>([]);
     const sseRef = useRef<EventSource | null>(null);
 
     useEffect(() => {
@@ -101,6 +102,12 @@ export const DashboardPage: React.FC = () => {
                 if (eventsRes.data && eventsRes.data.length > 0) {
                     // Find most recent (upcoming) event or just the first
                     setRecentEvent(eventsRes.data[0]);
+                }
+
+                // Fetch notifications
+                const notifRes = await chatApi.getNotifications();
+                if (notifRes.success && notifRes.data) {
+                    setNotifications(notifRes.data);
                 }
             } finally {
                 setLoading(false);
@@ -228,6 +235,49 @@ export const DashboardPage: React.FC = () => {
                                             <span>EVENTS</span>
                                         </Button>
                                     </PermissionGuard>
+                                </div>
+                            </div>
+
+                            {/* Notifications Panel */}
+                            <div className="cp-panel" style={{ padding: '24px', borderLeft: '4px solid var(--neon-cyan)' }}>
+                                <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 20, display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>◈ RECENT_NOTIFICATIONS</span>
+                                    {notifications.filter(n => !n.read).length > 0 && (
+                                        <span style={{ background: 'var(--neon-pink)', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '4px' }}>
+                                            {notifications.filter(n => !n.read).length} NEW
+                                        </span>
+                                    )}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    {notifications.length === 0 ? (
+                                        <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)' }}>No new updates.</p>
+                                    ) : (
+                                        notifications.slice(0, 5).map(notif => (
+                                            <div 
+                                                key={notif.id}
+                                                onClick={async () => {
+                                                    await chatApi.markAsRead(notif.id);
+                                                    navigate(notif.link);
+                                                }}
+                                                style={{ 
+                                                    padding: '12px', 
+                                                    background: notif.read ? 'rgba(255,255,255,0.02)' : 'rgba(0,245,255,0.05)',
+                                                    border: `1px solid ${notif.read ? 'var(--border-subtle)' : 'var(--neon-cyan)33'}`,
+                                                    borderRadius: '8px',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                                className="notification-item"
+                                            >
+                                                <div style={{ fontSize: 'var(--font-size-sm)', color: notif.read ? 'var(--text-secondary)' : 'var(--text-primary)', fontWeight: notif.read ? 400 : 500 }}>
+                                                    {notif.message}
+                                                </div>
+                                                <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: 4 }}>
+                                                    {new Date(notif.createdAt).toLocaleString()}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </div>
 

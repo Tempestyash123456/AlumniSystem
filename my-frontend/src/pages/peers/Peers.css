@@ -522,25 +522,32 @@
     border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.card-linkedin-link {
+.card-message-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 10px;
-    background: #0a66c2;
-    color: white;
-    text-decoration: none;
+    background: var(--neon-cyan);
+    color: var(--bg-void);
+    border: none;
     border-radius: 6px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    transition: all 0.2s;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.card-linkedin-link:hover {
-    background: #004182;
-    transform: scale(1.02);
+.card-message-btn:hover {
+    background: #00e5ff;
+    box-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.card-message-btn:active {
+    transform: translateY(0);
 }
 
 .card-linkedin-none {

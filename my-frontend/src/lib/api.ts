@@ -133,7 +133,15 @@ export const alumniApi = {
     getPeerCountries: (program: string, year: number) => apiFetch<PeerGroupDto[]>(`/alumni/peers/countries?program=${encodeURIComponent(program)}&year=${year}`),
     getPeerStates: (program: string, year: number, country: string) => apiFetch<PeerGroupDto[]>(`/alumni/peers/states?program=${encodeURIComponent(program)}&year=${year}&country=${encodeURIComponent(country)}`),
     getPeerCities: (program: string, year: number, country: string, state: string) => apiFetch<PeerGroupDto[]>(`/alumni/peers/cities?program=${encodeURIComponent(program)}&year=${year}&country=${encodeURIComponent(country)}&state=${encodeURIComponent(state)}`),
-    getPeers: (program: string, year: number, country: string, state: string, city: string) => apiFetch<AlumniDto[]>(`/alumni/peers/list?program=${encodeURIComponent(program)}&year=${year}&country=${encodeURIComponent(country)}&state=${encodeURIComponent(state)}&city=${encodeURIComponent(city)}`),
+    getPeers: (params: { query?: string; program?: string; year?: string; country?: string; state?: string; city?: string; page?: number; size?: number }) => {
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                queryParams.append(key, String(value));
+            }
+        });
+        return apiFetch<AlumniListResponse>(`/alumni/peers/list?${queryParams.toString()}`);
+    }
 };
 
 export const adminApi = {
@@ -194,6 +202,14 @@ export const eventsApi = {
     },
 
     delete: (id: string) => apiFetch<void>(`/events/${id}`, { method: 'DELETE' }),
+};
+
+export const chatApi = {
+    send: (recipientId: string, content: string) => apiFetch<ChatMessageDto>('/chat/send', { method: 'POST', body: JSON.stringify({ recipientId, content }) }),
+    getHistory: (userId: string) => apiFetch<ChatMessageDto[]>(`/chat/history?userId=${userId}`),
+    getConversations: () => apiFetch<ConversationDto[]>('/chat/conversations'),
+    getNotifications: () => apiFetch<NotificationDto[]>('/chat/notifications'),
+    markAsRead: (id: string) => apiFetch<void>(`/chat/notifications/${id}/read`, { method: 'PATCH' }),
 };
 
 export const getImageUrl = (path: string | null | undefined) => {

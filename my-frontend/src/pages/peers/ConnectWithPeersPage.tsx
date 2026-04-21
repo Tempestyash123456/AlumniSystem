@@ -1,12 +1,21 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { alumniApi } from '../../lib/api';
+import { useNavigate } from 'react-router-dom';
 import type { AlumniDto } from '../../types';
-import { Spinner } from '../../components/ui';
+import { Spinner, Button } from '../../components/ui';
 import './Peers.css';
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 const SearchIcon = ({ size = 20 }: { size?: number }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+);
+
+const ChevronLeft = ({ size = 20 }: { size?: number }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+);
+
+const ChevronRight = ({ size = 20 }: { size?: number }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
 );
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -43,16 +52,15 @@ const FilterSidebar: React.FC<{
     filters: Filters;
     onChange: (key: keyof Filters, value: string) => void;
     onClear: () => void;
-    options: { [key in keyof Omit<Filters, 'search'>]: string[] };
+    options: { [key: string]: string[] };
     isOpen: boolean;
 }> = ({ filters, onChange, onClear, options, isOpen }) => {
-    // Local state for which sections are expanded
     const [expanded, setExpanded] = useState<Record<string, boolean>>({
-        program: !!filters.program,
-        year: !!filters.year,
-        country: !!filters.country,
-        state: !!filters.state,
-        city: !!filters.city
+        program: true,
+        year: true,
+        country: true,
+        state: false,
+        city: false
     });
 
     const toggleSection = (key: string) => {
@@ -65,7 +73,7 @@ const FilterSidebar: React.FC<{
                 <div className="sidebar-search-box">
                     <input
                         type="search"
-                        placeholder="Search peers by name, company, or role..."
+                        placeholder="Search by Name, Email, ID..."
                         className="sidebar-search-input"
                         value={filters.search}
                         onChange={(e) => onChange('search', e.target.value)}
@@ -88,7 +96,7 @@ const FilterSidebar: React.FC<{
                         active={expanded[key]}
                         onClick={() => toggleSection(key)}
                     >
-                        {options[key].map(opt => (
+                        {(options[key] || []).map(opt => (
                             <label key={opt} className="filter-option">
                                 <input
                                     type="checkbox"
@@ -98,7 +106,7 @@ const FilterSidebar: React.FC<{
                                 {opt}
                             </label>
                         ))}
-                        {options[key].length === 0 && <span style={{ fontSize: 12, opacity: 0.5 }}>No options available</span>}
+                        {(!options[key] || options[key].length === 0) && <span style={{ fontSize: 12, opacity: 0.5 }}>No options available</span>}
                     </SidebarFilterSection>
                 ))}
             </div>
@@ -114,6 +122,7 @@ const FilterSidebar: React.FC<{
 
 // ── Peer Card Component ──────────────────────────────────────────────────────
 const PeerCard: React.FC<{ peer: AlumniDto }> = ({ peer }) => {
+    const navigate = useNavigate();
     return (
         <div className="peer-card-new animate-fade-in">
             <div className="peer-card-header">
@@ -136,13 +145,12 @@ const PeerCard: React.FC<{ peer: AlumniDto }> = ({ peer }) => {
             </div>
             
             <div className="peer-card-actions">
-                {peer.linkedinUrl ? (
-                    <a href={peer.linkedinUrl} target="_blank" rel="noopener noreferrer" className="card-linkedin-link">
-                        LinkedIn Profile
-                    </a>
-                ) : (
-                    <span className="card-linkedin-none">LinkedIn Not Available</span>
-                )}
+                <button 
+                    className="card-message-btn"
+                    onClick={() => navigate(`/chat?to=${peer.id}`)}
+                >
+                    Message
+                </button>
             </div>
         </div>
     );
@@ -188,10 +196,11 @@ const PeerCardGrid: React.FC<PeerGridProps> = ({ peers, loading, onClear }) => {
 
 // ── Main Page Component ───────────────────────────────────────────────────────
 export const ConnectWithPeersPage: React.FC = () => {
-    const [allPeers, setAllPeers] = useState<AlumniDto[]>([]);
-    const [filteredPeers, setFilteredPeers] = useState<AlumniDto[]>([]);
+    const [peers, setPeers] = useState<AlumniDto[]>([]);
+    const [totalCount, setTotalCount] = useState(0);
     const [loading, setLoading] = useState(true);
-    const sidebarOpen = false; // Toggle removed by user request
+    const [page, setPage] = useState(0);
+    const pageSize = 12;
 
     const [filters, setFilters] = useState<Filters>({
         program: '',
@@ -202,86 +211,123 @@ export const ConnectWithPeersPage: React.FC = () => {
         search: ''
     });
 
-    const [debouncedFilters, setDebouncedFilters] = useState<Filters>(filters);
+    const [options, setOptions] = useState<Record<string, string[]>>({});
 
-    // Fetch all peers on mount
+    // Fetch filters options
     useEffect(() => {
-        const fetchPeers = async () => {
-            try {
-                const res = await alumniApi.getAll();
-                if (res.success && res.data) {
-                    setAllPeers(res.data);
-                    setFilteredPeers(res.data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch peers:', err);
-            } finally {
-                setLoading(false);
+        const fetchFilters = async () => {
+            const programsRes = await alumniApi.getPeerPrograms();
+            if (programsRes.success && programsRes.data) {
+                setOptions(prev => ({ 
+                    ...prev, 
+                    program: programsRes.data!.map(d => d.name) 
+                }));
             }
         };
-        fetchPeers();
+        fetchFilters();
     }, []);
 
-    // Debounce filter changes
+    // Fetch dependent filters
+    useEffect(() => {
+        const fetchDependent = async () => {
+            if (filters.program) {
+                const yearsRes = await alumniApi.getPeerYears(filters.program);
+                if (yearsRes.success && yearsRes.data) {
+                    setOptions(prev => ({ ...prev, year: yearsRes.data!.map(d => d.name) }));
+                }
+            } else {
+                setOptions(prev => ({ ...prev, year: [], country: [], state: [], city: [] }));
+            }
+        };
+        fetchDependent();
+    }, [filters.program]);
+
+    useEffect(() => {
+        const fetchCountries = async () => {
+            if (filters.program && filters.year) {
+                const res = await alumniApi.getPeerCountries(filters.program, parseInt(filters.year));
+                if (res.success && res.data) {
+                    setOptions(prev => ({ ...prev, country: res.data!.map(d => d.name) }));
+                }
+            } else {
+                setOptions(prev => ({ ...prev, country: [], state: [], city: [] }));
+            }
+        };
+        fetchCountries();
+    }, [filters.program, filters.year]);
+
+    useEffect(() => {
+        const fetchStates = async () => {
+            if (filters.program && filters.year && filters.country) {
+                const res = await alumniApi.getPeerStates(filters.program, parseInt(filters.year), filters.country);
+                if (res.success && res.data) {
+                    setOptions(prev => ({ ...prev, state: res.data!.map(d => d.name) }));
+                }
+            } else {
+                setOptions(prev => ({ ...prev, state: [], city: [] }));
+            }
+        };
+        fetchStates();
+    }, [filters.program, filters.year, filters.country]);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            if (filters.program && filters.year && filters.country && filters.state) {
+                const res = await alumniApi.getPeerCities(filters.program, parseInt(filters.year), filters.country, filters.state);
+                if (res.success && res.data) {
+                    setOptions(prev => ({ ...prev, city: res.data!.map(d => d.name) }));
+                }
+            } else {
+                setOptions(prev => ({ ...prev, city: [] }));
+            }
+        };
+        fetchCities();
+    }, [filters.program, filters.year, filters.country, filters.state]);
+
+    // Fetch Peers with debouncing for search
+    const fetchPeers = useCallback(async (currentFilters: Filters, currentPage: number) => {
+        setLoading(true);
+        try {
+            const res = await alumniApi.getPeers({
+                query: currentFilters.search,
+                program: currentFilters.program,
+                year: currentFilters.year,
+                country: currentFilters.country,
+                state: currentFilters.state,
+                city: currentFilters.city,
+                page: currentPage,
+                size: pageSize
+            });
+
+            if (res.success && res.data) {
+                setPeers(res.data.alumni);
+                setTotalCount(res.data.totalCount);
+            }
+        } catch (err) {
+            console.error('Failed to fetch peers:', err);
+        } finally {
+            setLoading(false);
+        }
+    }, [pageSize]);
+
     useEffect(() => {
         const handler = setTimeout(() => {
-            setDebouncedFilters(filters);
+            fetchPeers(filters, page);
         }, 300);
         return () => clearTimeout(handler);
-    }, [filters]);
-
-    // Apply filtering
-    useEffect(() => {
-        let result = [...allPeers];
-
-        if (debouncedFilters.search) {
-            const s = debouncedFilters.search.toLowerCase();
-            result = result.filter(p =>
-                p.firstName.toLowerCase().includes(s) ||
-                p.lastName.toLowerCase().includes(s) ||
-                p.email.toLowerCase().includes(s) ||
-                (p.currentJobTitle || '').toLowerCase().includes(s) ||
-                (p.currentCompany || '').toLowerCase().includes(s)
-            );
-        }
-
-        if (debouncedFilters.program) {
-            result = result.filter(p => p.program === debouncedFilters.program);
-        }
-        if (debouncedFilters.year) {
-            result = result.filter(p => String(p.graduationYear) === debouncedFilters.year);
-        }
-        if (debouncedFilters.country) {
-            result = result.filter(p => p.country === debouncedFilters.country);
-        }
-        if (debouncedFilters.state) {
-            result = result.filter(p => p.state === debouncedFilters.state);
-        }
-        if (debouncedFilters.city) {
-            result = result.filter(p => p.city === debouncedFilters.city);
-        }
-
-        setFilteredPeers(result);
-    }, [debouncedFilters, allPeers]);
-
-    // Options for sidebar
-    const filterOptions = useMemo(() => {
-        return {
-            program: Array.from(new Set(allPeers.map(p => p.program).filter(Boolean))).sort() as string[],
-            year: Array.from(new Set(allPeers.map(p => p.graduationYear).filter(Boolean).map(String))).sort((a, b) => b.localeCompare(a)) as string[],
-            country: Array.from(new Set(allPeers.map(p => p.country).filter(Boolean))).sort() as string[],
-            state: Array.from(new Set(allPeers.map(p => p.state).filter(Boolean))).sort() as string[],
-            city: Array.from(new Set(allPeers.map(p => p.city).filter(Boolean))).sort() as string[],
-        };
-    }, [allPeers]);
+    }, [filters, page, fetchPeers]);
 
     const handleFilterChange = (key: keyof Filters, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
+        setPage(0); // Reset to first page on filter change
     };
 
     const clearFilters = () => {
         setFilters({ program: '', year: '', country: '', state: '', city: '', search: '' });
+        setPage(0);
     };
+
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     return (
         <div className="peers-container animate-fade-in">
@@ -304,26 +350,53 @@ export const ConnectWithPeersPage: React.FC = () => {
                     filters={filters}
                     onChange={handleFilterChange}
                     onClear={clearFilters}
-                    options={filterOptions}
-                    isOpen={sidebarOpen}
+                    options={options}
+                    isOpen={false}
                 />
 
                 <main className="peers-main">
                     <div className="table-controls">
                         <div className="result-count">
-                            <span className="count-num">{filteredPeers.length}</span>
+                            <span className="count-num">{totalCount}</span>
                             <span className="count-label">Peers Found</span>
                         </div>
                     </div>
 
                     <PeerCardGrid 
-                        peers={filteredPeers} 
+                        peers={peers} 
                         loading={loading} 
                         onClear={clearFilters}
                     />
+
+                    {totalPages > 1 && (
+                        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '32px', marginBottom: '32px' }}>
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => setPage(p => Math.max(0, p - 1))}
+                                disabled={page === 0 || loading}
+                                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                                <ChevronLeft size={16} /> Previous
+                            </Button>
+                            
+                            <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-secondary)', fontFamily: 'Orbitron, sans-serif' }}>
+                                PAGE <span style={{ color: 'var(--neon-cyan)' }}>{page + 1}</span> OF {totalPages}
+                            </span>
+
+                            <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                                disabled={page >= totalPages - 1 || loading}
+                                style={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+                            >
+                                Next <ChevronRight size={16} />
+                            </Button>
+                        </div>
+                    )}
                 </main>
             </div>
         </div>
     );
 };
-
