@@ -64,6 +64,7 @@ public class ChatService {
         return saved;
     }
 
+    @Transactional(readOnly = true)
     public List<ChatMessage> getChatHistory(UUID user1Id, UUID user2Id) {
         User u1 = userRepository.findById(user1Id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
@@ -73,10 +74,12 @@ public class ChatService {
         return chatMessageRepository.findChatHistory(u1, u2);
     }
 
+    @Transactional(readOnly = true)
     public List<User> getConversations(UUID userId) {
         return chatMessageRepository.findConversations(userId);
     }
 
+    @Transactional(readOnly = true)
     public List<Notification> getNotifications(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));

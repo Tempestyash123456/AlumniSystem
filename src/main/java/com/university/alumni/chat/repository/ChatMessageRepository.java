@@ -15,7 +15,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, UUID> 
 
     long countBySenderAndRecipient(User sender, User recipient);
 
-    @Query("SELECT m FROM ChatMessage m WHERE (m.sender = :u1 AND m.recipient = :u2) OR (m.sender = :u2 AND m.recipient = :u1) ORDER BY m.createdAt ASC")
+    @Query("SELECT m FROM ChatMessage m JOIN FETCH m.sender JOIN FETCH m.recipient WHERE (m.sender = :u1 AND m.recipient = :u2) OR (m.sender = :u2 AND m.recipient = :u1) ORDER BY m.createdAt ASC")
     List<ChatMessage> findChatHistory(@Param("u1") User u1, @Param("u2") User u2);
 
     @Query(value = "SELECT DISTINCT u.* FROM users u " +
