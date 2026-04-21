@@ -130,10 +130,32 @@ export const supportApi = {
 export const alumniApi = {
     getAll: () => apiFetch<AlumniDto[]>('/alumni'),
     getPeerPrograms: () => apiFetch<PeerGroupDto[]>('/alumni/peers/programs'),
-    getPeerYears: (program: string) => apiFetch<PeerGroupDto[]>(`/alumni/peers/years?program=${encodeURIComponent(program)}`),
-    getPeerCountries: (program: string, year: number) => apiFetch<PeerGroupDto[]>(`/alumni/peers/countries?program=${encodeURIComponent(program)}&year=${year}`),
-    getPeerStates: (program: string, year: number, country: string) => apiFetch<PeerGroupDto[]>(`/alumni/peers/states?program=${encodeURIComponent(program)}&year=${year}&country=${encodeURIComponent(country)}`),
-    getPeerCities: (program: string, year: number, country: string, state: string) => apiFetch<PeerGroupDto[]>(`/alumni/peers/cities?program=${encodeURIComponent(program)}&year=${year}&country=${encodeURIComponent(country)}&state=${encodeURIComponent(state)}`),
+    getPeerYears: (program?: string) => {
+        const p = new URLSearchParams();
+        if (program) p.append('program', program);
+        return apiFetch<PeerGroupDto[]>(`/alumni/peers/years${p.toString() ? `?${p.toString()}` : ''}`);
+    },
+    getPeerCountries: (program?: string, year?: number) => {
+        const p = new URLSearchParams();
+        if (program) p.append('program', program);
+        if (year) p.append('year', year.toString());
+        return apiFetch<PeerGroupDto[]>(`/alumni/peers/countries${p.toString() ? `?${p.toString()}` : ''}`);
+    },
+    getPeerStates: (program?: string, year?: number, country?: string) => {
+        const p = new URLSearchParams();
+        if (program) p.append('program', program);
+        if (year) p.append('year', year.toString());
+        if (country) p.append('country', country);
+        return apiFetch<PeerGroupDto[]>(`/alumni/peers/states${p.toString() ? `?${p.toString()}` : ''}`);
+    },
+    getPeerCities: (program?: string, year?: number, country?: string, state?: string) => {
+        const p = new URLSearchParams();
+        if (program) p.append('program', program);
+        if (year) p.append('year', year.toString());
+        if (country) p.append('country', country);
+        if (state) p.append('state', state);
+        return apiFetch<PeerGroupDto[]>(`/alumni/peers/cities${p.toString() ? `?${p.toString()}` : ''}`);
+    },
     getPeers: (params: { query?: string; program?: string; year?: string; country?: string; state?: string; city?: string; page?: number; size?: number }) => {
         const queryParams = new URLSearchParams();
         Object.entries(params).forEach(([key, value]) => {
