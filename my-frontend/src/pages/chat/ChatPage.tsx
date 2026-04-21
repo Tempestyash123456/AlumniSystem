@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { chatApi, profileApi, getImageUrl } from '../../lib/api';
+import { chatApi, profileApi } from '../../lib/api';
 import { useAuthStore } from '../../store/authStore';
 import { Spinner, Button } from '../../components/ui';
 import type { ChatMessageDto, ConversationDto, ProfileResponse } from '../../types';

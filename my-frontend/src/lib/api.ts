@@ -1,7 +1,8 @@
 import type {
     ApiResponse, AuthResponse, UserInfo, ProfileResponse,
     UpdateProfileRequest, AdminUserListResponse, AdminUserDto, AlumniDto, PostDto, EventDto,
-    PermissionDto, SupportDeveloperResponse, PeerGroupDto
+    PermissionDto, SupportDeveloperResponse, PeerGroupDto, AlumniListResponse,
+    ChatMessageDto, ConversationDto, NotificationDto
 } from '../types';
 
 const BASE_URL = '/api/v1';
