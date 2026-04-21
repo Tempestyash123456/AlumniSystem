@@ -71,11 +71,12 @@ public class EmailService {
                         })
                     )
                     .toBodilessEntity()
-                    .block();
+                    .doOnSuccess(res -> log.info("Email sent successfully via Resend API to {}", to))
+                    .doOnError(err -> log.error("Failed to send email via Resend API to {}: {}", to, err.getMessage()))
+                    .subscribe();
 
-            log.info("Email sent via Resend API to {}", to);
         } catch (Exception e) {
-            log.error("Failed to send email via Resend API to {}: {}", to, e.getMessage());
+            log.error("Error initiating email send via Resend API to {}: {}", to, e.getMessage());
         }
     }
 

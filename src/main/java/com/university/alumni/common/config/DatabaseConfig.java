@@ -82,7 +82,7 @@ public class DatabaseConfig {
         config.setDriverClassName("org.postgresql.Driver");
         
         // Optimized settings for typical Render database tier
-        config.setMaximumPoolSize(5);
+        config.setMaximumPoolSize(20);
         config.setMinimumIdle(2);
         
         return new HikariDataSource(config);
