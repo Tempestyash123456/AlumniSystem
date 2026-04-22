@@ -352,7 +352,8 @@ export const DashboardPage: React.FC = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="cp-panel" style={{ padding: '24px', height: 'fit-content' }}>
+                        <>
+                            <div className="cp-panel" style={{ padding: '24px', height: 'fit-content' }}>
                             <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-green)', letterSpacing: '0.15em', marginBottom: 20 }}>
                                 ◈ QUICK_ACTIONS
                             </div>
@@ -371,8 +372,52 @@ export const DashboardPage: React.FC = () => {
                                 </PermissionGuard>
                             </div>
                         </div>
-                    )}
-                </div>
+
+                        {/* Notifications Panel for Admins */}
+                        <div id="notifications-panel" className="cp-panel" style={{ padding: '24px', borderLeft: '4px solid var(--neon-cyan)', marginTop: 24 }}>
+                            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 20, display: 'flex', justifyContent: 'space-between' }}>
+                                <span>◈ RECENT_NOTIFICATIONS</span>
+                                {notifications.filter(n => !n.read).length > 0 && (
+                                    <span style={{ background: 'var(--neon-pink)', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '4px' }}>
+                                        {notifications.filter(n => !n.read).length} NEW
+                                    </span>
+                                )}
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                {notifications.length === 0 ? (
+                                    <p style={{ color: 'var(--text-muted)', fontSize: 'var(--font-size-sm)' }}>No new updates.</p>
+                                ) : (
+                                    notifications.slice(0, 5).map(notif => (
+                                        <div 
+                                            key={notif.id}
+                                            onClick={async () => {
+                                                await chatApi.markAsRead(notif.id);
+                                                navigate(notif.link);
+                                            }}
+                                            style={{ 
+                                                padding: '12px', 
+                                                background: notif.read ? 'rgba(255,255,255,0.02)' : 'rgba(0,245,255,0.05)',
+                                                border: `1px solid ${notif.read ? 'var(--border-subtle)' : 'var(--neon-cyan)33'}`,
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                            className="notification-item"
+                                        >
+                                            <div style={{ fontSize: 'var(--font-size-sm)', color: notif.read ? 'var(--text-secondary)' : 'var(--text-primary)', fontWeight: notif.read ? 400 : 500 }}>
+                                                {notif.message}
+                                            </div>
+                                            <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: 4 }}>
+                                                {new Date(notif.createdAt).toLocaleString()}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
 
                 {/* RIGHT COLUMN - Independent Scroll (Live Logs for Admin, Stats for Alumni) */}
                 <div className={hasAnyAdminPermission ? "custom-scrollbar" : "custom-scrollbar-purple"} style={{ overflowY: 'auto', paddingRight: 8 }}>
