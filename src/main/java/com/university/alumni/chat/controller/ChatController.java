@@ -45,14 +45,17 @@ public class ChatController {
     public ResponseEntity<ApiResponse<List<ConversationDto>>> getConversations(
             @AuthenticationPrincipal CachedUserDetails currentUser) {
         
-        var users = chatService.getConversations(currentUser.getId());
-        var dtos = users.stream().map(u -> ConversationDto.builder()
-                .userId(u.getId())
-                .userName(u.getFirstName() + " " + u.getLastName())
-                .profilePhotoUrl(u.getProfilePhotoUrl())
-                .build()).collect(Collectors.toList());
-        
+        var dtos = chatService.getConversationsEnriched(currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success(dtos));
+    }
+
+    @PatchMapping("/mark-read/{contactId}")
+    public ResponseEntity<ApiResponse<Void>> markChatAsRead(
+            @AuthenticationPrincipal CachedUserDetails currentUser,
+            @PathVariable UUID contactId) {
+        
+        chatService.markChatAsRead(currentUser.getId(), contactId);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @GetMapping("/notifications")

@@ -75,8 +75,26 @@ public class ChatService {
     }
 
     @Transactional(readOnly = true)
-    public List<User> getConversations(UUID userId) {
-        return chatMessageRepository.findConversations(userId);
+    public List<com.university.alumni.chat.dto.ChatDtos.ConversationDto> getConversationsEnriched(UUID userId) {
+        List<User> users = chatMessageRepository.findConversations(userId);
+        return users.stream().map(u -> {
+            ChatMessage latest = chatMessageRepository.findLatestMessage(userId, u.getId());
+            long unread = chatMessageRepository.countUnreadMessages(userId, u.getId());
+            
+            return com.university.alumni.chat.dto.ChatDtos.ConversationDto.builder()
+                    .userId(u.getId())
+                    .userName(u.getFirstName() + " " + u.getLastName())
+                    .profilePhotoUrl(u.getProfilePhotoUrl())
+                    .lastMessageAt(latest != null ? latest.getCreatedAt() : null)
+                    .lastMessageContent(latest != null ? latest.getContent() : null)
+                    .unreadCount(unread)
+                    .build();
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Transactional
+    public void markChatAsRead(UUID recipientId, UUID senderId) {
+        chatMessageRepository.markAsRead(recipientId, senderId);
     }
 
     @Transactional(readOnly = true)

@@ -86,30 +86,44 @@ const FilterSidebar: React.FC<{
             </div>
 
             <div className="sidebar-filters-area">
-                {(['program', 'year', 'country', 'state', 'city'] as const).map((key) => (
-                    <SidebarFilterSection
-                        key={key}
-                        label={
-                            key === 'program' ? 'Program' :
-                            key === 'year' ? 'Graduation Year' :
-                            key.charAt(0).toUpperCase() + key.slice(1)
-                        }
-                        active={expanded[key]}
-                        onClick={() => toggleSection(key)}
-                    >
-                        {(options[key] || []).map(opt => (
-                            <label key={opt} className="filter-option">
-                                <input
-                                    type="checkbox"
-                                    checked={filters[key] === opt}
-                                    onChange={() => onChange(key, filters[key] === opt ? '' : opt)}
-                                />
-                                {opt}
-                            </label>
-                        ))}
-                        {(!options[key] || options[key].length === 0) && <span style={{ fontSize: 12, opacity: 0.5 }}>No options available</span>}
-                    </SidebarFilterSection>
-                ))}
+                {(['program', 'year', 'country', 'state', 'city'] as const).map((key, index, array) => {
+                    const parentKey = index > 0 ? array[index - 1] : null;
+                    const isDisabled = parentKey && !filters[parentKey];
+                    const label = 
+                        key === 'program' ? 'Program' :
+                        key === 'year' ? 'Graduation Year' :
+                        key.charAt(0).toUpperCase() + key.slice(1);
+
+                    return (
+                        <SidebarFilterSection
+                            key={key}
+                            label={label}
+                            active={expanded[key] && !isDisabled}
+                            onClick={() => !isDisabled && toggleSection(key)}
+                        >
+                            <div style={{ opacity: isDisabled ? 0.5 : 1, pointerEvents: isDisabled ? 'none' : 'auto' }}>
+                                {(options[key] || []).map(opt => (
+                                    <label key={opt} className="filter-option">
+                                        <input
+                                            type="checkbox"
+                                            checked={filters[key] === opt}
+                                            onChange={() => onChange(key, filters[key] === opt ? '' : opt)}
+                                        />
+                                        {opt}
+                                    </label>
+                                ))}
+                                {(!options[key] || options[key].length === 0) && !isDisabled && (
+                                    <span style={{ fontSize: 12, opacity: 0.5 }}>No options available</span>
+                                )}
+                                {isDisabled && (
+                                    <span style={{ fontSize: 11, fontStyle: 'italic', opacity: 0.7 }}>
+                                        Select {array[index-1] === 'year' ? 'Graduation Year' : array[index-1]} first
+                                    </span>
+                                )}
+                            </div>
+                        </SidebarFilterSection>
+                    );
+                })}
             </div>
 
             <div className="sidebar-actions">

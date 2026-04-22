@@ -142,25 +142,54 @@ export const ChatPage: React.FC = () => {
                             <p>No active chats. Connect with peers to start messaging.</p>
                         </div>
                     ) : (
-                        conversations.map(conv => (
-                            <div 
-                                key={conv.userId} 
-                                className={`conversation-item ${selectedUserId === conv.userId ? 'active' : ''}`}
-                                onClick={() => {
-                                    setSelectedUserId(conv.userId);
-                                    setSearchParams({ to: maskId(conv.userId) });
-                                }}
-                            >
-                                <img 
-                                    src={conv.profilePhotoUrl || 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'} 
-                                    alt={conv.userName} 
-                                    className="conv-avatar"
-                                />
-                                <div className="conv-info">
-                                    <span className="conv-name">{conv.userName}</span>
+                        conversations
+                            .slice()
+                            .sort((a, b) => {
+                                const dateA = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+                                const dateB = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+                                return dateB - dateA;
+                            })
+                            .map(conv => (
+                                <div 
+                                    key={conv.userId} 
+                                    className={`conversation-item ${selectedUserId === conv.userId ? 'active' : ''}`}
+                                    onClick={async () => {
+                                        setSelectedUserId(conv.userId);
+                                        setSearchParams({ to: maskId(conv.userId) });
+                                        if (conv.unreadCount && conv.unreadCount > 0) {
+                                            await chatApi.markChatAsRead(conv.userId);
+                                            // Optimistically clear unread count
+                                            setConversations(prev => prev.map(c => 
+                                                c.userId === conv.userId ? { ...c, unreadCount: 0 } : c
+                                            ));
+                                        }
+                                    }}
+                                >
+                                    <div className="conv-avatar-wrapper">
+                                        <img 
+                                            src={conv.profilePhotoUrl || 'https://raw.githubusercontent.com/shadcn-ui/ui/main/apps/www/public/avatars/01.png'} 
+                                            alt={conv.userName} 
+                                            className="conv-avatar"
+                                        />
+                                        {conv.unreadCount && conv.unreadCount > 0 ? (
+                                            <span className="unread-badge">{conv.unreadCount}</span>
+                                        ) : null}
+                                    </div>
+                                    <div className="conv-info">
+                                        <div className="conv-header">
+                                            <span className="conv-name">{conv.userName}</span>
+                                            {conv.lastMessageAt && (
+                                                <span className="conv-time">
+                                                    {new Date(conv.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {conv.lastMessageContent && (
+                                            <p className="conv-last-msg">{conv.lastMessageContent}</p>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        ))
+                            ))
                     )}
                 </div>
             </div>

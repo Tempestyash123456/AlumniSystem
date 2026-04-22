@@ -72,6 +72,64 @@
     color: var(--text-primary);
 }
 
+.conv-avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.unread-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--neon-pink);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-dark);
+    box-shadow: 0 0 8px var(--neon-pink);
+    animation: pulse-pink 2s infinite;
+}
+
+.conv-info {
+    flex: 1;
+    min-width: 0; /* Important for ellipsis */
+}
+
+.conv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+}
+
+.conv-time {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'Outfit', sans-serif;
+}
+
+.conv-last-msg {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'Outfit', sans-serif;
+}
+
+@keyframes pulse-pink {
+    0% { box-shadow: 0 0 0 0 rgba(255, 77, 107, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 77, 107, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 77, 107, 0); }
+}
+
 /* Main Chat Area Styling */
 .chat-main {
     flex: 1;

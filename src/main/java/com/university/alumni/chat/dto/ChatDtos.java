@@ -49,5 +49,8 @@ public class ChatDtos {
         private UUID userId;
         private String userName;
         private String profilePhotoUrl;
+        private Instant lastMessageAt;
+        private String lastMessageContent;
+        private Long unreadCount;
     }
 }

@@ -164,12 +164,57 @@ export const DashboardPage: React.FC = () => {
 
             {/* STATIC TOP SECTION (Doesn't scroll) */}
             <div style={{ flexShrink: 0 }}>
-                <div style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 6, fontWeight: 700 }}>
-                    {greeting}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                        <div style={{ fontFamily: 'Rajdhani, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 6, fontWeight: 700 }}>
+                            {greeting}
+                        </div>
+                        <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.05em' }}>
+                            {user?.firstName} {user?.lastName}
+                        </h1>
+                    </div>
+                    
+                    <div 
+                        onClick={() => {
+                            // Scroll to notifications panel
+                            const panel = document.getElementById('notifications-panel');
+                            panel?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        style={{ 
+                            position: 'relative', 
+                            cursor: 'pointer',
+                            padding: '10px',
+                            background: 'rgba(255,255,255,0.03)',
+                            borderRadius: '12px',
+                            border: '1px solid var(--border-subtle)',
+                            transition: 'all 0.2s'
+                        }}
+                        className="notification-bell-btn"
+                    >
+                        <span style={{ fontSize: '24px' }}>🔔</span>
+                        {notifications.filter(n => !n.read).length > 0 && (
+                            <span style={{ 
+                                position: 'absolute', 
+                                top: '4px', 
+                                right: '4px', 
+                                background: 'var(--neon-pink)', 
+                                color: 'white', 
+                                fontSize: '10px', 
+                                fontWeight: '700',
+                                minWidth: '18px',
+                                height: '18px',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                border: '2px solid var(--bg-dark)',
+                                boxShadow: '0 0 8px var(--neon-pink)'
+                            }}>
+                                {notifications.filter(n => !n.read).length}
+                            </span>
+                        )}
+                    </div>
                 </div>
-                <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-2xl)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '0.05em' }}>
-                    {user?.firstName} {user?.lastName}
-                </h1>
 
                 <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
                     {hasPermission('VIEW_DIRECTORY') ? (
@@ -239,7 +284,7 @@ export const DashboardPage: React.FC = () => {
                             </div>
 
                             {/* Notifications Panel */}
-                            <div className="cp-panel" style={{ padding: '24px', borderLeft: '4px solid var(--neon-cyan)' }}>
+                            <div id="notifications-panel" className="cp-panel" style={{ padding: '24px', borderLeft: '4px solid var(--neon-cyan)' }}>
                                 <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 'var(--font-size-sm)', color: 'var(--neon-cyan)', letterSpacing: '0.15em', marginBottom: 20, display: 'flex', justifyContent: 'space-between' }}>
                                     <span>◈ RECENT_NOTIFICATIONS</span>
                                     {notifications.filter(n => !n.read).length > 0 && (
@@ -409,6 +454,12 @@ export const DashboardPage: React.FC = () => {
                 .custom-scrollbar::-webkit-scrollbar-track,
                 .custom-scrollbar-purple::-webkit-scrollbar-track {
                     background: rgba(255, 255, 255, 0.05);
+                }
+                .notification-bell-btn:hover {
+                    background: rgba(0, 245, 255, 0.1) !important;
+                    border-color: var(--neon-cyan) !important;
+                    transform: translateY(-2px);
+                    box-shadow: 0 0 15px rgba(0, 245, 255, 0.1);
                 }
             `}</style>
         </div>

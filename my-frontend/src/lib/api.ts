@@ -233,6 +233,7 @@ export const chatApi = {
     getConversations: () => apiFetch<ConversationDto[]>('/chat/conversations'),
     getNotifications: () => apiFetch<NotificationDto[]>('/chat/notifications'),
     markAsRead: (id: string) => apiFetch<void>(`/chat/notifications/${id}/read`, { method: 'PATCH' }),
+    markChatAsRead: (contactId: string) => apiFetch<void>(`/chat/mark-read/${contactId}`, { method: 'PATCH' }),
 };
 
 export const getImageUrl = (path: string | null | undefined) => {

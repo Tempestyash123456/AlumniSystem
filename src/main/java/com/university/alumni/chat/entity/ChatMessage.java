@@ -29,4 +29,8 @@ public class ChatMessage extends BaseEntity {
     @Column(nullable = false, length = 100)
     @Size(max = 100, message = "Message must be at most 100 characters long")
     private String content;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean isRead = false;
 }

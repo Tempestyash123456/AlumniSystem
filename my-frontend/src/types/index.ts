@@ -240,4 +240,7 @@ export interface ConversationDto {
     userId: string;
     userName: string;
     profilePhotoUrl?: string;
+    lastMessageAt?: string;
+    lastMessageContent?: string;
+    unreadCount?: number;
 }
